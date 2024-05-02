@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1013910398731",
+    "project_id": "detailing-xperts",
+    "storage_bucket": "detailing-xperts.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1013910398731:android:2af50f2c433798ba93e40e",
+        "android_client_info": {
+          "package_name": "com.example.responsive_dashboard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYGsXtDeTBrMx8KnDdW8ZDEgqjyOGLvAw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
