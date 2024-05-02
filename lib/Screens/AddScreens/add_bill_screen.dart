@@ -259,8 +259,8 @@ class _BillAddState extends State<BillAdd> {
       ppfPackage.text = data?.ppfServices?.isNotEmpty == true ? data!.ppfServices![0].package ?? 'N/A' : '';
 
       totalServiceAmt.value = double.parse(data?.totalServicesAmount != null && data!.totalServicesAmount!.isNotEmpty ? data!.totalServicesAmount! : '0');
-      discountAmount.value = double.parse(data?.totalDiscount != null && data!.totalDiscount!.isNotEmpty ? data!.totalDiscount! : '0');
-      discountAmt.value = totalServiceAmt.value * (discountAmount.value / 100);
+      discountAmt.value = double.parse(data?.totalDiscount != null && data!.totalDiscount!.isNotEmpty ? data!.totalDiscount! : '0');
+      //discountAmt.value = totalServiceAmt.value * (discountAmount.value / 100);
       totalTaxebleAmt.value = double.parse(data?.totalTaxableAmount != null && data!.totalTaxableAmount!.isNotEmpty ? data!.totalTaxableAmount! : '0');
       totalApplicaleTaxAmt.value = double.parse(data?.totalApplicableTax != null && data!.totalApplicableTax!.isNotEmpty ? data!.totalApplicableTax! : '0');
       totalPayableAmt.value = double.parse(data?.totalPayableAmount != null && data!.totalPayableAmount!.isNotEmpty ? data!.totalPayableAmount! : '0');
@@ -1288,8 +1288,8 @@ class _BillAddState extends State<BillAdd> {
                                     estimateData["select_services_package"] = data!.selectServices?.map((e) => e.package).toList();
                                     estimateData["select_services_type"] = data!.selectServices?.map((e) => e.name).toList();
 
-                                    estimateData["ppf_services_type"] = data!.ppfServices![0].type;
-                                    estimateData["ppf_services_package"] = ppfPackage.text.isNotEmpty ? ppfPackage.text : "N/A";
+                                    //estimateData["ppf_services_type"] = data!.ppfServices![0].type;
+                                   // estimateData["ppf_services_package"] = ppfPackage.text.isNotEmpty ? ppfPackage.text : "N/A";
                                     estimateData["ppf_services_amount"] = ppfAmount.text.isNotEmpty ? ppfAmount.text : "N/A";
                                     estimateData["ppf_services_name"] = data!.ppfServices?.map((e) => e.name).toList();
                                     estimateData["ppf_services_selected"] = data!.ppfServices?.map((e) => e.name).toList();
@@ -1308,14 +1308,11 @@ class _BillAddState extends State<BillAdd> {
                                     estimateData["total_applicable_tax"] = totalApplicaleTaxAmt.value;
                                     estimateData["total_payable_amount"] = totalPayableAmt.value;
 
-                                    if (isBillEdit == null &&
-                                            data!.selectServices != null &&
-                                            data!.selectServices!.isNotEmpty &&
-                                            data!.selectServices!.any((element) => element.name == 'Ceramic Coating') ||
-                                        data!.selectServices!.any((element) => element.name == 'Graphene Coating')) {
+                                    if (isBillEdit == null && data!.selectServices != null && data!.selectServices!.isNotEmpty && data!.selectServices!.any((element) => element.name == 'Ceramic Coating') || data!.selectServices!.any((element) => element.name == 'Graphene Coating')) {
                                       final list = await ApiProvider().fetchBarcodeList();
-                                      if (list.contains(ceramicBarcodeController.text) || list.contains(grapheneBarcodeController.text)) {
+                                      if (list.contains(ceramicBarcodeController.text) ) {
                                         estimateData["service_barcode"] = ceramicBarcodeController.text;
+                                        estimateData["qty"] = '0';
                                         billUpdated = true;
                                       } else {
                                         toastification.show(

@@ -513,8 +513,13 @@ class _AddQuickState extends State<AddQuick> {
                                     // var dataRes = await ApiProvider().getServiceByName(value[0].toString(), segment.text);
                                     for (var item in value) {
                                       var dataRes = await ApiProvider().getServiceByName(item.toString(), segment.text);
-                                      if (dataRes['status'] == 1 && selectedService.every((element) => element[0]['id'] != dataRes['services'][0]['id'])) {
-                                        selectedService.add(dataRes['services']);
+                                      if (dataRes['status'] == 1) {
+                                        // Check if the service is already present in selectedService
+                                        bool serviceExists = selectedService.any((element) => element[0]['id'] == dataRes['services'][0]['id']);
+                                        if (!serviceExists) {
+                                          // Add the service to selectedService
+                                          selectedService.add(dataRes['services']);
+                                        }
                                       }
                                     }
 
@@ -558,8 +563,7 @@ class _AddQuickState extends State<AddQuick> {
                                           paddingTop: 10,
                                           paddingBottom: 10,
                                         ),
-                                        if (selectedService[index][0]["service_name"] == 'Ceramic Coating' ||
-                                            selectedService[index][0]["service_name"] == 'Graphene Coating') ...[
+                                        if (selectedService[index][0]["service_name"] == 'Ceramic Coating' || selectedService[index][0]["service_name"] == 'Graphene Coating') ...[
                                           Row(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
@@ -656,6 +660,16 @@ class _AddQuickState extends State<AddQuick> {
                                 // return;
 
                                 if (_formKey.currentState!.validate()) {
+                                  List<String> serviceNames = [];
+
+// Iterate through each list in selectedService
+                                  for (var list in selectedService) {
+                                    // Iterate through each map inside the current list
+                                    for (var map in list) {
+                                      // Extract the "service_name" from the current map and add it to the serviceNames list
+                                      serviceNames.add(map["service_name"].toString());
+                                    }
+                                  }
                                   Random random = Random();
                                   int randomNumber = random.nextInt(100) + 1;
                                   Map quickQuat = Map();
@@ -668,7 +682,7 @@ class _AddQuickState extends State<AddQuick> {
                                   quickQuat["delivery_date"] = deliveryDate.text;
                                   quickQuat["advance"] = advance.text;
                                   quickQuat["segment"] = segment.text;
-                                  quickQuat["services"] = _selectedService;
+                                  quickQuat["services"] =serviceNames;
                                   print(quickQuat);
                                   var storeEstimateRes;
                                   if (isEdit) {

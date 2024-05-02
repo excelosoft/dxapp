@@ -63,6 +63,8 @@ class _AddJobSheetState extends State<AddJobSheet> {
   TextEditingController alloyCoatingController = TextEditingController();
   TextEditingController remarksController = TextEditingController();
 
+  Map<int, TextEditingController> controllersMap = {};
+
   var selectedServiceList = [];
   var selectedppfServiceList = [];
   var serviceList = [];
@@ -623,16 +625,47 @@ class _AddJobSheetState extends State<AddJobSheet> {
                     ),
                     if (jobData != null && jobData!.selectServices != null)
                       Column(children: [
-                        ...jobData!.selectServices!.map((e) {
-                          final TextEditingController controller = TextEditingController();
-                          controllers.add(controller);
+                        ...jobData!.selectServices!.asMap().entries.map((entry) {
+                          int index = entry.key;
+                          SelectServices service = entry.value;
+
+                          String savedValue = args['description']??'';
+                          List<String> savedValuesList = savedValue.split(',');
+
+                          // Extract the value for the current index
+                          String savedValues = index < savedValuesList.length ? savedValuesList[index] : '';// Replace this with your saved value retrieval logic
+                          ValueNotifier<String> textValueNotifier = ValueNotifier(savedValues);
+
+
+                          // Create a TextEditingController with the saved value
+                          TextEditingController controller = TextEditingController(text: savedValues);
+
+
+                          controllersMap[index] = controller;
+
+                          // If there's a stored value for this index, set the controller's text
+
+                          void onTextChanged(String newText) {
+                            // Update the saved value
+                            savedValue = newText;
+                            // Notify listeners about the change
+                            textValueNotifier.value = newText;
+                            // You may want to save it to a database or another storage mechanism here
+                            print('Value changed: $newText');
+                          }
+
+                          controller.addListener(() {
+                            onTextChanged(controller.text);
+                          });
 
                           return CustomContainer(
                             textFieldForFullWidth(
+
                               context: context,
                               textEditingController: controller,
-                              labelText: '${e.name} ${e.package} ${e.type}',
+                              labelText: '${service.name} ${service.package} ${service.type}',
                               hintext: "Type here...",
+
                             ),
                             marginbottom: SizeConfig.blockSizeVertical! * 4,
                           );
@@ -748,13 +781,19 @@ class _AddJobSheetState extends State<AddJobSheet> {
                                 // "ppf_services_selected": jobData?.selectServices?.map((e) => e.name).toList(),
 
                                 "modal_name": jobData?.modalName,
-                                "description": controllers.length > 0 ? controllers[0].text : "",
+                                //"description": controllers.length > 0 ? controllers[0].text : "",
                                 "carphoto": photosToUploaded,
                                 "assigned_worker": AssignedWorkers.text,
                                 "estimated_delivery_time": estDateTime.text.toString(),
                                 "remarks": remarksController.text,
                               };
+                              List<String> controllerValues = controllersMap.values.map((controller) => controller.text).toList();
 
+// Convert the list of controller values to a single string
+                              String allValuesAsString = controllerValues.join(',');
+
+// Add the single string to the jobDataMap
+                              jobDataMap["description"] = allValuesAsString;
                               var response = await ApiProvider().storeJobSheet(jobDataMap);
                               if (response['status'] == "1") {
                                 toastification.show(
