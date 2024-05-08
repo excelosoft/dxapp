@@ -25,6 +25,7 @@ class Estimate extends StatefulWidget {
 
 class _EstimateState extends State<Estimate> {
   late Future<EstimateListModel> estimateFuture;
+
   TextEditingController searchController = TextEditingController();
 
   @override
@@ -38,6 +39,7 @@ class _EstimateState extends State<Estimate> {
     estimateFuture = ApiProvider().getEstimateList();
     print(estimateFuture);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -355,8 +357,7 @@ class _EstimateState extends State<Estimate> {
                                               IconButton(
                                                 tooltip: 'Edit',
                                                 onPressed: filteredData[index].billsStatus == 1
-                                                    ? null
-                                                    : () async {
+                                                    ? null : () async {
                                                   print('filteredData[index] ===');
                                                   print(filteredData[index].estimatedDeliveryTime);
                                                   print(filteredData[index].date);

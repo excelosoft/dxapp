@@ -10,21 +10,38 @@ class EventDataSource extends CalendarDataSource {
     this.appointments = appointments;
   }
 
+  // Generate special regions for each event in the month
+  List<TimeRegion> getEventRegionsForMonth(DateTime monthStartDate, DateTime monthEndDate) {
+    List<TimeRegion> eventRegions = [];
+    for (int i = 0; i < appointments!.length; i++) {
+      CalendarItem event = getCalendarEvent(i);
+      DateTime eventDate = DateTime.parse(event.startDate!);
+      if (eventDate.isAfter(monthStartDate) && eventDate.isBefore(monthEndDate)) {
+        eventRegions.add(TimeRegion(
+          startTime: eventDate,
+          endTime: eventDate.add(Duration(hours: 1)), // Adjust duration as needed
+          text: event.title!,
+          textStyle: TextStyle(color: Colors.black), // Customize text style as needed
+          color: Colors.yellow, // Customize region color as needed
+        ));
+      }
+    }
+    return eventRegions;
+  }
+
   getCalendarEvent(int index) {
-    // print('appointments ${appointments![index]}');
     return appointments![index] as CalendarItem;
   }
 
   @override
   DateTime getStartTime(int index) {
     final CalendarItem calendarEvent = getCalendarEvent(index);
-    // print('calendarEvent ${calendarEvent.toJson()}');
 
     DateFormat inputFormat = DateFormat('E, MMM d, y');
 
     DateTime date;
     try {
-      date = inputFormat.parse(calendarEvent.startDate!);
+      date = inputFormat.parse('2024-05-1');
     } catch (_) {
       final DateFormat alternativeFormat = DateFormat('yyyy-MM-dd');
       date = alternativeFormat.parse(calendarEvent.startDate!);
@@ -49,43 +66,51 @@ class EventDataSource extends CalendarDataSource {
 
     return date;
   }
+}
+class EventDataSource2 extends CalendarDataSource {
+  final List<CalendarItem> appointments;
+  final DateTime monthStartDate;
+  final DateTime monthEndDate;
+
+  EventDataSource2(this.appointments, this.monthStartDate, this.monthEndDate);
+
+  List<CalendarItem> getEventsForMonth(DateTime monthStartDate, DateTime monthEndDate) {
+    return appointments.where((appointment) {
+      DateTime eventDate = DateTime.parse(appointment.startDate!);
+      return eventDate.isAfter(monthStartDate) && eventDate.isBefore(monthEndDate);
+    }).toList();
+  }
 
   @override
-  DateTime getEndTime(int index) {
-    final CalendarItem calendarEvent = getCalendarEvent(index);
-    DateFormat inputFormat = DateFormat('E, MMM d, y');
+  DateTime getStartTime(int index) {
+    final CalendarItem calendarEvent = appointments[index];
+    DateFormat inputFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
 
     DateTime date;
     try {
-      date = inputFormat.parse(calendarEvent.startDate ?? '2024-04-15');
-    } catch (e) {
-      // print(e);
-      final DateFormat alternativeFormat = DateFormat('yyyy-MM-dd');
-      date = alternativeFormat.parse(calendarEvent.startDate ?? '2024-04-15');
+      date = inputFormat.parse(calendarEvent.startDate!);
+    } catch (_) {
+      date = DateTime.now(); // Set some default date or handle error
     }
-
-    String customTime = '3:20 AM';
-    DateFormat customTimeFormat = DateFormat('hh:mm aa');
-
-    try {
-      DateTime customDateTime = customTimeFormat.parse(customTime).add(const Duration(hours: 3));
-
-      date = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        customDateTime.hour,
-        customDateTime.minute,
-      );
-    } catch (e) {
-      print('Error parsing custom time: $e');
-    }
-
     return date;
   }
 
   @override
-  String getSubject(int index) => getCalendarEvent(index).title ?? '';
+  DateTime getEndTime(int index) {
+    final CalendarItem calendarEvent = appointments[index];
+    DateFormat inputFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
+
+    DateTime date;
+    try {
+      date = inputFormat.parse(calendarEvent.endDate!);
+    } catch (_) {
+      date = DateTime.now(); // Set some default date or handle error
+    }
+    return date;
+  }
+
+  @override
+  String getSubject(int index) => appointments[index].title ?? '';
 
   @override
   Color getColor(int index) => AppColors.buttonColor;

@@ -1120,7 +1120,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                                               selectedppfServiceList.removeWhere((element) => element == f);
                                               setState(() {});
                                               int rateToRemove = int.parse(selectedPPFRateData["rate"] ?? '0');
-                                              ppfAmount.text = (int.parse(ppfAmount.text) - rateToRemove).toString();
+                                             // ppfAmount.text = (int.parse(ppfAmount.text) - rateToRemove).toString();
                                               totalServiceAmt.value -= rateToRemove;
                                               calculateTotalBill(totalServiceAmt.value);
                                               print(selectedppfServiceList);

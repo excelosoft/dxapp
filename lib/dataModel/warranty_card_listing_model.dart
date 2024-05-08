@@ -524,3 +524,208 @@ class WarrantyData {
 //     return _data;
 //   }
 // }
+
+
+class WarrantyCardListingModel2 {
+  String? status;
+  String? message;
+  List<WarrantyCardData>? data;
+
+  WarrantyCardListingModel2({this.status, this.message, this.data});
+
+  factory WarrantyCardListingModel2.fromJson(Map<String, dynamic> json) {
+    return WarrantyCardListingModel2(
+      status: json['status'],
+      message: json['message'],
+      data: List<WarrantyCardData>.from((json['data'] ?? []).map((x) => WarrantyCardData.fromJson(x))),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      'status': status,
+      'message': message,
+      'data': this.data != null ? this.data!.map((x) => x.toJson()).toList() : null,
+    };
+    return data;
+  }
+}
+
+class WarrantyCardData {
+  int? id;
+  String? name;
+  String? date;
+  String? phone;
+  String? email;
+  String? address;
+  String? vehicleNumber;
+  String? modalName;
+  String? makeId;
+  String? year;
+  String? color;
+  String? vin;
+  String? gst;
+  String? segment;
+  String? estimatedDeliveryTime;
+  String? assignedWorker;
+  List<SelectService>? selectServices;
+  List<PpfService>? ppfServices;
+  String? maintenanceNumber;
+  List<String>? dueDate;
+  List<String>? doneDate;
+  String? charges;
+
+  WarrantyCardData({
+    this.id,
+    this.name,
+    this.date,
+    this.phone,
+    this.email,
+    this.address,
+    this.vehicleNumber,
+    this.modalName,
+    this.makeId,
+    this.year,
+    this.color,
+    this.vin,
+    this.gst,
+    this.segment,
+    this.estimatedDeliveryTime,
+    this.assignedWorker,
+    this.selectServices,
+    this.ppfServices,
+    this.maintenanceNumber,
+    this.dueDate,
+    this.doneDate,
+    this.charges,
+  });
+
+  factory WarrantyCardData.fromJson(Map<String, dynamic> json) {
+    return WarrantyCardData(
+      id: json['id'],
+      name: json['name'],
+      date: json['date'],
+      phone: json['phone'],
+      email: json['email'],
+      address: json['address'],
+      vehicleNumber: json['vehicle_number'],
+      modalName: json['modal_name'],
+      makeId: json['make_id'],
+      year: json['year'],
+      color: json['color'],
+      vin: json['vin'],
+      gst: json['gst'],
+      segment: json['segment'],
+      estimatedDeliveryTime: json['estimated_delivery_time'],
+      assignedWorker: json['assigned_worker'],
+      selectServices: List<SelectService>.from((json['select_services'] ?? []).map((x) => SelectService.fromJson(x))),
+      ppfServices: List<PpfService>.from((json['ppf_services'] ?? []).map((x) => PpfService.fromJson(x))),
+      maintenanceNumber: json['maintenance_number'],
+      dueDate: List<String>.from(json['due_date']?.map((x) => x.toString()) ?? []),
+      doneDate: List<String>.from(json['done_date']?.map((x) => x.toString()) ?? []),
+      charges: json['charges'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      'id': id,
+      'name': name,
+      'date': date,
+      'phone': phone,
+      'email': email,
+      'address': address,
+      'vehicle_number': vehicleNumber,
+      'modal_name': modalName,
+      'make_id': makeId,
+      'year': year,
+      'color': color,
+      'vin': vin,
+      'gst': gst,
+      'segment': segment,
+      'estimated_delivery_time': estimatedDeliveryTime,
+      'assigned_worker': assignedWorker,
+      'select_services': selectServices != null ? selectServices!.map((x) => x.toJson()).toList() : null,
+      'ppf_services': ppfServices != null ? ppfServices!.map((x) => x.toJson()).toList() : null,
+      'maintenance_number': maintenanceNumber,
+      'due_date': dueDate,
+      'done_date': doneDate,
+      'charges': charges,
+    };
+    return data;
+  }
+}
+
+class SelectService {
+  String? name;
+  String? type;
+  String? package;
+  String? amount;
+  String? servicesSelected;
+
+  SelectService({
+    this.name,
+    this.type,
+    this.package,
+    this.amount,
+    this.servicesSelected,
+  });
+
+  factory SelectService.fromJson(Map<String, dynamic> json) {
+    return SelectService(
+      name: json['name'],
+      type: json['type'],
+      package: json['package'],
+      amount: json['amount'],
+      servicesSelected: json['services_selected'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      'name': name,
+      'type': type,
+      'package': package,
+      'amount': amount,
+      'services_selected': servicesSelected,
+    };
+    return data;
+  }
+}
+
+class PpfService {
+  String? name;
+  String? type;
+  String? package;
+  String? amount;
+  List<String>? servicesSelected;
+
+  PpfService({
+    this.name,
+    this.type,
+    this.package,
+    this.amount,
+    this.servicesSelected,
+  });
+
+  factory PpfService.fromJson(Map<String, dynamic> json) {
+    return PpfService(
+      name: json['name'],
+      type: json['type'],
+      package: json['package'],
+      amount: json['amount'],
+      servicesSelected: List<String>.from(json['services_selected'].map((x) => x)),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      'name': name,
+      'type': type,
+      'package': package,
+      'amount': amount,
+      'services_selected': servicesSelected,
+    };
+    return data;
+  }
+}

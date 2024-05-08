@@ -21,7 +21,7 @@ class Warranty extends StatefulWidget {
 }
 
 class _WarrantyState extends State<Warranty> {
-  late Future<WarrantyCardListingModel> future;
+  late Future<WarrantyCardListingModel2> future;
   TextEditingController searchController = TextEditingController();
 
   @override
@@ -31,7 +31,7 @@ class _WarrantyState extends State<Warranty> {
   }
 
   void getDataforWarranty() {
-    future = ApiProvider().getWarrantyListing();
+    future = ApiProvider().getWarrantyListing2();
   }
 
   Future<List<BillListData>> fetchBillsList() async {
@@ -57,7 +57,7 @@ class _WarrantyState extends State<Warranty> {
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(30.0),
-                child: FutureBuilder<WarrantyCardListingModel>(
+                child: FutureBuilder<WarrantyCardListingModel2>(
                     future: future,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -213,7 +213,7 @@ class _WarrantyState extends State<Warranty> {
                                           ),
                                         ],
                                         rows: List<DataRow>.generate(filteredData.length, (index) {
-                                          final WarrantyData? warrantList = filteredData[index];
+                                          final WarrantyCardData? warrantList = filteredData[index];
                                           return DataRow(
                                             cells: [
                                               DataCell(
@@ -246,7 +246,10 @@ class _WarrantyState extends State<Warranty> {
                                               ),
                                               DataCell(
                                                 Text(
-                                                  '${capitalizeFirstLetter(warrantList?.selectServicesName ?? 'N/A')} (${warrantList?.selectServicesPackage != null ? capitalizeFirstLetter(warrantList!.selectServicesPackage!.contains('Year') ? warrantList.selectServicesPackage! : warrantList.selectServicesPackage! + ' ' + 'year') : 'N/A'})',
+
+                                                  '${capitalizeFirstLetter(warrantList?.selectServices?.isNotEmpty ?? false ? warrantList!.selectServices!.first.name ?? 'N/A' : 'N/A')} ',
+
+                                                     // '(${warrantList?.selectServices != null ? capitalizeFirstLetter(warrantList!.selectServices.first!.contains('Year') ? warrantList.selectServicesPackage! : warrantList.selectServicesPackage! + ' ' + 'year') : 'N/A'})',
                                                   style: GoogleFonts.inter(color: Colors.black),
                                                 ),
                                               ),

@@ -119,6 +119,19 @@ class ApiProvider {
     }
     return [] as WarrantyCardListingModel;
   }
+  Future<WarrantyCardListingModel2> getWarrantyListing2() async {
+    Map<String, dynamic> data = await postRequest(
+      url: BaseUrl.warrantyListingApi,
+      headers: ApiHeaders.apiHeader,
+      body: {"user_id": userid},
+    );
+    print('dataaaaaaaaaaaaaaa');
+    print(data);
+    if (data['status'] != null && data['status'] == '1' || data['status'] == 1) {
+      return WarrantyCardListingModel2.fromJson(data);
+    }
+    return [] as WarrantyCardListingModel2;
+  }
 
   Future<QuatationModel> getQuickQuationApi() async {
     Map<String, dynamic> data = await postRequest(
@@ -132,7 +145,33 @@ class ApiProvider {
     }
     return [] as QuatationModel;
   }
+  Future<List<MaintainestData>> getMaintenceList() async {
+    try {
+      Map<String, dynamic> data = await postRequest(
+        url: 'https://excelosoft.com/dxapp/public/api/maintenanceList',
+        headers: ApiHeaders.apiHeader,
+        body: {"user_id": userid},
+      );
 
+      if (data['status'] != null && (data['status'] == '1' || data['status'] == 1)) {
+        List<MaintainestData> maintenanceList = [];
+        List<dynamic> dataList = data['data'] ?? [];
+        for (var item in dataList) {
+          maintenanceList.add(MaintainestData.fromJson(item));
+        }
+        return maintenanceList;
+      } else {
+        // Handle if status is not valid
+        // For example: show an error message to the user
+        throw Exception('Failed to fetch maintenance list');
+      }
+    } catch (e) {
+      // Handle any exceptions during API call
+      print('Error fetching maintenance list: $e');
+      // You can also show an error message to the user
+      throw e;
+    }
+  }
   // Future<List<MaintanceModel>> getMaintenceList() async {
   //   MaintanceModel maintenceList = [];
   //   var responseData = await http.post(
@@ -140,9 +179,9 @@ class ApiProvider {
   //     headers: ApiHeaders.apiHeader,
   //     body: jsonEncode({"user_id": userid}),
   //   );
-
+  //
   //   var model = jsonDecode(responseData.body.toString());
-
+  //
   //   if (model['status'] != 0) {
   //     List modelData = model['data'];
   //     modelData.forEach((element) {
@@ -151,35 +190,40 @@ class ApiProvider {
   //   }
   //   return maintenceList;
   // }
+  //
+  // Future<MaintainestListModel> getMaintenceList() async {
+  //   // var responseData = await http.post(
+  //   //   Uri.parse('https://excelosoft.com/dxapp/public/api/maintenanceList'),
+  //   //   headers: ApiHeaders.apiHeader,
+  //   //   body: jsonEncode({"user_id": userid}),
+  //   // );
+  //
+  //   // var model = jsonDecode(responseData.body.toString());
+  //
+  //   // if (model['status'] != 0) {
+  //   //   List modelData = model['data'];
+  //   //   modelData.forEach((element) {
+  //   //     maintenceList.add(MaintanceModel.fromJson(element));
+  //   //   });
+  //   // }
+  //   try {
+  //     Map<String, dynamic> data = await postRequest(
+  //       url: 'https://excelosoft.com/dxapp/public/api/maintenanceList',
+  //       headers: ApiHeaders.apiHeader,
+  //       body: {"user_id": userid},
+  //     );
+  //     if (data['status'] != null && data['status'] == '1' ||
+  //         data['status'] == 1) {
+  //       return MaintainestListModel.fromJson(data);
+  //     }else{
+  //     return [] as MaintainestListModel;}
+  //   }catch(e){
+  //     print(e.toString());
+  //     throw e;
+  //   }
+  // }
 
-  Future<MaintanceModel> getMaintenceList() async {
-    // var responseData = await http.post(
-    //   Uri.parse('https://excelosoft.com/dxapp/public/api/maintenanceList'),
-    //   headers: ApiHeaders.apiHeader,
-    //   body: jsonEncode({"user_id": userid}),
-    // );
-
-    // var model = jsonDecode(responseData.body.toString());
-
-    // if (model['status'] != 0) {
-    //   List modelData = model['data'];
-    //   modelData.forEach((element) {
-    //     maintenceList.add(MaintanceModel.fromJson(element));
-    //   });
-    // }
-
-    Map<String, dynamic> data = await postRequest(
-      url: 'https://excelosoft.com/dxapp/public/api/maintenanceList',
-      headers: ApiHeaders.apiHeader,
-      body: {"user_id": userid},
-    );
-    if (data['status'] != null && data['status'] == '1' || data['status'] == 1) {
-      return MaintanceModel.fromJson(data);
-    }
-    return [] as MaintanceModel;
-  }
-
-  Future<CalendarModel> calendarListApi() async {
+  Future<CalendarModel?> calendarListApi() async {
     try {
       Map<String, dynamic> data = await postRequest(
         url: BaseUrl.getCalendarList,
@@ -190,7 +234,7 @@ class ApiProvider {
       if (data['status'] != null && data['status'] == '1' || data['status'] == 1) {
         return CalendarModel.fromJson(data);
       }
-      return [] as CalendarModel;
+      return null;
     } catch (e) {
       print(e.toString());
       throw e;
@@ -296,16 +340,19 @@ class ApiProvider {
   storeWarrantyCard(Map dataMap, String id) async {
     dataMap["user_id"] = userid;
 
-    print(jsonEncode(dataMap));
-
-    var response = await http.post(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/warrantyCardsUpdate/$id}'),
-      headers: ApiHeaders.apiHeader,
-      body: jsonEncode(dataMap),
-    );
-    var data = jsonDecode(response.body.toString());
-    print(data);
-    return data;
+    try {
+      var response = await http.post(
+        Uri.parse('https://excelosoft.com/dxapp/public/api/warrantyCardsUpdate/$id'),
+        headers: ApiHeaders.apiHeader,
+        body: jsonEncode(dataMap),
+      );
+      var data = jsonDecode(response.body.toString());
+      print(data);
+      return data;
+    } catch (e) {
+      print('Error occurred: $e');
+      return null; // or handle the error in a different way, such as showing a dialog to the user
+    }
   }
 
   storeEstimateApi(Map dataMap) async {

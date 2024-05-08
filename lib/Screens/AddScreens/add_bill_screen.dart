@@ -242,6 +242,7 @@ class _BillAddState extends State<BillAdd> {
       vin.text = data?.vin ?? '';
       gstNo.text = data?.gst ?? '';
       segment.text = data?.segment ?? '';
+
       assignedWorkersController.text = data?.assignedWorker ?? '';
       modelId = data?.modelId;
       // segment.text = data?.segment ?? '';
@@ -254,6 +255,8 @@ class _BillAddState extends State<BillAdd> {
       // print(data!.totalApplicaleTaxAmt);
       // print(data!.totalPayableAmt);
 
+       ceramicBarcodeController = TextEditingController(text:paramsBarcode );
+       grapheneBarcodeController = TextEditingController(text: paramsBarcode);
       ppfAmount.text = data?.ppfServices?.isNotEmpty == true ? data!.ppfServices![0].amount ?? 'N/A' : '0';
       ppfType.text = data?.ppfServices?.isNotEmpty == true ? data!.ppfServices![0].type ?? 'N/A' : '0';
       ppfPackage.text = data?.ppfServices?.isNotEmpty == true ? data!.ppfServices![0].package ?? 'N/A' : '';
@@ -783,10 +786,7 @@ class _BillAddState extends State<BillAdd> {
                             // ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: data!.selectServices != null
-                                  ? data!.selectServices!
-                                      .map(
-                                        (e) => Padding(
+                              children: data!.selectServices != null ? data!.selectServices!.map((e) => Padding(
                                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -834,6 +834,7 @@ class _BillAddState extends State<BillAdd> {
                                               SizedBox(
                                                 height: 15,
                                               ),
+
                                               if (e.name == 'Ceramic Coating' || e.name == 'Graphene Coating') ...[
                                                 Row(
                                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -880,8 +881,7 @@ class _BillAddState extends State<BillAdd> {
                                             ],
                                           ),
                                         ),
-                                      )
-                                      .toList()
+                                      ).toList()
                                   : [],
                             ),
                             SizedBox(
@@ -1288,8 +1288,8 @@ class _BillAddState extends State<BillAdd> {
                                     estimateData["select_services_package"] = data!.selectServices?.map((e) => e.package).toList();
                                     estimateData["select_services_type"] = data!.selectServices?.map((e) => e.name).toList();
 
-                                    //estimateData["ppf_services_type"] = data!.ppfServices![0].type;
-                                   // estimateData["ppf_services_package"] = ppfPackage.text.isNotEmpty ? ppfPackage.text : "N/A";
+                                    estimateData["ppf_services_type"] = ppfType.text.isNotEmpty?ppfType.text:'N/A';
+                                    estimateData["ppf_services_package"] = ppfPackage.text.isNotEmpty ? ppfPackage.text : "N/A";
                                     estimateData["ppf_services_amount"] = ppfAmount.text.isNotEmpty ? ppfAmount.text : "N/A";
                                     estimateData["ppf_services_name"] = data!.ppfServices?.map((e) => e.name).toList();
                                     estimateData["ppf_services_selected"] = data!.ppfServices?.map((e) => e.name).toList();
@@ -1310,7 +1310,7 @@ class _BillAddState extends State<BillAdd> {
 
                                     if (isBillEdit == null && data!.selectServices != null && data!.selectServices!.isNotEmpty && data!.selectServices!.any((element) => element.name == 'Ceramic Coating') || data!.selectServices!.any((element) => element.name == 'Graphene Coating')) {
                                       final list = await ApiProvider().fetchBarcodeList();
-                                      if (list.contains(ceramicBarcodeController.text) ) {
+                                      if (list.contains(ceramicBarcodeController.text) || list.contains(grapheneBarcodeController.text) ) {
                                         estimateData["service_barcode"] = ceramicBarcodeController.text;
                                         estimateData["qty"] = '0';
                                         billUpdated = true;
@@ -1397,6 +1397,7 @@ class _BillAddState extends State<BillAdd> {
           selectedResponseServerRes.selectServices == null || selectedResponseServerRes.selectServices!.isEmpty
               ? Container()
               : CustomDropdownFormField<String>(
+            readOnly: true,
                   width: MediaQuery.of(context).size.width / 3.5,
                   hintText: "Select Package Time (Year)",
                   label: "Package",
@@ -1411,6 +1412,7 @@ class _BillAddState extends State<BillAdd> {
           selectedResponseServerRes.selectServices == null || selectedResponseServerRes.selectServices!.isEmpty
               ? Container()
               : CustomDropdownFormField<String>(
+            readOnly: true,
                   width: Responsive.isMobile(context) ? MediaQuery.of(context).size.width / 2.5 : MediaQuery.of(context).size.width / 3.5,
                   hintText: "Rate",
                   label: "Amount",

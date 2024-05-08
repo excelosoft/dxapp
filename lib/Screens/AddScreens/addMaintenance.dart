@@ -25,7 +25,7 @@ class AddMaintenance extends StatefulWidget {
 }
 
 class _AddMaintenanceState extends State<AddMaintenance> {
-  List<WarrantyData>? maintenanceData;
+  List<WarrantyCardData>? maintenanceData;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -46,9 +46,11 @@ class _AddMaintenanceState extends State<AddMaintenance> {
   TextEditingController chargeController = TextEditingController(text: '1500');
   TextEditingController searchController = TextEditingController();
 
-  List<WarrantyData> searchResult = [];
+  List<WarrantyCardData> searchResult = [];
 
   List<String> models = [];
+  List<DateTime> serviceDates = [];
+  List<String> doneDates = [];
 
   String selectedServiceForMaintenance = '';
 
@@ -73,6 +75,17 @@ class _AddMaintenanceState extends State<AddMaintenance> {
     }
     fetchInvoiceList();
     estimatedata();
+
+    var dateFormatter = DateFormat('yyyy-MM-dd'); // Import 'package:intl/intl.dart';
+
+    // Get current date
+    var currentDate = DateTime.now();
+
+    // Format current date
+    var formattedDate = dateFormatter.format(currentDate);
+
+    // Set maintanenceDateController's text to the formatted current date
+    maintanenceDateController.text = formattedDate;
   }
 
   fetchInvoiceList() async {
@@ -83,7 +96,7 @@ class _AddMaintenanceState extends State<AddMaintenance> {
 
   Future<void> fetchMaintenanceData() async {
     try {
-      WarrantyCardListingModel fetchedData = await ApiProvider().getWarrantyListing();
+      WarrantyCardListingModel2 fetchedData = await ApiProvider().getWarrantyListing2();
 
       print(fetchedData);
 
@@ -167,14 +180,13 @@ class _AddMaintenanceState extends State<AddMaintenance> {
     );
   }
 
-  List<WarrantyData> searchMaintenance(searchQuery) {
-    List<WarrantyData> maintenanceList = maintenanceData ?? [];
-    List<WarrantyData> result = maintenanceList
-        .where((maintenance) =>
-            maintenance.name != null && maintenance.name!.toLowerCase().contains(searchQuery) ||
-            maintenance.vehicleNumber != null && maintenance.vehicleNumber!.toLowerCase().contains(searchQuery))
-        .toList();
+  List<WarrantyCardData> searchMaintenance(searchQuery) {
+    List<WarrantyCardData> maintenanceList = maintenanceData ?? [];
+    List<WarrantyCardData> result = maintenanceList.where((maintenance){
+      final String searchTerm = searchQuery.toLowerCase();
+      return maintenance.name!.toLowerCase().contains(searchTerm);
 
+    }).toList();
     if (result.isNotEmpty) {
       final res = result[0];
       print(res);
@@ -186,10 +198,33 @@ class _AddMaintenanceState extends State<AddMaintenance> {
       vechileNo.text = res.vehicleNumber ?? '';
       color.text = res.color ?? '';
       year.text = res.year ?? '';
-      ceramicCoatingPackageController.text = res.selectServicesPackage ?? '';
-      selectedServiceForMaintenance = res.selectServicesName ?? '';
-      numberOfMaintenance = int.parse(res.maintenanceNumber ?? '0');
-      // maintanenceDateController.text = res.dueDate ?? [];
+
+      if (res.dueDate != null) {
+        for (String dateString in res.dueDate!) {
+          DateTime? date = DateTime.tryParse(dateString);
+          if (date != null) {
+            serviceDates.add(date);
+          }
+        }
+      }
+
+      if (res.doneDate != null) {
+        for (String dateString in res.doneDate!) {
+          doneDates.add(dateString);
+        }
+      }
+      doneDates.add(maintanenceDateController.text.toString());
+      if (res.ppfServices != null && res.ppfServices!.isNotEmpty) {
+        // Accessing the first element of selectServices list
+        ceramicCoatingPackageController.text = res.ppfServices![0].package ?? '';
+        // selectedServiceForMaintenance = res.selectServicesName.name ?? '';
+      }
+
+     // selectedServiceForMaintenance = res.selectServicesName.name ?? '';
+     // numberOfMaintenance = int.parse(res.maintenanceNumber ?? '0');
+
+      selectMaintenenceController.text = res.maintenanceNumber.toString();
+      numberOfMaintenance = int.parse(res.maintenanceNumber.toString());
       maintenancecharge.value = double.parse(chargeController.text);
       taxAmount.value = maintenancecharge.value * 0.18;
       totalPayableAmt.value = maintenancecharge.value + taxAmount.value;
@@ -275,7 +310,7 @@ class _AddMaintenanceState extends State<AddMaintenance> {
                               CustomButton(
                                 text: "Search",
                                 onPressed: () {
-                                  searchResult = searchMaintenance(searchController.text.toLowerCase());
+                                 searchResult = searchMaintenance(searchController.text.toLowerCase());
                                   setState(() {});
                                 },
                                 width: Responsive.isMobile(context) ? 160 : 180,
@@ -326,7 +361,7 @@ class _AddMaintenanceState extends State<AddMaintenance> {
                                     ),
                                   ),
                                 ),
-                              ),
+                             ),
                               SizedBox(
                                 width: 30,
                               ),
@@ -615,42 +650,43 @@ class _AddMaintenanceState extends State<AddMaintenance> {
                                 readOnly: true,
                               ),
                             ],
-                          ),
-                          SizedBox(
+                          ), SizedBox(
                             height: SizeConfig.blockSizeVertical! * 4,
                           ),
                           SizedBox(
                             height: SizeConfig.blockSizeVertical! * 4,
                           ),
-                          if (numberOfMaintenance > 0)
+                          if (numberOfMaintenance >= 0)
                             MaintenanceDetailTableWidget(
                               numberOfMaintenance: numberOfMaintenance,
-                              dueDate: '24-23-23',
-                              doneDate: '',
+
+                              doneDate:doneDates, serviceDueDates: serviceDates,
                             ),
                           SizedBox(
                             height: SizeConfig.blockSizeVertical! * 4,
-                          ),
+                           ),
                           if (numberOfMaintenance > 0) ...[
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                CustomDropdownFormField<String>(
-                                  width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
-                                  labelFontWeight: FontWeight.w500,
-                                  label: "Select Maintenance",
-                                  hintText: "Select Maintenance",
-                                  value: '',
-                                  items: arr,
-                                  onChanged: (value) async {},
-                                ),
-                                // textFieldForWarranty(
-                                //   context: context,
-                                //   textEditingController: selectMaintenenceController,
-                                //   labelText: "Select Maintenance",
-                                //   hintext: "Select Maintenance",
-                                //   isDigitOnly: true,
+                                // CustomDropdownFormField<String>(
+                                //   width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
+                                //   labelFontWeight: FontWeight.w500,
+                                //   label: "Select Maintenance",
+                                //   hintText: "Select Maintenance",
+                                //   value: '',
+                                //   items: arr,
+                                //   onChanged: (value) async {},
                                 // ),
+                                textFieldForWarranty(
+                                  context: context,
+                                  textEditingController: selectMaintenenceController,
+                                  labelText: "Select Maintenance",
+                                  hintext: "Select Maintenance",
+                                  isDigitOnly: true,
+                                ),
+
+
 
                                 textFieldForWarranty(
                                   context: context,
@@ -660,6 +696,9 @@ class _AddMaintenanceState extends State<AddMaintenance> {
                                   readOnly: true,
                                   rightIcon: Icons.calendar_month,
                                   onTap: () {
+                                    setState(() {
+                                      doneDates.add(maintanenceDateController.text.toString());
+                                    });
                                     showDateDailog(maintanenceDateController);
                                   },
                                   hintext: "Date",
@@ -833,14 +872,13 @@ class _AddMaintenanceState extends State<AddMaintenance> {
                                   estimateData["total_payable_amount"] = totalPayableAmt.value;
 
                                   estimateData["maintenance_number"] = taxAmount.value;
-                                  estimateData["due_date"] = totalPayableAmt.value;
+                                  estimateData["due_date"] = serviceDates;
 
-                                  estimateData["done_date"] = totalPayableAmt.value;
+                                  estimateData["done_date"] = doneDates;
                                   estimateData["charges"] = totalPayableAmt.value;
 
                                   var storeEstimateRes = await ApiProvider().storeMaintenance(
-                                    estimateData,
-                                    maintenanceData![0].id.toString(),
+                                    estimateData, maintenanceData![0].id.toString(),
                                   );
 
                                   if (storeEstimateRes['status'] == "1") {

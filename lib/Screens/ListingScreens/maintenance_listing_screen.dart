@@ -12,6 +12,7 @@ import 'package:responsive_dashboard/component/header.dart';
 import 'package:responsive_dashboard/config/size_config.dart';
 import 'package:responsive_dashboard/dataModel/maintenceModel.dart';
 import 'package:responsive_dashboard/utils/loginUtility.dart';
+import '../../Services/request_url.dart';
 import '../../component/custom/custom_confirmation_model.dart';
 import '../../component/no_data_found.dart';
 import '../../utils/image_constants.dart';
@@ -22,17 +23,29 @@ class MaintenanceListingScreen extends StatefulWidget {
 }
 
 class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
-  late Future<MaintanceModel> estimateFuture;
+  late Future<List<MaintainestData>> estimateFuture;
   TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
+
+
+
     getDataForMaintence();
     super.initState();
   }
 
-  void getDataForMaintence() {
-    estimateFuture = ApiProvider().getMaintenceList();
+
+  void getDataForMaintence() async{
+
+      try {
+        estimateFuture =  ApiProvider().getMaintenceList();
+        print(estimateFuture); // or whatever you want to do with the data
+      } catch (e) {
+        print('Error fetching maintenance data: $e');
+        // Handle the error gracefully, such as showing an error message to the user
+      }
+
   }
 
   @override
@@ -206,16 +219,20 @@ class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
                     SizedBox(
                       height: 20,
                     ),
-                    FutureBuilder<MaintanceModel>(
+                    FutureBuilder<List<MaintainestData>>(
                         future: estimateFuture,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
-                            return Center(
-                              child: CircularProgressIndicator(),
+                            return SizedBox(
+                              height: MediaQuery.of(context).size.height / 2,
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
                             );
                           }
+
                           if (snapshot.hasData) {
-                            final maintenanceDataList = snapshot.data?.data;
+                            final maintenanceDataList = snapshot.data;
 
                             final filteredData = maintenanceDataList!.where((estimate) {
                               final searchQuery = searchController.text.toLowerCase();

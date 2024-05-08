@@ -113,7 +113,7 @@ class ProfileMenuItems {
 
 List<ProfileMenuItems> profileMenuItems = [
   ProfileMenuItems(title: "Profile", screen: RoutePath.profileScreen, id: 1, icon: ImageConstant.userIcon),
-  ProfileMenuItems(title: "Calendar", screen: RoutePath.calendar, id: 2, icon: ImageConstant.calendarIcon),
+ // ProfileMenuItems(title: "Calendar", screen: RoutePath.calendar, id: 2, icon: ImageConstant.calendarIcon),
   ProfileMenuItems(title: "Maintenance", screen: RoutePath.maintenanceScreen, id: 3, icon: ImageConstant.maintenanceIcon),
   ProfileMenuItems(title: "Offers", screen: RoutePath.offersScreen, id: 4, icon: ImageConstant.offersIcon),
   ProfileMenuItems(title: "Logout", screen: RoutePath.login, id: 5, icon: ImageConstant.logoutIcon),

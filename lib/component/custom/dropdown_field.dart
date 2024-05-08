@@ -22,7 +22,9 @@ class CustomDropdownFormField<T> extends StatefulWidget {
   final bool isMandatory;
   final FocusNode? focusNode;
   final bool disabled;
+  final bool readOnly; // Add new property for read-only mode
   final double? width;
+
   const CustomDropdownFormField({
     Key? key,
     this.label,
@@ -41,6 +43,7 @@ class CustomDropdownFormField<T> extends StatefulWidget {
     this.isMandatory = false,
     this.focusNode,
     this.disabled = false,
+    this.readOnly = false, // Initialize read-only to false by default
     this.width,
   }) : super(key: key);
 
@@ -69,15 +72,6 @@ class _CustomDropdownFormFieldState<T> extends State<CustomDropdownFormField<T>>
                       fontWeight: widget.labelFontWeight,
                     ),
                   ),
-                  // if (widget.isMandatory)
-                  //   const TextSpan(
-                  //     text: ' *',
-                  //     style: TextStyle(
-                  //       fontSize: 12,
-                  //       fontWeight: FontWeight.w500,
-                  //       color: Colors.red,
-                  //     ),
-                  //   ),
                 ],
               ),
             ),
@@ -87,64 +81,58 @@ class _CustomDropdownFormFieldState<T> extends State<CustomDropdownFormField<T>>
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: DropdownButtonFormField<T>(
-              dropdownColor: Colors.white,
-              focusNode: widget.focusNode,
-              value: widget.value,
-              isExpanded: true,
-              borderRadius: BorderRadius.circular(widget.borderRadius),
-              isDense: true,
-              padding: const EdgeInsets.all(0),
-              focusColor: Colors.transparent,
-              icon: const Icon(Icons.expand_more, color: Colors.transparent),
-              alignment: Alignment.center,
-              items: widget.items.map((item) {
-                return DropdownMenuItem<T>(
-                  value: item,
-                  child: Text(
-                    '$item',
-                    softWrap: true,
-                    // textAlign: TextAlign.center,
-                    maxLines: 1,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                );
-              }).toList(),
-              onChanged: widget.disabled ? null : widget.onChanged,
-              validator: widget.validator,
-              decoration: InputDecoration(
+            child: AbsorbPointer( // Use AbsorbPointer to disable interaction when read-only
+              absorbing: widget.readOnly,
+              child: DropdownButtonFormField<T>(
+                dropdownColor: Colors.white,
+                focusNode: widget.focusNode,
+                value: widget.value,
+                isExpanded: true,
+                borderRadius: BorderRadius.circular(widget.borderRadius),
                 isDense: true,
-                hintText: widget.hintText,
-                hoverColor: Colors.transparent,
-                suffixIcon: const Icon(Icons.expand_more),
-                disabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(widget.borderRadius),
-                    borderSide: const BorderSide(
-                        // color: AppColor.inputFieldBorderColor,
-                        )),
-                errorStyle: const TextStyle(height: 0),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.red, width: 1),
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                // labelText: widget.placeHolderText ?? "--Select--",
-                labelStyle: const TextStyle(fontSize: 12),
-                focusColor: Colors.white,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(widget.borderRadius),
-                    borderSide: const BorderSide(
-                        // color: AppColors.inputFieldBorderColor,
-                        )),
-                // isDense: true,
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(widget.borderRadius),
-                  borderSide: const BorderSide(
-                    color: AppColors.primary,
+                padding: const EdgeInsets.all(0),
+                focusColor: Colors.transparent,
+                icon: const Icon(Icons.expand_more, color: Colors.transparent),
+                alignment: Alignment.center,
+                items: widget.items.map((item) {
+                  return DropdownMenuItem<T>(
+                    value: item,
+                    child: Text(
+                      '$item',
+                      softWrap: true,
+                      maxLines: 1,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  );
+                }).toList(),
+                onChanged: widget.disabled ? null : widget.onChanged,
+                validator: widget.validator,
+                decoration: InputDecoration(
+                  isDense: true,
+                  hintText: widget.hintText,
+                  hoverColor: Colors.transparent,
+                  suffixIcon: const Icon(Icons.expand_more),
+                  disabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(widget.borderRadius),
+                      borderSide: const BorderSide()),
+                  errorStyle: const TextStyle(height: 0),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.red, width: 1),
                   ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  labelStyle: const TextStyle(fontSize: 12),
+                  focusColor: Colors.white,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(widget.borderRadius),
+                      borderSide: const BorderSide()),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(widget.borderRadius),
+                    borderSide: const BorderSide(color: AppColors.primary),
+                  ),
+                  errorMaxLines: 1,
                 ),
-                errorMaxLines: 1,
               ),
             ),
           ),

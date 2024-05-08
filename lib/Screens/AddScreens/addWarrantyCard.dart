@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:universal_html/html.dart' as html;
@@ -21,6 +23,7 @@ import 'package:toastification/toastification.dart';
 
 import '../../config/responsive.dart';
 import '../../functions/date_picker.dart';
+import '../../widgets/maintenance_table_widget.dart';
 
 class AddWarrantyCard extends StatefulWidget {
   @override
@@ -39,6 +42,7 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
   TextEditingController date = TextEditingController(
     text: DateFormat('yyyy-MM-dd').format(DateTime.now()),
   );
+  TextEditingController maintain=TextEditingController();
   TextEditingController phoneNo = TextEditingController();
   TextEditingController Address = TextEditingController();
   TextEditingController email = TextEditingController();
@@ -58,20 +62,20 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
   );
   TextEditingController AssignedWorkers = TextEditingController();
   TextEditingController ceramictypeController = TextEditingController();
-  TextEditingController ceramicWarrantyController = TextEditingController();
+  TextEditingController ceramicWarrantyController = TextEditingController(text: '5 year');
   TextEditingController ppfTypeController = TextEditingController();
   TextEditingController ppfPackage = TextEditingController();
   TextEditingController ppfWarrantController = TextEditingController();
   TextEditingController carWashTypeController = TextEditingController();
   TextEditingController cardWashWarrantyController = TextEditingController();
   TextEditingController noOfMaintenanceController = TextEditingController();
-
+TextEditingController  selectePackageController = TextEditingController();
   List<String> selectedServiceList = [];
 
   var serviceList = [];
 
   List models = [];
-
+  List models1 = [];
   var _intervalValue;
 
   List colors = [];
@@ -88,7 +92,8 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
   bool isCarWashVisible = false;
 
   String isSele = '';
-  String selectePackage = '1 year';
+  String selectePackage = '4 year';
+  int noOfMaintenance=0;
 
   @override
   void initState() {
@@ -113,11 +118,50 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
       AssignedWorkers.text = billData?.assignedWorker ?? '';
       modelId = billData?.modalName ?? 13;
       model.text = billData!.modalName ?? 'Swift';
+      selectePackage=billData!.selectServices![0].package.toString();
+      selectePackageController.text=billData!.selectServices![0].package.toString();
+
+      updateMaintenanceValue(billData!.selectServices![0].package.toString());
+      divideService(billData!.selectServices![0].package.toString(),value.first);
     }
     estimatedata();
   }
+  void updateMaintenanceValue(String? selectedPackage) {
+    if (selectedPackage != null) {
+      int years = int.parse(selectedPackage.split(' ')[0]);
+      int numberOfMaintenance = 2 * years - 1;
+      noOfMaintenance = numberOfMaintenance;
+    }
+  }
 
+  List<DateTime> serviceDates = [];
+  List<DateTime> divideService( String years,String estDatas) {
+    DateTime parsedDate = DateTime.parse(estDatas);
+
+
+    int yearsCount = int.parse(years.split(' ')[0]);
+    int totalMonths = yearsCount * 12;
+
+    // Calculate the number of services needed in total
+    int totalServices = totalMonths ~/ 6;
+
+    // Calculate the number of months between each service
+    int monthsBetweenServices = totalMonths ~/ totalServices;
+
+    // Calculate the first service date
+    DateTime currentDate = parsedDate;
+
+    for (int i = 0; i < totalServices; i++) {
+      serviceDates.add(currentDate);
+      // Move currentDate to the next service date
+      currentDate = currentDate.add(Duration(days: monthsBetweenServices * 30));
+    }
+
+    return serviceDates;
+
+  }
   estimatedata() async {
+
     var responseData = await http.get(
       Uri.parse('https://excelosoft.com/dxapp/public/api/getModels'),
     );
@@ -127,20 +171,21 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
     if (model['status'] != 0) {
       List modelData = model['models'];
       modelData.forEach((val) {
-        models.add(val['modal_name']);
+        models.add(val);
+        models1.add(val['modal_name'].toString());
       });
-      _intervalValue = models.first;
+      _intervalValue = models.first['modal_name'];
       // models = model['models'];
 
       if (billData != null) {
-        _intervalValue = billData?.modalName ?? 'Swift';
+        _intervalValue = billData?.modalName?? 'Swift';
         getColors(billData?.modalName ?? 'Swift');
       }
 
       for (var model in models) {
         if (model['modal_name'] == _intervalValue) {
           // Found the matching model, set the modelId
-          modelId = model['id'].toString();
+          modelId = model['id'];
           break; // Exit the loop since we found the matching model
         }
       }
@@ -478,8 +523,8 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
                             labelFontWeight: FontWeight.w500,
                             label: 'Select Model',
                             hintText: "Select Model",
-                            value: _intervalValue,
-                            items: models,
+                            value: _intervalValue.toString(),
+                            items: models1,
                             validator: (value) => validateForNormalFeild(value: value, props: "Select Model"),
                             onChanged: (value) async {
                               print("Testtt");
@@ -726,6 +771,8 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
                           // spacing: 10,
                           runSpacing: 20,
                           children: billData!.selectServices!.map((f) {
+
+
                             List<String> allowedServices = ['Graphene Coating', 'Ceramic Coating'];
 
                             // selectedServiceList = billData!.selectServices!.where((service) {
@@ -747,9 +794,7 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
                                     return allowedServices.contains(service.name) || service.name!.toLowerCase().contains('ppf');
                                   }
                                   return false;
-                                })
-                                .map((service) => service.name!)
-                                .toList();
+                                }).map((service) => service.name!).toList();
 
                             isSele = selectedServiceList.isNotEmpty ? selectedServiceList.first : '';
 
@@ -757,7 +802,8 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
                             //   // isSele = true;
                             // }
 
-                            if (f.name == 'Ceramic Coating' || f.name == 'Graphene Coating' || f.name!.contains('PPF')) {
+                            if (
+                            f.name == 'Ceramic Coating' || f.name == 'Graphene Coating' || f.name!.contains('PPF')) {
                               return StatefulBuilder(
                                 builder: (context, setstate) {
                                   return Container(
@@ -806,13 +852,16 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
                                           Padding(
                                             padding: const EdgeInsets.symmetric(horizontal: 10.0),
                                             child: buildServiceFields(
-                                              billData,
-                                              isSele == f.name,
-                                              selectePackage,
+                                              billData, isSele == f.name, selectePackage,
                                             ),
                                           ),
+
+
+
                                         ],
                                       )
+
+
                                       // Text('${f}',
                                       //   style: TextStyle(
                                       //     color: Colors.white ,
@@ -825,8 +874,14 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
                             }
                             return SizedBox();
                           }).toList(),
+
                         ),
                       ),
+
+
+
+
+
 
                     SizedBox(
                       height: SizeConfig.blockSizeVertical! * 1,
@@ -972,26 +1027,51 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
                           ),
                           CustomButton(
                             onPressed: () async {
+
+                              DateTime? parsedDate = DateTime.tryParse(estDate.text);
+                              TimeOfDay? parsedTime;
+
+// Parse time
+                              List<String> timeParts = estTime.text.split(':');
+                              if (timeParts.length == 2) {
+                                int hour = int.tryParse(timeParts[0]) ?? 0;
+                                int minute = int.tryParse(timeParts[1]) ?? 0;
+                                parsedTime = TimeOfDay(hour: hour, minute: minute);
+                              }
+
+                              String estimatedDeliveryTime = "N/A";
+                              if (parsedDate != null && parsedTime != null) {
+                                DateTime deliveryDateTime = DateTime(
+                                  parsedDate.year,
+                                  parsedDate.month,
+                                  parsedDate.day,
+                                  parsedTime.hour,
+                                  parsedTime.minute,
+                                );
+                                estimatedDeliveryTime = deliveryDateTime.toString();
+                              }
+
+
                               // warrantyData["maintenance_number"] = totalMaintenance.toString();
                               if (_formKey.currentState!.validate()) {
                                 Map<String, dynamic> warrantyData = {};
-                                warrantyData["name"] = name.text;
-                                warrantyData["date"] = date.text;
-                                warrantyData["email"] = email.text;
-                                warrantyData["phone"] = phoneNo.text;
-                                warrantyData["address"] = Address.text;
-                                warrantyData["vehicle_number"] = vechileNo.text;
-                                warrantyData["model_id"] = modelId;
-                                warrantyData["modal_name"] = model.text;
-                                warrantyData["make_id"] = make.text;
-                                warrantyData["year"] = year.text;
+                                warrantyData["name"] = name.text.toString();
+                                warrantyData["date"] = date.text.toString();
+                                warrantyData["email"] = email.text.toString();
+                                 warrantyData["phone"] = phoneNo.text.toString();
+                                warrantyData["address"] = Address.text.toString();
+                                warrantyData["vehicle_number"] = vechileNo.text.toString();
+                                 warrantyData["model_id"] = modelId.toString();
+                                warrantyData["modal_name"] = model.text.toString();
+                                warrantyData["make_id"] = make.text.toString();
+                                warrantyData["year"] = year.text.toString();
                                 warrantyData["color"] = _colorValue;
-                                warrantyData["vin"] = vin.text;
-                                warrantyData["gst"] = gstNo.text;
-                                warrantyData["segment"] = segment.text;
+                                warrantyData["vin"] = vin.text.toString();
+                                warrantyData["gst"] = gstNo.text.toString();
+                                warrantyData["segment"] = segment.text.toString();
 
-                                warrantyData["assigned_worker"] = AssignedWorkers.text;
-                                warrantyData["customer_id"] = billData?.id;
+                                warrantyData["assigned_worker"] = AssignedWorkers.text.toString();
+                                // warrantyData["customer_id"] = billData?.id.toString();
 
                                 // warrantyData["select_services_name"] = billData?.selectServicesName;
                                 // warrantyData["select_services_type"] = billData?.selectServicesType;
@@ -1010,28 +1090,30 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
                                 warrantyData["ppf_services_type"] = billData?.ppfServices?.map((service) => service.type).toList() ?? [];
                                 warrantyData["ppf_services_package"] = billData?.ppfServices?.map((service) => service.package).toList() ?? [];
 
-                                warrantyData["estimated_delivery_time"] = (estDate.text + estTime.text).isNotEmpty ? estDate.text + " " + estTime.text : "N/A";
+                                warrantyData["estimated_delivery_time"] =   estimatedDeliveryTime;
 
-                                int years = int.parse(selectePackage.split(' ')[0]); // Extract the number of years
-                                DateTime currentDate = DateTime.now();
-                                DateTime estimatedDeliveryDate = currentDate.add(Duration(days: years * 365));
 
-                                int differenceInMonths = currentDate.difference(estimatedDeliveryDate).inDays ~/ 30;
-                                int totalMaintenance = (differenceInMonths / 6).ceil().abs();
+                                // int years = int.parse(selectePackage.split(' ')[0]); // Extract the number of years
+                                // DateTime currentDate = DateTime.now();
+                                // DateTime estimatedDeliveryDate = currentDate.add(Duration(days: years * 365));
+                                //
+                                // int differenceInMonths = currentDate.difference(estimatedDeliveryDate).inDays ~/ 30;
+                                // int totalMaintenance = (differenceInMonths / 6).ceil().abs();
+                                //
+                                // Duration maintenanceInterval = Duration(days: 180);
+                                // List<String> dueDates = [];
+                                // List<String> doneDates = List.filled(totalMaintenance, "");
+                                //
+                                // DateTime currentDueDate = estimatedDeliveryDate;
+                                // for (int i = 0; i < totalMaintenance; i++) {
+                                //   dueDates.add(currentDueDate.toString());
+                                //   currentDueDate = currentDueDate.add(maintenanceInterval);
+                                // }
 
-                                Duration maintenanceInterval = Duration(days: 180);
-                                List<String> dueDates = [];
-                                List<String> doneDates = List.filled(totalMaintenance, "");
-
-                                DateTime currentDueDate = estimatedDeliveryDate;
-                                for (int i = 0; i < totalMaintenance; i++) {
-                                  dueDates.add(currentDueDate.toString());
-                                  currentDueDate = currentDueDate.add(maintenanceInterval);
-                                }
-
-                                warrantyData["maintenance_number"] = noOfMaintenanceController.text;
-                                warrantyData["due_date"] = dueDates;
-                                warrantyData["done_date"] = doneDates;
+                                warrantyData["maintenance_number"] = noOfMaintenance.toString();
+                                List<String> serviceDateStrings = serviceDates.map((dateTime) => dateTime.toIso8601String()).toList();
+                                warrantyData["due_date"] = serviceDateStrings;
+                                warrantyData["done_date"] = [];
 
                                 var storeEstimateRes;
 
@@ -1073,45 +1155,146 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
   }
 
   Widget buildServiceFields(
-    BillListData? selectedResponseServerRes,
-    bool isSelected,
-    String selectePackage,
+      BillListData? selectedResponseServerRes,
+      bool isSelected,
+      String selectePackage,
+
   ) {
     if (isSelected) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      return Column(
         children: [
-          CustomDropdownFormField<String>(
-            width: MediaQuery.of(context).size.width / 3.5,
-            hintText: "Select Package Time (Year)",
-            label: "Package",
-            value: selectePackage,
-            items: ['1 year', '2 year', '3 year', '4 year', '5 year'],
-            onChanged: (value) {
-              selectePackage = value!;
-              // Extract the number of years selected
-              int years = int.parse(value.split(' ')[0]);
-              // Calculate the number of maintenance
-              int numberOfMaintenance = 2 * years - 1;
-              // Set the calculated number of maintenance to the text controller
-              noOfMaintenanceController.text = numberOfMaintenance.toString();
-            },
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              textFieldForWarranty(
+                width: MediaQuery.of(context).size.width / 3.5,
+                context: context,
+                textEditingController:selectePackageController ,
+                labelText: "Package",
+                hintext: "selectePackage",
+              ),
+
+              // CustomDropdownFormField<String>(
+              //   width: MediaQuery.of(context).size.width / 3.5,
+              //   hintText: "Select Package Time (Year)",
+              //   label: "Package",
+              //   value: selectePackage,
+              //   items: ['1 year', '2 year', '3 year', '4 year', '5 year'],
+              //   onChanged: (value) {
+              //     selectePackage = value!;
+              //     // Extract the number of years selected
+              //     int years = int.parse(value.split(' ')[0]);
+              //     // Calculate the number of maintenance
+              //     int numberOfMaintenance = 2 * years - 1;
+              //     // Set the calculated number of maintenance to the text controller
+              //
+              //   },
+              // ),
+              SizedBox(
+                width: 30,
+              ),
+              // textFieldForWarranty(
+              //   width: MediaQuery.of(context).size.width / 3.5,
+              //   context: context,
+              //   textEditingController:noOfMaintenanceController ,
+              //   labelText: "No. of Maintenance",
+              //   hintext: "Maintenance",
+              // ),
+              //
+              // SizedBox(
+              //   width: 30,
+              // ),
+              // SizedBox(height: 200,
+              //   width: 300,
+              //   child: ListView.builder(
+              //     itemCount: serviceDates.length,
+              //     itemBuilder: (context, index) {
+              //       DateTime date = serviceDates[index];
+              //       return ListTile(
+              //         title: Row(
+              //           children: [
+              //             Text(
+              //               "${_getIndexWithOrdinal(index + 1)} :- ",
+              //               style: TextStyle(color: Colors.white),
+              //             ),
+              //
+              //             Text(
+              //               "${date.day} ${_getMonthName(date.month)} ${date.year}",
+              //               style: TextStyle(color: Colors.white),
+              //             ),
+              //           ],
+              //         ),
+              //
+              //       );
+              //     },
+              //   ),
+              // ),
+              if (noOfMaintenance >= 0)
+                Container(
+
+                  width: MediaQuery.sizeOf(context).width*.5,
+                  child: WarrantyDetailTableWidget(
+                    numberOfMaintenance: noOfMaintenance,
+                     serviceDates: serviceDates ,
+
+                  ),
+                ),
+
+            ],
           ),
-          SizedBox(
-            width: 30,
-          ),
-          textFieldForWarranty(
-            width: MediaQuery.of(context).size.width / 3.5,
-            context: context,
-            textEditingController: noOfMaintenanceController,
-            labelText: "No. of Maintenance",
-            hintext: "Maintenance",
-          ),
+
         ],
       );
     }
     return Container();
   }
+  String _getMonthName(int month) {
+    switch (month) {
+      case 1:
+        return 'January';
+      case 2:
+        return 'February';
+      case 3:
+        return 'March';
+      case 4:
+        return 'April';
+      case 5:
+        return 'May';
+      case 6:
+        return 'June';
+      case 7:
+        return 'July';
+      case 8:
+        return 'August';
+      case 9:
+        return 'September';
+      case 10:
+        return 'October';
+      case 11:
+        return 'November';
+      case 12:
+        return 'December';
+      default:
+        return '';
+    }
+  }
+
+  String _getIndexWithOrdinal(int index) {
+    if (index >= 10 && index <= 20) {
+      return '$index' + 'th';
+    }
+    switch (index % 10) {
+      case 1:
+        return '$index' + 'st';
+      case 2:
+        return '$index' + 'nd';
+      case 3:
+        return '$index' + 'rd';
+      default:
+        return '$index' + 'th';
+    }
+  }
+
 }
