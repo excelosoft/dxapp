@@ -61,13 +61,22 @@ class _LoginScreenState extends State<LoginScreen> {
             }));
 
         var status = jsonDecode(response.body.toString());
+        print(response.body);
         print(status);
         if (status['status'] != 0) {
           UserId = status['data']['id'];
           AppConst.setAccessToken(status['data']['id']);
+
+
           SharedPreferences prefs = await SharedPreferences.getInstance();
           prefs.setBool("isLoggedIn", true);
-          saveUserId(status['data']['id']);
+
+          if(status['data']['manager']==true){
+            saveUserId(status['data']['parent_id']);
+          }else{
+            saveUserId(status['data']['id']);
+          }
+
           toastification.show(
             context: context,
             type: ToastificationType.success,
