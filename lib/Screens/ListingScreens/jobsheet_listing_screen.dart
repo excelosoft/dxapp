@@ -13,6 +13,7 @@ import '../../component/no_data_found.dart';
 import '../../config/responsive.dart';
 import '../../dataModel/estimate_list_model.dart';
 import '../../routes/RoutePath.dart';
+import '../../style/colors.dart';
 import '../../utils/image_constants.dart';
 
 class JobSheet extends StatefulWidget {
@@ -23,7 +24,8 @@ class JobSheet extends StatefulWidget {
 class _JobSheetState extends State<JobSheet> {
   late Future<JobSheetListingModel> jobSheetFuture;
   TextEditingController searchController = TextEditingController();
-
+  int _currentPage = 1;
+  int _rowsPerPage = 10; // Number of rows per page
   @override
   void initState() {
     getDataforJobsheet();
@@ -76,6 +78,32 @@ class _JobSheetState extends State<JobSheet> {
                           final vehicleNumberMatches = estimate.vehicleNumber != null && estimate.vehicleNumber!.toLowerCase().contains(searchQuery);
                           return nameMatches || vehicleNumberMatches;
                         }).toList();
+
+                        // Calculate total pages based on filtered data
+                        final totalPages = (filteredData.length / _rowsPerPage).ceil();
+
+                        // Ensure that current page index is within valid range
+                        _currentPage = (_currentPage > totalPages) ? totalPages : _currentPage;
+
+                        // Calculate start and end index for the current page
+                        final startIndex = (_currentPage - 1) * _rowsPerPage;
+                        final endIndex = startIndex + _rowsPerPage;
+
+                        // Ensure that endIndex is within the valid range of data indices
+                        final endValidIndex = endIndex.clamp(0, filteredData.length);
+
+                        // Slice the filtered data to get the data for the current page
+                        final paginatedData = filteredData.sublist(startIndex, endValidIndex);
+
+                        if (paginatedData.isEmpty && _currentPage > 1) {
+                          // If there's no data on the current page and it's not the first page,
+                          // decrement the current page value to navigate back to the previous page.
+                          setState(() {
+                            _currentPage--;
+                          });
+                          return SizedBox(); // Return an empty SizedBox as the UI will be updated after setState
+                        }
+
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,7 +238,7 @@ class _JobSheetState extends State<JobSheet> {
                                           size: ColumnSize.L,
                                         ),
                                       ],
-                                      rows: List<DataRow>.generate(filteredData.length, (index) {
+                                      rows: List<DataRow>.generate(paginatedData.length, (index) {
                                         return DataRow(
                                           cells: [
                                             DataCell(
@@ -330,6 +358,26 @@ class _JobSheetState extends State<JobSheet> {
                                 ],
                               ),
                             ),
+
+
+                            SizedBox(height: 20),
+                            Row(
+                              children: [
+                                Spacer(),
+                                Align(
+                                  alignment: Alignment.bottomLeft,
+                                  child: PaginationControls(
+                                    currentPage: _currentPage,
+                                    totalPages: totalPages,
+                                    onPageChanged: (int newPage) {
+                                      setState(() {
+                                        _currentPage = newPage;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         );
                       }
@@ -342,6 +390,40 @@ class _JobSheetState extends State<JobSheet> {
           )
         ],
       ),
+    );
+  }
+}
+class PaginationControls extends StatelessWidget {
+  final int currentPage;
+  final int totalPages;
+  final ValueChanged<int> onPageChanged;
+
+  const PaginationControls({
+    required this.currentPage,
+    required this.totalPages,
+    required this.onPageChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.buttonColor),
+          color: currentPage > 1 ? Colors.blue : Colors.grey,
+          onPressed: currentPage > 1 ? () => onPageChanged(currentPage - 1) : null,
+        ),
+        Text(
+          'Page $currentPage of $totalPages',
+          style: TextStyle(color: AppColors.buttonColor),
+        ),
+        IconButton(
+          icon: Icon(Icons.arrow_forward_ios, color: AppColors.buttonColor),
+          color: currentPage < totalPages ? Colors.blue : Colors.grey,
+          onPressed: currentPage < totalPages ? () => onPageChanged(currentPage + 1) : null,
+        ),
+      ],
     );
   }
 }

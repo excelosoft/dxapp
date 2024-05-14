@@ -386,18 +386,15 @@ class ApiProvider {
   }
 
   storeMaintenance(Map dataMap, String id) async {
-    dataMap["user_id"] = userid;
+      dataMap["user_id"] = userid;
 
-    var headers = {'Content-Type': 'application/json'};
-    var response = await http.post(
-        Uri.parse(
-          'https://excelosoft.com/dxapp/public/api/maintenanceUpdate/$id',
-        ),
-        headers: headers,
-        body: jsonEncode(dataMap));
-    var data = jsonDecode(response.body.toString());
-    print(data);
-    return data;
+      var headers = {'Content-Type': 'application/json'};
+      var response = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/maintenanceUpdate/$id',), headers: headers, body: jsonEncode(dataMap));
+
+          var data = jsonDecode(response.body.toString());
+      print(data);
+      return data;
+
   }
 
   storeInvoiceNumber(String invoiceNumber, String id) async {

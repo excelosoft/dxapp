@@ -939,9 +939,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                                     Column(
                                       children: [
                                         buildServiceFields(
-                                          selectedServiceList[index].name,
-                                          amountController,
-                                          index,
+                                          selectedServiceList[index].name, amountController, index,
                                         ),
                                         SizedBox(
                                           height: SizeConfig.blockSizeVertical! * 4,
@@ -974,8 +972,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                           ? Text(
                               'No Service add , please add service to make estimate',
                               style: GoogleFonts.inter(color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold),
-                            )
-                          : Wrap(
+                            ) : Wrap(
                               alignment: WrapAlignment.start,
                               crossAxisAlignment: WrapCrossAlignment.start,
                               runAlignment: WrapAlignment.start,
@@ -1049,6 +1046,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                             hintext: "Package",
                           ),
                           textFieldForWarranty(
+
                             context: context,
                             textEditingController: ppfAmount,
                             labelText: "Amount",
@@ -1060,8 +1058,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                       SizedBox(
                         height: SizeConfig.blockSizeVertical! * 2,
                       ),
-                      serviceList == []
-                          ? Text(
+                      serviceList == [] ? Text(
                               'No partial ppf add',
                               style: GoogleFonts.inter(color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold),
                             )
@@ -1102,9 +1099,11 @@ class _EstimateAddState extends State<EstimateAdd> {
                                               // if (serviceList.length < 5) {
                                               selectedppfServiceList.add(f);
                                               setState(() {});
-                                              ppfAmount.text = (int.parse(ppfAmount.text) +
-                                                      ((selectedPPFRateData != null && selectedPPFRateData["rate"] != null) ? int.parse(selectedPPFRateData["rate"]) : 0))
-                                                  .toString();
+                                              if(int.parse(ppfAmount.text)!=0){
+                                                totalServiceAmt.value-=int.parse(ppfAmount.text);
+                                              }
+
+                                              ppfAmount.text = (int.parse(ppfAmount.text) + ((selectedPPFRateData != null && selectedPPFRateData["rate"] != null) ? int.parse(selectedPPFRateData["rate"]) : 0)).toString();
                                               totalServiceAmt.value += int.parse(ppfAmount.text);
                                               calculateTotalBill(totalServiceAmt.value);
                                               setState(() {});
@@ -1118,13 +1117,14 @@ class _EstimateAddState extends State<EstimateAdd> {
                                               // selectedppfServiceList.removeWhere((element) => element == f);
                                               // setState(() {});
                                               selectedppfServiceList.removeWhere((element) => element == f);
-                                              setState(() {});
+
                                               int rateToRemove = int.parse(selectedPPFRateData["rate"] ?? '0');
-                                             // ppfAmount.text = (int.parse(ppfAmount.text) - rateToRemove).toString();
+                                              ppfAmount.text = (int.parse(ppfAmount.text) - rateToRemove).toString();
                                               totalServiceAmt.value -= rateToRemove;
                                               calculateTotalBill(totalServiceAmt.value);
                                               print(selectedppfServiceList);
                                               // print(selectedppfServiceList);
+                                              setState(() {});
                                             }
                                           },
                                           icon: Icon(isSele ? Icons.check_box : Icons.check_box_outline_blank_rounded),
@@ -1577,6 +1577,7 @@ class _EstimateAddState extends State<EstimateAdd> {
   void calculateTotalBill(double totalServiceAmount) {
     //Clear the old data
     discountAmt.value = 0.0;
+
     totalTaxebleAmt.value = 0.0;
     totalApplicaleTaxAmt.value = 0.0;
     totalPayableAmt.value = 0.0;

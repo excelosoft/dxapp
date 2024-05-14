@@ -117,88 +117,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      height: SizeConfig.blockSizeVertical! * 3,
-                    ),
-                    Row(
-                      children: [
-                        CustomButton(
-                          width: Responsive.isMobile(context) ? 180 : 220,
-                          height: 39,
-                          text: '15 March 2024',
-                          leftIcon: Icons.calendar_month_outlined,
-                          textColor: Colors.black,
-                          lefticonColor: Colors.black,
-                          // textAlign: TextAlign.start,
-                          buttonColor: Colors.white,
 
-                          borderRadius: 30,
-                          onPressed: () {
-                            showDateDailog();
-                          },
-                        ),
-                        if (!Responsive.isMobile(context))...[
-                          Spacer(),
-                          SizedBox(
-                            width: 500,
-                            child: TabBarWidget(
-                              tabviewController: tabviewController,
-                              onTabChanged: (e) {
-                                // setState(() {
-                                // });
-                              },
-                            ),
-                          ),
-                        ] else ...[
-                          Spacer(),
-                          PopupMenuButton(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            initialValue: '',
-                            tooltip: '',
-                            padding: EdgeInsets.zero,
-                            color: Colors.white.withOpacity(1),
-                            offset: const Offset(10, 40),
-                            itemBuilder: (context) {
-                              return filterList
-                                  .map((e) => popupMenuItem(
-                                        e.toString(),
-                                        selectedValue: 'Day',
-                                      ))
-                                  .toList();
-                            },
-                            onSelected: (value) {
-                              setState(() {
-                                currentTimeFormat = value.toString();
-                              });
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                              child: IntrinsicWidth(
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      currentTimeFormat,
-                                      style: GoogleFonts.inter(
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    Icon(
-                                      Icons.expand_more_outlined,
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ]
-                      ],
-                    ),
                     SizedBox(
                       height: SizeConfig.blockSizeVertical! * 4,
                     ),
@@ -265,53 +184,62 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                                   ),
                                 ),
                               ),
-                              if (!Responsive.isMobile(context)) ...[
-                                const VerticalDivider(
-                                  indent: 15,
-                                  width: 20,
-                                ),
-                                // Expanded(
-                                //   flex: Responsive.isTablet(context) ? 2 : 1,
-                                //   child: Padding(
-                                //     padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10),
-                                //     child: Column(
-                                //       children: [
-                                //         Center(
-                                //           child: SfCalendar(
-                                //             controller: calendarController2,
-                                //             // headerHeight: 0,
-                                //             initialDisplayDate: selectedDate,
-                                //             initialSelectedDate: selectedDate,
-                                //             dataSource: EventDataSource(calenderList),
-                                //             cellBorderColor: Colors.transparent,
-                                //             view: CalendarView.month,
-                                //             backgroundColor: Colors.white,
-                                //             onTap: (calendarLongPressDetails) {
-                                //               selectedDate = calendarLongPressDetails.date!;
-                                //               calendarController1.displayDate = calendarLongPressDetails.date;
-                                //             },
-                                //           ),
-                                //         ),
-                                //         const Padding(
-                                //           padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                //           child: Divider(),
-                                //         ),
-                                //         CustomButton(
-                                //           height: 40,
-                                //           width: 160,
-                                //           text: 'Create new +',
-                                //           onPressed: () {
-                                //             showAddCalendarModal(
-                                //               context: context,
-                                //               isEdit: false,
-                                //             );
-                                //           },
-                                //         )
-                                //       ],
-                                //     ),
-                                //   ),
-                                // ),
-                              ]
+                              // if (!Responsive.isMobile(context)) ...[
+                              //   const VerticalDivider(
+                              //     indent: 15,
+                              //     width: 20,
+                              //   ),
+                              //   Expanded(
+                              //     flex: Responsive.isTablet(context) ? 2 : 1,
+                              //     child: Padding(
+                              //       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10),
+                              //       child: Container(
+                              //         decoration: BoxDecoration(
+                              //           color: Colors.white,
+                              //           borderRadius: BorderRadius.all(Radius.circular(10)),
+                              //         ),
+                              //         height:height/1.2,
+                              //         padding: const EdgeInsets.all(15),
+                              //         child: ScrollConfiguration(
+                              //             behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                              //             child: SfCalendar(
+                              //                 backgroundColor: Colors.white,
+                              //                 view: CalendarView.month,
+                              //                 monthViewSettings: MonthViewSettings(
+                              //                     appointmentDisplayMode: MonthAppointmentDisplayMode.appointment),
+                              //                 dataSource: _calendarDataSource,
+                              //                 onViewChanged: (viewChangedDetails) {
+                              //                   final CalendarView currentView = viewChangedDetails.visibleDates.length > 1 ? CalendarView.month : CalendarView.week;
+                              //
+                              //                   if (currentView == CalendarView.month) {
+                              //                     weekCalendarView = true;
+                              //                   } else {
+                              //                     weekCalendarView = true;
+                              //                   }
+                              //
+                              //                   calendarController1.view = currentView;
+                              //                 },
+                              //                 initialDisplayDate: selectedDate,
+                              //                 initialSelectedDate: selectedDate,
+                              //                 viewHeaderHeight: Responsive.isMobile(context) ? 0 : -1,
+                              //                 showTodayButton: Responsive.isMobile(context) ? false : true,
+                              //                 showNavigationArrow: Responsive.isMobile(context) ? false : true,
+                              //                 onTap: (details) {
+                              //                   if (details.appointments == null) return;
+                              //
+                              //                   final CalendarItem event = details.appointments!.first;
+                              //
+                              //                   showAddCalendarModal(
+                              //                     context: context,
+                              //                     isEdit: true,
+                              //                     calendarModel: event,
+                              //                   );}
+                              //             )
+                              //         ),
+                              //       ),
+                              //     ),
+                              //   ),
+                              // ]
                             ],
                           );
                         }

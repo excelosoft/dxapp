@@ -1,9 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.responsive_dashboard">
+    <uses-permission android:name="android.permission.INTERNET" />
    <application
         android:label="responsive_dashboard"
         android:icon="@mipmap/ic_launcher">
         <activity
+
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"

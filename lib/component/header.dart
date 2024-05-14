@@ -33,9 +33,9 @@ class _HeaderState extends State<Header> {
 
   getUserData() async {
     final data = await ApiProvider().getProfile();
-    setState(() {
+
       userDataModel = data;
-    });
+
   }
 
   @override

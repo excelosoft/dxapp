@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -179,16 +180,19 @@ class _AddMaintenanceState extends State<AddMaintenance> {
       },
     );
   }
-
+  List<WarrantyCardData> results=[];
   List<WarrantyCardData> searchMaintenance(searchQuery) {
     List<WarrantyCardData> maintenanceList = maintenanceData ?? [];
-    List<WarrantyCardData> result = maintenanceList.where((maintenance){
+     results = maintenanceList.where((maintenance){
       final String searchTerm = searchQuery.toLowerCase();
       return maintenance.name!.toLowerCase().contains(searchTerm);
 
     }).toList();
-    if (result.isNotEmpty) {
-      final res = result[0];
+
+
+    if (results.isNotEmpty) {
+
+      final res = results[0];
       print(res);
       name.text = res.name ?? '';
       date.text = res.date ?? '';
@@ -236,7 +240,7 @@ class _AddMaintenanceState extends State<AddMaintenance> {
       );
     }
 
-    return result;
+    return results;
   }
 
   @override
@@ -341,6 +345,7 @@ class _AddMaintenanceState extends State<AddMaintenance> {
                                 child: TextField(
                                   controller: searchController,
                                   onChanged: (value) {
+                                    searchMaintenance(value);
                                     setState(() {});
                                   },
                                   decoration: InputDecoration(
@@ -379,6 +384,45 @@ class _AddMaintenanceState extends State<AddMaintenance> {
                         ],
                       ),
                     ],
+                    SizedBox(
+                      height: SizeConfig.blockSizeVertical! * 4,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+Spacer(),
+                        if (searchResult.isEmpty)...[
+                          if (results.isNotEmpty)
+                            SizedBox(
+                              height:500,
+                              width:MediaQuery.sizeOf(context).width*0.28,
+                              child: ListView.builder(
+                                  itemCount: results.length,
+
+                                  itemBuilder: (BuildContext context, int index) {
+                                    return Row(
+                                      children: [
+                                        Text(results[index].name.toString(),
+                                          style: TextStyle(
+                                            color: Colors.white,
+
+                                            fontFamily: 'Poppins',
+                                            fontSize: 15,
+
+                                          ),),
+
+                                      ],
+                                    );
+                                  }),
+                            ),
+
+                        ],
+                      ],
+                    ),
+
+
+
+
                     if (searchResult.isNotEmpty) ...[
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
