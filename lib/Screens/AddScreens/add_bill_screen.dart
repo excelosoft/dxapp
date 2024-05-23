@@ -60,7 +60,7 @@ class _BillAddState extends State<BillAdd> {
   TextEditingController gstNo = TextEditingController();
   TextEditingController year = TextEditingController();
   TextEditingController estDate = TextEditingController(
-    text: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+    //text: DateFormat('yyyy-MM-dd').format(DateTime.now()),
   );
   TextEditingController estTime = TextEditingController(
     text: DateFormat('HH:mm').format(DateTime.now()),
@@ -242,6 +242,10 @@ class _BillAddState extends State<BillAdd> {
       vin.text = data?.vin ?? '';
       gstNo.text = data?.gst ?? '';
       segment.text = data?.segment ?? '';
+      List<String> splitList = data?.estimatedDeliveryTime?.split(' ') ?? [];
+
+      estDate.text=splitList[0];
+      estTime.text=splitList[1];
 
       assignedWorkersController.text = data?.assignedWorker ?? '';
       modelId = data?.modelId;
@@ -941,94 +945,151 @@ class _BillAddState extends State<BillAdd> {
                                     runSpacing: 10,
                                     children: data!.ppfServices!.isNotEmpty && data!.ppfServices![0].services != null
                                         ? data!.ppfServices![0].services!.map((f) {
-                                            bool isSele = false;
-                                            final selectedppfServiceList = data!.ppfServices![0].services ?? [];
-                                            if (selectedppfServiceList.contains(f)) {
-                                              isSele = true;
-                                            }
-                                            return GestureDetector(
-                                              child: Container(
-                                                  padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 8.0),
-                                                  decoration: BoxDecoration(
-                                                    // color: isSele ? Colors.red : Colors.white,
-                                                    // border: Border.all(color: Color(0xFF282f61), width: 2.0),
-                                                    borderRadius: BorderRadius.all(Radius.circular(20.0) //                 <--- border radius here
-                                                        ),
-                                                  ),
-                                                  child: ElevatedButton.icon(
-                                                      style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent),
-                                                      onPressed: () {
-                                                        var selectedPPFRateData;
-                                                        ppfserviceRateDataList.forEach((element) {
-                                                          if (element["ppfservice_id"] == f) {
-                                                            selectedPPFRateData = element;
-                                                          }
-                                                        });
-                                                        print("selectedPPFRateData $selectedPPFRateData");
-                                                        if (!selectedppfServiceList.contains(f)) {
-                                                          // if (serviceList.length < 5) {
-                                                          selectedppfServiceList.add(f);
-                                                          setState(() {});
-                                                          ppfAmount.text = (int.parse(ppfAmount.text) +
-                                                                  ((selectedPPFRateData != null && selectedPPFRateData["rate"] != null)
-                                                                      ? int.parse(selectedPPFRateData["rate"])
-                                                                      : 0))
-                                                              .toString();
-                                                          totalServiceAmt.value += int.parse(ppfAmount.text);
-                                                          calculateTotalBill(totalServiceAmt.value);
-                                                          setState(() {});
-                                                          print(selectedppfServiceList);
-                                                          // }
-                                                        } else {
-                                                          // ppfAmount.text = (int.parse(ppfAmount.text) -
-                                                          //         ((selectedPPFRateData != null && selectedPPFRateData["rate"] != null) ? int.parse(selectedPPFRateData["rate"]) : 0))
-                                                          //     .toString();
-                                                          // totalServiceAmt.value = totalServiceAmt.value - double.parse(ppfAmount.text);
-                                                          // calculateTotalBill(totalServiceAmt.value);
-                                                          // selectedppfServiceList.removeWhere((element) => element == f);
-                                                          // setState(() {});
-                                                          selectedppfServiceList.removeWhere((element) => element == f);
-                                                          setState(() {});
-                                                          int rateToRemove = int.parse(selectedPPFRateData["rate"] ?? '0');
-                                                          ppfAmount.text = (int.parse(ppfAmount.text) - rateToRemove).toString();
-                                                          totalServiceAmt.value -= rateToRemove;
-                                                          calculateTotalBill(totalServiceAmt.value);
-                                                          print(selectedppfServiceList);
-                                                          // print(selectedppfServiceList);
-                                                        }
-                                                      },
-                                                      icon: Icon(isSele ? Icons.check_box : Icons.check_box_outline_blank_rounded),
-                                                      label: Text(
-                                                        '$f',
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 16.0,
-                                                        ),
-                                                      ))
-                                                  // Text('${f}',
-                                                  //   style: TextStyle(
-                                                  //     color: Colors.white ,
-                                                  //     fontSize: 16.0,
-                                                  //   ),
-                                                  // ),
-                                                  ),
-                                              onTap: () {
-                                                if (!selectedppfServiceList.contains(f)) {
-                                                  // if (serviceList.length < 5) {
-                                                  selectedppfServiceList.add(f);
-                                                  setState(() {});
-                                                  print(selectedppfServiceList);
-                                                  // }
-                                                } else {
-                                                  selectedppfServiceList.removeWhere((element) => element == f);
-                                                  setState(() {});
-                                                  print(selectedppfServiceList);
+                                      final selectedppfServiceList = data!.ppfServices![0].services ?? [];
+                                      bool isSele = selectedppfServiceList.contains(f);
+                                      return GestureDetector(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                                            color: isSele ? Colors.white : Colors.white,
+                                            border: Border.all(color: Color(0xFF282f61), width: 2.0),
+                                                             borderRadius: BorderRadius.all(Radius.circular(20.0) //                 <--- border radius here
+                                                                 ),
+                                          ),
+                                          child: ElevatedButton.icon(
+                                            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                                            onPressed: isSele
+                                                ? null // Disable the button if the item is already selected
+                                                : () {
+                                              var selectedPPFRateData;
+                                              ppfserviceRateDataList.forEach((element) {
+                                                if (element["ppfservice_id"] == f) {
+                                                  selectedPPFRateData = element;
                                                 }
-                                              },
-                                            );
-                                          }).toList()
+                                              });
+                                              print("selectedPPFRateData $selectedPPFRateData");
+                                              if (!selectedppfServiceList.contains(f)) {
+                                                selectedppfServiceList.add(f);
+                                                setState(() {});
+                                                ppfAmount.text = (int.parse(ppfAmount.text) +
+                                                    ((selectedPPFRateData != null && selectedPPFRateData["rate"] != null)
+                                                        ? int.parse(selectedPPFRateData["rate"])
+                                                        : 0))
+                                                    .toString();
+                                                totalServiceAmt.value += int.parse(ppfAmount.text);
+                                                calculateTotalBill(totalServiceAmt.value);
+                                                setState(() {});
+                                                print(selectedppfServiceList);
+                                              }
+                                            },
+                                            icon: isSele ? Icon(Icons.check_box,color: Colors.blue,) : Icon(Icons.check_box_outline_blank_rounded), // Show select icon based on isSele flag
+                                            label: Text(
+                                              '$f',
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 16.0,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        onTap: null, // Disable onTap functionality for already selected items
+                                      );
+                                    }).toList()
                                         : [],
                                   ),
+                                  // Wrap(
+                                  //   alignment: WrapAlignment.start,
+                                  //   crossAxisAlignment: WrapCrossAlignment.start,
+                                  //   runAlignment: WrapAlignment.start,
+                                  //   spacing: 10,
+                                  //   runSpacing: 10,
+                                  //   children: data!.ppfServices!.isNotEmpty && data!.ppfServices![0].services != null
+                                  //       ? data!.ppfServices![0].services!.map((f) {
+                                  //           bool isSele = false;
+                                  //           final selectedppfServiceList = data!.ppfServices![0].services ?? [];
+                                  //           if (selectedppfServiceList.contains(f)) {
+                                  //             isSele = true;
+                                  //           }
+                                  //           return GestureDetector(
+                                  //             child: Container(
+                                  //                 padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 8.0),
+                                  //                 decoration: BoxDecoration(
+                                  //                   // color: isSele ? Colors.red : Colors.white,
+                                  //                   // border: Border.all(color: Color(0xFF282f61), width: 2.0),
+                                  //                   borderRadius: BorderRadius.all(Radius.circular(20.0) //                 <--- border radius here
+                                  //                       ),
+                                  //                 ),
+                                  //                 child: ElevatedButton.icon(
+                                  //                     style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent),
+                                  //                     onPressed: () {
+                                  //                       var selectedPPFRateData;
+                                  //                       ppfserviceRateDataList.forEach((element) {
+                                  //                         if (element["ppfservice_id"] == f) {
+                                  //                           selectedPPFRateData = element;
+                                  //                         }
+                                  //                       });
+                                  //                       print("selectedPPFRateData $selectedPPFRateData");
+                                  //                       if (!selectedppfServiceList.contains(f)) {
+                                  //                         // if (serviceList.length < 5) {
+                                  //                         selectedppfServiceList.add(f);
+                                  //                         setState(() {});
+                                  //                         ppfAmount.text = (int.parse(ppfAmount.text) + ((selectedPPFRateData != null && selectedPPFRateData["rate"] != null) ? int.parse(selectedPPFRateData["rate"])
+                                  //                                     : 0))
+                                  //                             .toString();
+                                  //                         totalServiceAmt.value += int.parse(ppfAmount.text);
+                                  //                         calculateTotalBill(totalServiceAmt.value);
+                                  //                         setState(() {});
+                                  //                         print(selectedppfServiceList);
+                                  //                         // }
+                                  //                       } else {
+                                  //                         // ppfAmount.text = (int.parse(ppfAmount.text) -
+                                  //                         //         ((selectedPPFRateData != null && selectedPPFRateData["rate"] != null) ? int.parse(selectedPPFRateData["rate"]) : 0))
+                                  //                         //     .toString();
+                                  //                         // totalServiceAmt.value = totalServiceAmt.value - double.parse(ppfAmount.text);
+                                  //                         // calculateTotalBill(totalServiceAmt.value);
+                                  //                         // selectedppfServiceList.removeWhere((element) => element == f);
+                                  //                         // setState(() {});
+                                  //                         selectedppfServiceList.removeWhere((element) => element == f);
+                                  //                         setState(() {});
+                                  //                         int rateToRemove = int.parse(selectedPPFRateData["rate"] ?? '0');
+                                  //                         ppfAmount.text = (int.parse(ppfAmount.text) - rateToRemove).toString();
+                                  //                         totalServiceAmt.value -= rateToRemove;
+                                  //                         calculateTotalBill(totalServiceAmt.value);
+                                  //                         print(selectedppfServiceList);
+                                  //                         // print(selectedppfServiceList);
+                                  //                       }
+                                  //                     },
+                                  //                     icon: Icon(isSele ? Icons.check_box : Icons.check_box_outline_blank_rounded),
+                                  //                     label: Text(
+                                  //                       '$f',
+                                  //                       style: TextStyle(
+                                  //                         color: Colors.white,
+                                  //                         fontSize: 16.0,
+                                  //                       ),
+                                  //                     ))
+                                  //                 // Text('${f}',
+                                  //                 //   style: TextStyle(
+                                  //                 //     color: Colors.white ,
+                                  //                 //     fontSize: 16.0,
+                                  //                 //   ),
+                                  //                 // ),
+                                  //                 ),
+                                  //             onTap: () {
+                                  //               if (!selectedppfServiceList.contains(f)) {
+                                  //                 // if (serviceList.length < 5) {
+                                  //                 selectedppfServiceList.add(f);
+                                  //                 setState(() {});
+                                  //                 print(selectedppfServiceList);
+                                  //                 // }
+                                  //               } else {
+                                  //                 selectedppfServiceList.removeWhere((element) => element == f);
+                                  //                 setState(() {});
+                                  //                 print(selectedppfServiceList);
+                                  //               }
+                                  //             },
+                                  //           );
+                                  //         }).toList()
+                                  //       : [],
+                                  // ),
                                   if (data!.ppfServices!.length > 0)
                                     SizedBox(
                                       height: 20,
@@ -1263,6 +1324,13 @@ class _BillAddState extends State<BillAdd> {
                                   ),
                                 ),
                                 onPressed: () async {
+                                  List<String> PpfServicesType=[];
+                                  List<String> PpfAmount=[];
+                                  List<String> PpfPackage=[];
+                                  PpfAmount.add(ppfAmount.text.isNotEmpty ? ppfAmount.text : "N/A");
+                                  PpfPackage.add(ppfPackage.text.isNotEmpty ? ppfPackage.text : "N/A");
+
+                                  PpfServicesType.add(ppfType.text.isNotEmpty?ppfType.text:'N/A');
                                   if (_formKey.currentState!.validate()) {
                                     Map estimateData = Map();
                                     estimateData["name"] = nameController.text.isNotEmpty ? nameController.text : "N/A";
@@ -1288,9 +1356,9 @@ class _BillAddState extends State<BillAdd> {
                                     estimateData["select_services_package"] = data!.selectServices?.map((e) => e.package).toList();
                                     estimateData["select_services_type"] = data!.selectServices?.map((e) => e.name).toList();
 
-                                    estimateData["ppf_services_type"] = ppfType.text.isNotEmpty?ppfType.text:'N/A';
-                                    estimateData["ppf_services_package"] = ppfPackage.text.isNotEmpty ? ppfPackage.text : "N/A";
-                                    estimateData["ppf_services_amount"] = ppfAmount.text.isNotEmpty ? ppfAmount.text : "N/A";
+                                    estimateData["ppf_services_type"] = PpfServicesType;
+                                    estimateData["ppf_services_package"] = PpfPackage;
+                                    estimateData["ppf_services_amount"] = PpfAmount;
                                     estimateData["ppf_services_name"] = data!.ppfServices?.map((e) => e.name).toList();
                                     estimateData["ppf_services_selected"] = data!.ppfServices?.map((e) => e.name).toList();
 

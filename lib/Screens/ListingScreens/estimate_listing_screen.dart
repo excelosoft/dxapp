@@ -1,6 +1,8 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:responsive_dashboard/component/no_data_found.dart';
 
 import 'package:universal_html/html.dart' as html;
@@ -19,6 +21,7 @@ import 'package:responsive_dashboard/config/size_config.dart';
 import 'package:responsive_dashboard/utils/loginUtility.dart';
 import 'package:responsive_dashboard/utils/image_constants.dart';
 
+import '../../functions/mainger_provider.dart';
 import '../../style/colors.dart';
 
 class Estimate extends StatefulWidget {
@@ -47,6 +50,7 @@ class _EstimateState extends State<Estimate> {
 
   @override
   Widget build(BuildContext context) {
+    final data=Provider.of<MaingerProvide>(context, listen: false);
     SizeConfig().init(context);
 
     return Scaffold(
@@ -235,7 +239,9 @@ class _EstimateState extends State<Estimate> {
                               final vehicleNumberMatches = estimate.vehicleNumber != null && estimate.vehicleNumber!.toLowerCase().contains(searchQuery);
                               return nameMatches || vehicleNumberMatches;
                             }).toList();
-
+                            if (filteredData.isEmpty) {
+                              return NoDataFound();
+                            }
 
                             // Calculate total pages based on filtered data
                             final totalPages = (filteredData.length / _rowsPerPage).ceil();
@@ -389,47 +395,53 @@ class _EstimateState extends State<Estimate> {
                                                     },
                                                     icon: Icon(Icons.print_outlined),
                                                   ),
-                                                  IconButton(
-                                                    tooltip: 'Edit',
-                                                    onPressed: filteredData[index].billsStatus == 1
-                                                        ? null : () async {
-                                                      print('filteredData[index] ===');
-                                                      print(filteredData[index].estimatedDeliveryTime);
-                                                      print(filteredData[index].date);
-                                                      Get.toNamed(
-                                                        RoutePath.estimateAddScreen,
-                                                        arguments: filteredData[index],
-                                                        parameters: {
-                                                          'isEdit': 'true',
-                                                        },
-                                                      );
-                                                    },
-                                                    icon: Icon(Icons.edit_outlined),
-                                                    color: filteredData[index].billsStatus == 1 ? Colors.grey : Colors.black,
-                                                  ),
-                                                  IconButton(
-                                                    tooltip: 'Delete',
-                                                    onPressed: filteredData[index].billsStatus == 1
-                                                        ? null
-                                                        : () async {
-                                                            customConfirmationAlertDialog(
-                                                              context,
-                                                              () async {
-                                                                final id = filteredData[index].id;
-
-                                                                await ApiProvider().deleteEstimateApi(id!);
-                                                                getdataForEstimate();
-                                                                Navigator.of(context).pop();
-                                                                setState(() {});
-                                                              },
-                                                              'Delete',
-                                                              'Are you sure you want to delete?',
-                                                              'Delete',
-                                                            );
+                                                  Visibility(
+                                                    visible: data.maingerStatus,
+                                                    child: IconButton(
+                                                      tooltip: 'Edit',
+                                                      onPressed: filteredData[index].billsStatus == 1
+                                                          ? null : () async {
+                                                        print('filteredData[index] ===');
+                                                        print(filteredData[index].estimatedDeliveryTime);
+                                                        print(filteredData[index].date);
+                                                        Get.toNamed(
+                                                          RoutePath.estimateAddScreen,
+                                                          arguments: filteredData[index],
+                                                          parameters: {
+                                                            'isEdit': 'true',
                                                           },
-                                                    icon: Icon(
-                                                      Icons.delete_outline_rounded,
-                                                      color: filteredData[index].billsStatus == 1 ? Colors.grey : Colors.red,
+                                                        );
+                                                      },
+                                                      icon: Icon(Icons.edit_outlined),
+                                                      color: filteredData[index].billsStatus == 1 ? Colors.grey : Colors.black,
+                                                    ),
+                                                  ),
+                                                  Visibility(
+                                                    visible: data.maingerStatus,
+                                                    child: IconButton(
+                                                      tooltip: 'Delete',
+                                                      onPressed: filteredData[index].billsStatus == 1
+                                                          ? null
+                                                          : () async {
+                                                              customConfirmationAlertDialog(
+                                                                context,
+                                                                () async {
+                                                                  final id = filteredData[index].id;
+
+                                                                  await ApiProvider().deleteEstimateApi(id!);
+                                                                  getdataForEstimate();
+                                                                  Navigator.of(context).pop();
+                                                                  setState(() {});
+                                                                },
+                                                                'Delete',
+                                                                'Are you sure you want to delete?',
+                                                                'Delete',
+                                                              );
+                                                            },
+                                                      icon: Icon(
+                                                        Icons.delete_outline_rounded,
+                                                        color: filteredData[index].billsStatus == 1 ? Colors.grey : Colors.red,
+                                                      ),
                                                     ),
                                                   ),
                                                   IconButton(

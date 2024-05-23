@@ -93,6 +93,7 @@ class _EstimateAddState extends State<EstimateAdd> {
 
   List<SelectServices> selectedServiceList = [];
   var selectedppfServiceList = [];
+  var selectedppfAmountList=[];
   var serviceList = [];
   List<String> models = [];
   var modelId;
@@ -160,6 +161,8 @@ class _EstimateAddState extends State<EstimateAdd> {
       // print(data!.totalPayableAmt);
       print("select Services ${data!.selectServices}");
       print("ppf services ${data!.ppfServices}");
+      selectedppfAmountList = data?.ppfServicesAmountList ?? [];
+
 
       ppfAmount.text = data?.ppfServices?.isNotEmpty == true ? data!.ppfServices![0].amount ?? 'N/A' : '0';
       ppfType = data?.ppfServices?.isNotEmpty == true ? data!.ppfServices![0].type ?? 'N/A' : '0';
@@ -1098,6 +1101,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                                             if (!selectedppfServiceList.contains(f)) {
                                               // if (serviceList.length < 5) {
                                               selectedppfServiceList.add(f);
+                                              selectedppfAmountList.add(int.parse(selectedPPFRateData["rate"]));
                                               setState(() {});
                                               if(int.parse(ppfAmount.text)!=0){
                                                 totalServiceAmt.value-=int.parse(ppfAmount.text);
@@ -1119,6 +1123,8 @@ class _EstimateAddState extends State<EstimateAdd> {
                                               selectedppfServiceList.removeWhere((element) => element == f);
 
                                               int rateToRemove = int.parse(selectedPPFRateData["rate"] ?? '0');
+
+                                              selectedppfAmountList.remove(rateToRemove);
                                               ppfAmount.text = (int.parse(ppfAmount.text) - rateToRemove).toString();
                                               totalServiceAmt.value -= rateToRemove;
                                               calculateTotalBill(totalServiceAmt.value);
@@ -1524,10 +1530,11 @@ class _EstimateAddState extends State<EstimateAdd> {
 
                                     estimateData["total_services_amount"] = totalServiceAmt.value;
                                     estimateData["coupon_code"] = couponCodeController.text.toString();
-                                    estimateData["total_discount"] = discountAmount.value;
+                                    estimateData["total_discount"] = discountAmt.value;
                                     estimateData["total_taxable_amount"] = totalTaxebleAmt.value;
                                     estimateData["total_applicable_tax"] = totalApplicaleTaxAmt.value;
                                     estimateData["total_payable_amount"] = totalPayableAmt.value;
+                                   estimateData['ppf_services_amountlist']=selectedppfAmountList;
 
                                     // return;
 

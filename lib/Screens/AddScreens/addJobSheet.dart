@@ -93,12 +93,11 @@ class _AddJobSheetState extends State<AddJobSheet> {
   void initState() {
     super.initState();
     estimatedata();
-    if (jobData != null) {
-      print('remarks ======== > ${args}');
-      remarksController.text = args['remarks'];
-      if (controllers.length > 0) {
-        controllers[0].text = args['description'];
-      }
+    if (jobData != Null) {
+      print('remarks ======== > ${args}'); remarksController.text = args['remarks']??'';
+      // if (controllers.length > 0) {
+      //   controllers[0].text = args['description'];
+      // }
 
       name.text = jobData!.name ?? '';
       date.text = jobData?.date ?? '';

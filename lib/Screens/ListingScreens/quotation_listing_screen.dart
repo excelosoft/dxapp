@@ -1,6 +1,9 @@
 import 'package:data_table_2/data_table_2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:google_fonts/google_fonts.dart';
@@ -17,6 +20,7 @@ import '../../Services/Apis.dart';
 import '../../component/custom/custom_confirmation_model.dart';
 import '../../component/no_data_found.dart';
 import '../../config/responsive.dart';
+import '../../functions/mainger_provider.dart';
 import 'bills_listing_screen.dart';
 
 class QuotationListing extends StatefulWidget {
@@ -46,6 +50,7 @@ class _QuotationListingState extends State<QuotationListing> {
 
   @override
   Widget build(BuildContext context) {
+    final data=Provider.of<MaingerProvide>(context, listen: true);
     return Scaffold(
       key: _drawerKey,
       drawer: SizedBox(width: 100, child: SideMenu()),
@@ -235,6 +240,11 @@ class _QuotationListingState extends State<QuotationListing> {
                               final vehicleNumberMatches = estimate.vehicleNumber != null && estimate.vehicleNumber!.toLowerCase().contains(searchQuery);
                               return nameMatches || vehicleNumberMatches;
                             }).toList();
+
+
+                            if (filteredData.isEmpty) {
+                              return NoDataFound();
+                            }
                             // Calculate total pages based on filtered data
                             final totalPages = (filteredData.length / _rowsPerPage).ceil();
 
@@ -362,40 +372,46 @@ class _QuotationListingState extends State<QuotationListing> {
                                                     },
                                                     icon: Icon(Icons.print_outlined),
                                                   ),
-                                                  IconButton(
-                                                    tooltip: 'Edit',
-                                                    onPressed: () async {
-                                                      Get.toNamed(
-                                                        RoutePath.addQuickScreen,
-                                                        arguments: filteredData[index],
-                                                        parameters: {
-                                                          'isEdit': 'true',
-                                                        },
-                                                      );
-                                                    },
-                                                    icon: Icon(Icons.edit_outlined),
+                                                  Visibility(
+                                                    visible: data.maingerStatus,
+                                                    child: IconButton(
+                                                      tooltip: 'Edit',
+                                                      onPressed: () async {
+                                                        Get.toNamed(
+                                                          RoutePath.addQuickScreen,
+                                                          arguments: filteredData[index],
+                                                          parameters: {
+                                                            'isEdit': 'true',
+                                                          },
+                                                        );
+                                                      },
+                                                      icon: Icon(Icons.edit_outlined),
+                                                    ),
                                                   ),
-                                                  IconButton(
-                                                    tooltip: 'Delete',
-                                                    onPressed: () async {
-                                                      customConfirmationAlertDialog(
-                                                        context,
-                                                        () async {
-                                                          final id = filteredData[index].id;
-                                                          print(id);
-                                                          await ApiProvider().deleteQuickQuatation(id!);
-                                                          getDataForQuotation();
-                                                          Navigator.of(context).pop();
-                                                          setState(() {});
-                                                        },
-                                                        'Delete',
-                                                        'Are you sure you want to delete this Quotation?',
-                                                        'Delete',
-                                                      );
-                                                    },
-                                                    icon: Icon(
-                                                      Icons.delete_outline_rounded,
-                                                      color: Colors.red,
+                                                  Visibility(
+                                                    visible: data.maingerStatus,
+                                                    child: IconButton(
+                                                      tooltip: 'Delete',
+                                                      onPressed: () async {
+                                                        customConfirmationAlertDialog(
+                                                          context,
+                                                          () async {
+                                                            final id = filteredData[index].id;
+                                                            print(id);
+                                                            await ApiProvider().deleteQuickQuatation(id!);
+                                                            getDataForQuotation();
+                                                            Navigator.of(context).pop();
+                                                            setState(() {});
+                                                          },
+                                                          'Delete',
+                                                          'Are you sure you want to delete this Quotation?',
+                                                          'Delete',
+                                                        );
+                                                      },
+                                                      icon: Icon(
+                                                        Icons.delete_outline_rounded,
+                                                        color: Colors.red,
+                                                      ),
                                                     ),
                                                   ),
                                                 ],

@@ -288,6 +288,7 @@ class EstimateData {
   String? modalName;
   List<SelectServices>? selectServices;
   List<PpfServices>? ppfServices;
+  List<int>? ppfServicesAmountList;
 
   EstimateData(
       {this.id,
@@ -319,7 +320,9 @@ class EstimateData {
       this.franchisee,
       this.modalName,
       this.selectServices,
-      this.ppfServices});
+      this.ppfServices,
+        this.ppfServicesAmountList
+      });
 
   EstimateData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -361,6 +364,9 @@ class EstimateData {
       json['ppf_services'].forEach((v) {
         ppfServices!.add(new PpfServices.fromJson(v));
       });
+    }
+    if (json['ppf_services_amountlist'] != null) {
+      ppfServicesAmountList = List<int>.from(json['ppf_services_amountlist'].map((x) => int.parse(x.toString())));
     }
   }
 

@@ -1,7 +1,9 @@
 import 'package:data_table_2/data_table_2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:responsive_dashboard/Services/Apis.dart';
 import 'package:responsive_dashboard/component/custom/custom_fields.dart';
 import 'package:responsive_dashboard/component/header.dart';
@@ -19,6 +21,7 @@ import '../constants/app_constant.dart';
 import '../constants/string_methods.dart';
 import '../dataModel/calendar_model.dart';
 import '../functions/date_picker.dart';
+import '../functions/mainger_provider.dart';
 import '../routes/RoutePath.dart';
 import 'calendar_screen.dart';
 import 'event_data.dart';
@@ -29,8 +32,13 @@ class Dashboard extends StatefulWidget {
 }
 late List<CalendarItem> calendarList;
 class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
-  late TabController tabviewController;
 
+
+
+  final GlobalKey<ScaffoldState> _scaffoldKey1 = GlobalKey<ScaffoldState>();
+
+  late TabController tabviewController;
+  late Future<EstimateListModel> _futureEstimateList;
   DateTime selectedDate = DateTime.now();
   bool weekCalendarView = false;
   CalendarController calendarController1 = CalendarController();
@@ -40,7 +48,10 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
   late Stream<CalendarModel?> stream;
   late var _calendarDataSource;
   @override
+
   void initState() {
+    Provider.of<MaingerProvide>(context, listen: false).statusUpdate();
+    _futureEstimateList = ApiProvider().getEstimateList();
     tabviewController = TabController(length: 4, vsync: this, initialIndex: 0);
     stream = estimateStreamCalandar(Duration(seconds: 1));
     super.initState();
@@ -90,11 +101,13 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
   }
 
   Stream<EstimateListModel> estimateStream(Duration interval) async* {
-    while (true) {
+  //  while (true) {
       await Future.delayed(interval);
       var response = await ApiProvider().getEstimateList();
       yield response;
-    }
+
+   // }
+
   }
 
   String? selectedFilter;
@@ -106,6 +119,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
+      key: _scaffoldKey1,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -289,7 +303,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                     ),
                     FutureBuilder<EstimateListModel>(
                         // StreamBuilder<EstimateListModel>(
-                        future: ApiProvider().getEstimateList(),
+                        future: _futureEstimateList,
                         // stream: estimateStream(Duration(seconds: 1)),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -992,3 +1006,7 @@ void showAddCalendarModal({
     },
   );
 }
+
+
+
+

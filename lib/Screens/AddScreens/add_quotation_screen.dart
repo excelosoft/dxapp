@@ -126,20 +126,45 @@ class _AddQuickState extends State<AddQuick> {
     print(response.body);
     var data = jsonDecode(response.body.toString());
     print(data);
-    if (data['status'] != 0) {
-      List services = data['services'];
-      services.forEach((element) {
-        serviceList.add(element['name']);
-      });
-      if (isEdit) {
-        _selectedService = existingQuatation?.services ?? "";
-        var dataRes = await ApiProvider().getServiceByName(_selectedService, segment.text);
-        selectedService = dataRes["services"];
-        // selectedService.add(.services ?? "";
+
+    if (data != null && data['status'] != 0) {
+      if (data.containsKey('services') && data['services'] != null && data['services'] is List) {
+        List services = data['services'];
+        services.forEach((element) {
+          serviceList.add(element['name']);
+        });
+
+        if (isEdit) {
+          _selectedService = existingQuatation?.services ?? "";
+          var dataRes = await ApiProvider().getServiceByName(_selectedService, segment.text);
+          //selectedService.add(dataRes["services"]);
+
+        }
+      } else {
+        print('Error: "services" key is missing or invalid');
+        serviceList = [];
       }
     } else {
+      print('Error: ${data != null ? data['message'] : 'Invalid response'}');
       serviceList = [];
     }
+    // if (data['status'] != 0) {
+    //   List services = data['services'];
+    //   services.forEach((element) {
+    //     serviceList.add(element['name']);
+    //   });
+    //   if (isEdit) {
+    //     _selectedService = existingQuatation?.services ?? "";
+    //     var dataRes = await ApiProvider().getServiceByName(_selectedService, segment.text);
+    //     selectedService = dataRes["services"];
+    //     setState(() {
+    //
+    //     });
+    //     // selectedService.add(.services ?? "";
+    //   }
+    // } else {
+    //   serviceList = [];
+    // }
     print('serviceList=======');
     print(serviceList);
 

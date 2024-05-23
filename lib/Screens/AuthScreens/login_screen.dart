@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:provider/provider.dart';
 import 'package:responsive_dashboard/constants/validation/basic_validation.dart';
+import 'package:responsive_dashboard/functions/mainger_provider.dart';
 import 'package:responsive_dashboard/routes/RoutePath.dart';
 import 'package:responsive_dashboard/constants/app_constant.dart';
 import 'package:responsive_dashboard/style/colors.dart';
@@ -12,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toastification/toastification.dart';
 import '../../config/responsive.dart';
 import '../../utils/loginUtility.dart';
+import '../home_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -36,6 +39,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void saveUserId(int userId) {
     GetStorage().write('userId', userId);
+  }
+  void saveUserStatus(bool status) {
+    GetStorage().write('userStatus', status);
   }
 
   void loginwithemailpassword(BuildContext context) async {
@@ -72,8 +78,12 @@ class _LoginScreenState extends State<LoginScreen> {
           prefs.setBool("isLoggedIn", true);
 
           if(status['data']['manager']==true){
+            saveUserStatus(false);
+
+
             saveUserId(status['data']['parent_id']);
           }else{
+            saveUserStatus(true);
             saveUserId(status['data']['id']);
           }
 
@@ -83,7 +93,9 @@ class _LoginScreenState extends State<LoginScreen> {
             title: Text('Login Successfully'),
             autoCloseDuration: const Duration(seconds: 5),
           );
-          Get.toNamed(RoutePath.dashboardScreen);
+          Provider.of<MaingerProvide>(context, listen: false).statusUpdate();
+         // Get.toNamed(RoutePath.dashboardScreen);
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Dashboard()));
         } else {
           print(response.reasonPhrase);
           toastification.show(

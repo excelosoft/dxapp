@@ -1,7 +1,10 @@
 import 'package:data_table_2/data_table_2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:responsive_dashboard/Services/Apis.dart';
@@ -15,6 +18,7 @@ import 'package:responsive_dashboard/utils/loginUtility.dart';
 import '../../Services/request_url.dart';
 import '../../component/custom/custom_confirmation_model.dart';
 import '../../component/no_data_found.dart';
+import '../../functions/mainger_provider.dart';
 import '../../utils/image_constants.dart';
 import 'bills_listing_screen.dart';
 
@@ -52,6 +56,7 @@ class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final data=Provider.of<MaingerProvide>(context, listen: true);
     SizeConfig().init(context);
     return Scaffold(
       body: Column(
@@ -143,7 +148,8 @@ class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
                           )
                         ],
                       ),
-                    ] else ...[
+                    ]
+                    else ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -242,6 +248,11 @@ class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
                               final vehicleNumberMatches = estimate.vehicleNumber != null && estimate.vehicleNumber!.toLowerCase().contains(searchQuery);
                               return nameMatches || vehicleNumberMatches;
                             }).toList();
+
+                            if (filteredData.isEmpty) {
+                              return NoDataFound();
+                            }
+
 
                             final totalPages = (filteredData.length / _rowsPerPage).ceil();
 
@@ -369,37 +380,43 @@ class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
                                                   },
                                                   icon: Icon(Icons.print_outlined),
                                                 ),
-                                                IconButton(
-                                                  onPressed: () async {
-                                                    // Get.toNamed(
-                                                    //   RoutePath.estimateAddScreen,
-                                                    //   arguments: filteredData.data?.data?[index],
-                                                    //   parameters: {
-                                                    //     'isEdit': 'true',
-                                                    //   },
-                                                    // );
-                                                  },
-                                                  icon: Icon(Icons.edit_outlined),
+                                                Visibility(
+                                                  visible: data.maingerStatus,
+                                                  child: IconButton(
+                                                    onPressed: () async {
+                                                      // Get.toNamed(
+                                                      //   RoutePath.estimateAddScreen,
+                                                      //   arguments: filteredData.data?.data?[index],
+                                                      //   parameters: {
+                                                      //     'isEdit': 'true',
+                                                      //   },
+                                                      // );
+                                                    },
+                                                    icon: Icon(Icons.edit_outlined),
+                                                  ),
                                                 ),
-                                                IconButton(
-                                                  onPressed: () async {
-                                                    // customConfirmationAlertDialog(
-                                                    //   context,
-                                                    //   () async {
-                                                    //     final id = filteredData[index].id;
-                                                    //     await ApiProvider().deleteEstimateApi(id!);
-                                                    //     getDataForMaintence();
-                                                    //     Navigator.of(context).pop();
-                                                    //     setState(() {});
-                                                    //   },
-                                                    //   'Delete',
-                                                    //   'Are you sure you want to delete this maintainance?',
-                                                    //   'Delete',
-                                                    // );
-                                                  },
-                                                  icon: Icon(
-                                                    Icons.delete_outline_rounded,
-                                                    color: Colors.red,
+                                                Visibility(
+                                                  visible: data.maingerStatus,
+                                                  child: IconButton(
+                                                    onPressed: () async {
+                                                      // customConfirmationAlertDialog(
+                                                      //   context,
+                                                      //   () async {
+                                                      //     final id = filteredData[index].id;
+                                                      //     await ApiProvider().deleteEstimateApi(id!);
+                                                      //     getDataForMaintence();
+                                                      //     Navigator.of(context).pop();
+                                                      //     setState(() {});
+                                                      //   },
+                                                      //   'Delete',
+                                                      //   'Are you sure you want to delete this maintainance?',
+                                                      //   'Delete',
+                                                      // );
+                                                    },
+                                                    icon: Icon(
+                                                      Icons.delete_outline_rounded,
+                                                      color: Colors.red,
+                                                    ),
                                                   ),
                                                 ),
                                               ],

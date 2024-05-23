@@ -35,7 +35,9 @@ class _HeaderState extends State<Header> {
     final data = await ApiProvider().getProfile();
 
       userDataModel = data;
+      setState(() {
 
+      });
   }
 
   @override
@@ -55,19 +57,19 @@ class _HeaderState extends State<Header> {
     final width = MediaQuery.of(context).size.width;
 
     return SizedBox(
-      height: Responsive.isMobile(context) ? 70 : 110,
+      height: Responsive.isMobile(context) ? 110: 110,
       child: Scaffold(
-        appBar: Responsive.isMobile(context)
-            ? AppBar(
+        appBar: Responsive.isMobile(context) ? AppBar(
                 automaticallyImplyLeading: false,
-                leading: Get.currentRoute != '/' && Get.currentRoute != '/dashboard'
-                    ? IconButton(
+                leading: Get.currentRoute != '/' && Get.currentRoute != '/dashboard' ?
+                IconButton(
                         onPressed: () => Get.back(),
                         icon: Icon(
                           Icons.arrow_back,
                           color: AppColors.white,
                         ),
                       )
+
                     : IconButton(
                         onPressed: () {
                           if (drawerKey.currentState != null) {
@@ -85,10 +87,10 @@ class _HeaderState extends State<Header> {
                     SizedBox(
                       height: 4,
                     ),
-                    Image.asset(
-                      ImageConstant.appLogo,
-                      height: Responsive.isDesktop(context) ? 50 : 35,
+                    Image.asset('assets/logo.png',
+                      height:  Responsive.isDesktop(context) ? 50 : 30,
                     ),
+
                     CustomContainer(
                       PrimaryText(
                         text: "${capitalizeFirstLetter(userDataModel?.data?.companyName ?? '')}",
@@ -103,10 +105,8 @@ class _HeaderState extends State<Header> {
                 actions: [
                   MyTextWithMenu(imageUrl: userDataModel?.data?.avatar ?? noImg),
                 ],
-              )
-            : null,
-        body: Responsive.isMobile(context)
-            ? null
+              ) : null,
+        body: Responsive.isMobile(context) ? null
             : Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10.0),
                 child: Row(
@@ -366,30 +366,40 @@ class MyTextWithMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        int endIndex = MediaQuery
+            .of(context)
+            .size
+            .width <= 900 ? 4 : 4;
+        if (endIndex > profileMenuItems.length) {
+          endIndex = profileMenuItems.length;
+        }
+
         showMenu(
-            context: context,
-            position: RelativeRect.fromLTRB(100, 100, 0, 0),
-            items: profileMenuItems.sublist(0, MediaQuery.of(context).size.width <= 900 ? 6 : 5).map(
-              (e) {
-                return profilePopupMenuItem(
-                  e.title,
-                  e.icon,
-                  context,
-                  () {
-                    if (e.id == 5) {
-                      customConfirmationAlertDialog(context, () async {
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                        Get.offAndToNamed(e.screen);
-                        prefs.setBool("isLoggedIn", false);
-                        GetStorage().remove('userId');
-                      }, 'Logout', 'Are you sure you want to logout?', 'Logout');
-                    } else {
-                      Get.toNamed(e.screen);
-                    }
-                  },
-                );
-              },
-            ).toList());
+          context: context,
+          position: RelativeRect.fromLTRB(100, 100, 0, 0),
+          items: profileMenuItems.sublist(0, endIndex).map(
+                (e) {
+              return profilePopupMenuItem(
+                e.title,
+                e.icon,
+                context,
+                    () {
+                  if (e.id == 5) {
+                    customConfirmationAlertDialog(context, () async {
+                      SharedPreferences prefs = await SharedPreferences
+                          .getInstance();
+                      Get.offAndToNamed(e.screen);
+                      prefs.setBool("isLoggedIn", false);
+                      GetStorage().remove('userId');
+                    }, 'Logout', 'Are you sure you want to logout?', 'Logout');
+                  } else {
+                    Get.toNamed(e.screen);
+                  }
+                },
+              );
+            },
+          ).toList(),
+        );
       },
       child: CustomContainer(
         Image(

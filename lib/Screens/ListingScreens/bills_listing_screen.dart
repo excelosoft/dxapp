@@ -1,7 +1,9 @@
 import 'package:data_table_2/data_table_2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 import 'package:universal_html/html.dart' as html;
 
@@ -15,6 +17,7 @@ import '../../component/no_data_found.dart';
 import '../../config/responsive.dart';
 import '../../constants/string_methods.dart';
 import '../../dataModel/estimate_list_model.dart';
+import '../../functions/mainger_provider.dart';
 import '../../style/colors.dart';
 import '../../utils/image_constants.dart';
 
@@ -68,6 +71,7 @@ class _BillState extends State<Bill> {
 
   @override
   Widget build(BuildContext context) {
+    final data=Provider.of<MaingerProvide>(context, listen: true);
     SizeConfig().init(context);
     return Scaffold(
       body: Column(
@@ -79,7 +83,124 @@ class _BillState extends State<Bill> {
               child: Padding(
                 padding: EdgeInsets.all(Responsive.isMobile(context) ? 10 : 30),
                 child: Column(
+
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+
                   children: [
+
+                    if (Responsive.isMobile(context)) ...[
+                      Wrap(
+                        runSpacing: 20,
+                        children: [
+                          SizedBox(
+                            width: 300,
+                            child: Row(
+                              children: [
+                                Image.asset(
+                                  ImageConstant.billsIcon,
+                                  width: 30,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  'Bills List',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 24,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            width: 261,
+                            height: 32,
+                            child: TextField(
+                              controller: searchController,
+                              onChanged: (value) {
+                                setState(() {});
+                              },
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.all(8),
+                                hintText: 'Search',
+                                hintStyle: TextStyle(
+                                  color: Colors.black,
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.search,
+                                  color: Colors.black,
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+
+                    ] else ...[
+                      Wrap(
+                        runSpacing: 20,
+                        children: [
+                          SizedBox(
+                            width: 300,
+                            child: Row(
+                              children: [
+                                Image.asset(
+                                  ImageConstant.jobsheetIcon,
+                                  width: 30,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  'Bills List',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 24,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            width: 261,
+                            height: 32,
+                            child: TextField(
+                              controller: searchController,
+                              onChanged: (value) {
+                                setState(() {});
+                              },
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.all(8),
+                                hintText: 'Search',
+                                hintStyle: TextStyle(
+                                  color: Colors.black,
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.search,
+                                  color: Colors.black,
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
                     FutureBuilder<BillsListResponse>(
                       future: billFuture,
                       builder: (context, snapshot) {
@@ -101,6 +222,10 @@ class _BillState extends State<Bill> {
                             final vehicleNumberMatches = estimate.vehicleNumber != null && estimate.vehicleNumber!.toLowerCase().contains(searchQuery);
                             return nameMatches || vehicleNumberMatches;
                           }).toList();
+
+                          if (filteredData.isEmpty) {
+                            return NoDataFound();
+                          }
 
                           // Calculate total pages based on filtered data
                           final totalPages = (filteredData.length / _rowsPerPage).ceil();
@@ -240,37 +365,40 @@ class _BillState extends State<Bill> {
                                                   },
                                                   icon: Icon(Icons.print_outlined),
                                                 ),
-                                                IconButton(
-                                                  tooltip: 'Edit',
-                                                  onPressed: () async {
-                                                    List<EstimateData> estimateList = await fetchEstimateList();
-                                                    EstimateData? matchingEstimate;
-                                                    for (EstimateData estimate in estimateList) {
-                                                      if (estimate.id == paginatedData[index].id) {
-                                                        matchingEstimate = estimate;
-                                                        break;
+                                                Visibility(
+                                                  visible: data.maingerStatus,
+                                                  child: IconButton(
+                                                    tooltip: 'Edit',
+                                                    onPressed: () async {
+                                                      List<EstimateData> estimateList = await fetchEstimateList();
+                                                      EstimateData? matchingEstimate;
+                                                      for (EstimateData estimate in estimateList) {
+                                                        if (estimate.id == paginatedData[index].id) {
+                                                          matchingEstimate = estimate;
+                                                          break;
+                                                        }
                                                       }
-                                                    }
-                                                    if (matchingEstimate != null) {
-                                                      Get.toNamed(
-                                                        RoutePath.addBillScreen,
-                                                        arguments: matchingEstimate,
-                                                        parameters: {
-                                                          'isEdit': 'true',
-                                                          'invoiceNo': paginatedData[index].invoiceNo ?? "",
-                                                          'barcodeNo': paginatedData[index].serviceBarcode ?? "",
-                                                        },
-                                                      );
-                                                    } else {
-                                                      toastification.show(
-                                                        context: context,
-                                                        type: ToastificationType.error,
-                                                        title: Text('Something Went Wrong!'),
-                                                        autoCloseDuration: const Duration(seconds: 5),
-                                                      );
-                                                    }
-                                                  },
-                                                  icon: Icon(Icons.edit_outlined),
+                                                      if (matchingEstimate != null) {
+                                                        Get.toNamed(
+                                                          RoutePath.addBillScreen,
+                                                          arguments: matchingEstimate,
+                                                          parameters: {
+                                                            'isEdit': 'true',
+                                                            'invoiceNo': paginatedData[index].invoiceNo ?? "",
+                                                            'barcodeNo': paginatedData[index].serviceBarcode ?? "",
+                                                          },
+                                                        );
+                                                      } else {
+                                                        toastification.show(
+                                                          context: context,
+                                                          type: ToastificationType.error,
+                                                          title: Text('Something Went Wrong!'),
+                                                          autoCloseDuration: const Duration(seconds: 5),
+                                                        );
+                                                      }
+                                                    },
+                                                    icon: Icon(Icons.edit_outlined),
+                                                  ),
                                                 ),
                                                 // Other IconButton widgets
                                               ],
