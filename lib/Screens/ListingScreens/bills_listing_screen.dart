@@ -400,6 +400,18 @@ class _BillState extends State<Bill> {
                                                     icon: Icon(Icons.edit_outlined),
                                                   ),
                                                 ),
+                                                IconButton(
+                                                  tooltip: 'Warranty',
+                                                  onPressed: () async {
+                                                    Get.toNamed(
+                                                      RoutePath.addWarrantyCardScreen,
+                                                      arguments: filteredData[index],
+                                                    );
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.shield_moon_outlined,
+                                                  ),
+                                                ),
                                                 // Other IconButton widgets
                                               ],
                                             ),

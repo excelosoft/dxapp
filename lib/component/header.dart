@@ -30,7 +30,7 @@ class Header extends StatefulWidget {
 
 class _HeaderState extends State<Header> {
   UserDataModel? userDataModel;
-
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   getUserData() async {
     final data = await ApiProvider().getProfile();
 
@@ -59,6 +59,7 @@ class _HeaderState extends State<Header> {
     return SizedBox(
       height: Responsive.isMobile(context) ? 110: 110,
       child: Scaffold(
+        key: _scaffoldKey,
         appBar: Responsive.isMobile(context) ? AppBar(
                 automaticallyImplyLeading: false,
                 leading: Get.currentRoute != '/' && Get.currentRoute != '/dashboard' ?
@@ -68,16 +69,16 @@ class _HeaderState extends State<Header> {
                           Icons.arrow_back,
                           color: AppColors.white,
                         ),
-                      )
+                      ):IconButton(
+            onPressed: () {
+          if (drawerKey.currentState != null) {
+    drawerKey.currentState?.openDrawer();
+    }
+    },
+      icon: Icon(Icons.menu, color: AppColors.white),
+    ),
 
-                    : IconButton(
-                        onPressed: () {
-                          if (drawerKey.currentState != null) {
-                            drawerKey.currentState!.openDrawer();
-                          }
-                        },
-                        icon: Icon(Icons.menu, color: AppColors.white),
-                      ),
+
                 scrolledUnderElevation: 0.0,
                 backgroundColor: AppColors.primaryBg,
                 centerTitle: true,
@@ -366,10 +367,7 @@ class MyTextWithMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        int endIndex = MediaQuery
-            .of(context)
-            .size
-            .width <= 900 ? 4 : 4;
+        int endIndex = MediaQuery.of(context).size.width <= 1000 ? 5 : 5;
         if (endIndex > profileMenuItems.length) {
           endIndex = profileMenuItems.length;
         }
@@ -379,12 +377,8 @@ class MyTextWithMenu extends StatelessWidget {
           position: RelativeRect.fromLTRB(100, 100, 0, 0),
           items: profileMenuItems.sublist(0, endIndex).map(
                 (e) {
-              return profilePopupMenuItem(
-                e.title,
-                e.icon,
-                context,
-                    () {
-                  if (e.id == 5) {
+              return profilePopupMenuItem(e.title, e.icon, context, () {
+                  if (e.id == 6) {
                     customConfirmationAlertDialog(context, () async {
                       SharedPreferences prefs = await SharedPreferences
                           .getInstance();
@@ -417,12 +411,13 @@ class MyTextWithMenu extends StatelessWidget {
 
 PopupMenuEntry<int> profilePopupMenuItem(String title, String icon, BuildContext context, Function() onSelectItem) {
   return PopupMenuItem<int>(
-    value: 5,
+    value: 6,
     onTap: () {
       onSelectItem();
     },
     child: SizedBox(
       width: 150,
+
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [

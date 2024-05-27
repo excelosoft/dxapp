@@ -39,6 +39,7 @@ class _BillAddState extends State<BillAdd> {
   final paramsBarcode = Get.parameters['barcodeNo'];
   final paramsInvoice = Get.parameters['invoiceNo'];
 
+
   // var ppfType;
 
   TextEditingController ppfPackage = TextEditingController();
@@ -258,9 +259,13 @@ class _BillAddState extends State<BillAdd> {
       // print(data?.totalTaxebleAmt);
       // print(data!.totalApplicaleTaxAmt);
       // print(data!.totalPayableAmt);
+if(data!.selectServices![0].name=='Graphene Coating'){
 
-       ceramicBarcodeController = TextEditingController(text:paramsBarcode );
        grapheneBarcodeController = TextEditingController(text: paramsBarcode);
+}else{
+  ceramicBarcodeController = TextEditingController(text:paramsBarcode );
+}
+
       ppfAmount.text = data?.ppfServices?.isNotEmpty == true ? data!.ppfServices![0].amount ?? 'N/A' : '0';
       ppfType.text = data?.ppfServices?.isNotEmpty == true ? data!.ppfServices![0].type ?? 'N/A' : '0';
       ppfPackage.text = data?.ppfServices?.isNotEmpty == true ? data!.ppfServices![0].package ?? 'N/A' : '';
@@ -1379,7 +1384,11 @@ class _BillAddState extends State<BillAdd> {
                                     if (isBillEdit == null && data!.selectServices != null && data!.selectServices!.isNotEmpty && data!.selectServices!.any((element) => element.name == 'Ceramic Coating') || data!.selectServices!.any((element) => element.name == 'Graphene Coating')) {
                                       final list = await ApiProvider().fetchBarcodeList();
                                       if (list.contains(ceramicBarcodeController.text) || list.contains(grapheneBarcodeController.text) ) {
-                                        estimateData["service_barcode"] = ceramicBarcodeController.text;
+                                        if (ceramicBarcodeController.text.isNotEmpty) {
+                                          estimateData["service_barcode"] = ceramicBarcodeController.text;
+                                        } else {
+                                          estimateData["service_barcode"] = grapheneBarcodeController.text;
+                                        }
                                         estimateData["qty"] = '0';
                                         billUpdated = true;
                                       } else {

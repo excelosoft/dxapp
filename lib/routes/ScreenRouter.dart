@@ -16,13 +16,14 @@ import 'package:responsive_dashboard/Screens/AuthScreens/login_screen.dart';
 
 import '../Screens/AddScreens/add_bill_screen.dart';
 import '../Screens/AddScreens/add_estimate_screen.dart';
+import '../Screens/Inventroy_Review.dart';
 import '../Screens/ListingScreens/jobsheet_listing_screen.dart';
 import '../Screens/AddScreens/addWarrantyCard.dart';
 
 class ScreenRouter {
   static List<GetPage> routes = [
     GetPage(name: RoutePath.start, page: () => LayoutView()),
-    GetPage(name: RoutePath.calendar, page: () => CalendarScreen()),
+    GetPage(name: RoutePath.calendar, page: () => InventoryReview()),
     GetPage(name: RoutePath.login, page: () => LoginScreen()),
     GetPage(name: RoutePath.dashboardScreen, page: () => LayoutView()),
     GetPage(name: RoutePath.profileScreen, page: () => ProfileScreen()),

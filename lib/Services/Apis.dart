@@ -14,6 +14,7 @@ import 'package:responsive_dashboard/dataModel/quatation_model.dart';
 import 'package:responsive_dashboard/dataModel/user_data_model.dart';
 import 'package:responsive_dashboard/dataModel/warranty_card_listing_model.dart';
 
+import '../dataModel/invantary_model.dart';
 import '../dataModel/jobsheet_listing_model.dart';
 
 int? getUserId() {
@@ -284,6 +285,40 @@ class ApiProvider {
     } catch (e) {
       print(e);
     }
+  }
+
+
+  Future<List<InvantaryData>> fetchBarcodeListForInvontray() async {
+    final response = await http.post(
+      Uri.parse('https://excelosoft.com/dxapp/public/api/getProductBarcode'),
+      headers: ApiHeaders.apiHeader,
+      body: jsonEncode({"user_id": userid}),
+    );
+    print(response.body);
+
+
+    if (response.statusCode == 200) {
+      final List<dynamic> dataList = json.decode(response.body)['data'] ?? [];
+      List<InvantaryData> inventoryList = dataList.map((item) => InvantaryData.fromJson(item)).toList();
+      return inventoryList;
+    } else {
+      throw Exception('Failed to load barcodes');
+    }
+
+    // // if (json.decode(response.body)['status'] == '1' || json.decode(response.body)['status'] == 1) {
+    // final jsonData = json.decode(response.body);
+    // final List<dynamic> data = jsonData['data'] ?? [];
+    // final List<String> barcodeList = data.map((item) => item['service_barcode'].toString()).toList();
+    // return barcodeList;
+    // } else {
+    //   toastification.show(
+    //     context: context,
+    //     type: ToastificationType.error,
+    //     title: Text('Failed to load barcode list'),
+    //     autoCloseDuration: const Duration(seconds: 5),
+    //   );
+    //   throw Exception('Failed to load barcode list');
+    // }
   }
 
   Future<List<String>> fetchBarcodeList() async {
