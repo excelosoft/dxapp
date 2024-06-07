@@ -231,14 +231,15 @@ class _EstimateState extends State<Estimate> {
                           }
 
                           if (snapshot.hasData) {
-                            final estimateDataList = snapshot.data?.data;
-                            print(estimateDataList);
-                            final filteredData = estimateDataList!.where((estimate) {
+                            final billsDataList = snapshot.data?.data;
+
+                            final filteredData = billsDataList!.where((estimate) {
                               final searchQuery = searchController.text.toLowerCase();
                               final nameMatches = estimate.name != null && estimate.name!.toLowerCase().contains(searchQuery);
                               final vehicleNumberMatches = estimate.vehicleNumber != null && estimate.vehicleNumber!.toLowerCase().contains(searchQuery);
                               return nameMatches || vehicleNumberMatches;
                             }).toList();
+
                             if (filteredData.isEmpty) {
                               return NoDataFound();
                             }
@@ -267,6 +268,7 @@ class _EstimateState extends State<Estimate> {
                               });
                               return SizedBox(); // Return an empty SizedBox as the UI will be updated after setState
                             }
+
 
                             print(filteredData[0].date);
                             return Column(
@@ -304,7 +306,7 @@ class _EstimateState extends State<Estimate> {
                                       ),
                                       DataColumn(
                                         label: Text(
-                                          'VECHILE NUMBER',
+                                          'VEHICLE NUMBER',
                                           style: GoogleFonts.inter(color: Colors.grey),
                                         ),
                                       ),
@@ -316,7 +318,7 @@ class _EstimateState extends State<Estimate> {
                                       ),
                                       DataColumn(
                                         label: Text(
-                                          'Created Date',
+                                          'CREATED DATE',
                                           style: GoogleFonts.inter(color: Colors.grey),
                                         ),
                                       ),
@@ -351,13 +353,13 @@ class _EstimateState extends State<Estimate> {
                                             ),
                                             DataCell(
                                               Text(
-                                                capitalizeFirstLetter(filteredData[index].name.toString()),
+                                                capitalizeFirstLetter(paginatedData[index].name.toString()),
                                                 style: GoogleFonts.inter(color: Colors.black),
                                               ),
                                             ),
                                             DataCell(
                                               Text(
-                                                '${capitalizeFirstLetter(filteredData[index].modalName ?? 'N/A')} (${capitalizeFirstLetter(filteredData[index].makeId ?? 'N/A')})',
+                                                '${capitalizeFirstLetter(paginatedData[index].modalName ?? 'N/A')} (${capitalizeFirstLetter(filteredData[index].makeId ?? 'N/A')})',
                                                 style: GoogleFonts.inter(
                                                   color: Colors.black,
                                                 ),
@@ -365,7 +367,7 @@ class _EstimateState extends State<Estimate> {
                                             ),
                                             DataCell(
                                               Text(
-                                                filteredData[index].vehicleNumber ?? 'N/A',
+                                                paginatedData[index].vehicleNumber ?? 'N/A',
                                                 style: GoogleFonts.inter(color: Colors.black),
                                               ),
                                             ),
@@ -377,7 +379,7 @@ class _EstimateState extends State<Estimate> {
                                             ),
                                             DataCell(
                                               Text(
-                                                filteredData[index].date ?? 'N/A',
+                                                paginatedData[index].date ?? 'N/A',
                                                 style: GoogleFonts.inter(color: Colors.black),
                                               ),
                                             ),
@@ -389,7 +391,7 @@ class _EstimateState extends State<Estimate> {
                                                   IconButton(
                                                     tooltip: 'Print',
                                                     onPressed: () async {
-                                                      final id = filteredData[index].id.toString();
+                                                      final id = paginatedData[index].id.toString();
                                                       // https: //excelosoft.com/dxapp/public/estimates/116/pdf
                                                       html.window.open('https://excelosoft.com/dxapp/public/estimates/$id/pdf', '_blank');
                                                     },
@@ -399,7 +401,7 @@ class _EstimateState extends State<Estimate> {
                                                     visible: data.maingerStatus,
                                                     child: IconButton(
                                                       tooltip: 'Edit',
-                                                      onPressed: filteredData[index].billsStatus == 1
+                                                      onPressed: paginatedData[index].billsStatus == 1
                                                           ? null : () async {
                                                         print('filteredData[index] ===');
                                                         print(filteredData[index].estimatedDeliveryTime);
@@ -413,7 +415,7 @@ class _EstimateState extends State<Estimate> {
                                                         );
                                                       },
                                                       icon: Icon(Icons.edit_outlined),
-                                                      color: filteredData[index].billsStatus == 1 ? Colors.grey : Colors.black,
+                                                      color:paginatedData[index].billsStatus == 1 ? Colors.grey : Colors.black,
                                                     ),
                                                   ),
                                                   Visibility(
@@ -462,7 +464,7 @@ class _EstimateState extends State<Estimate> {
                                                         arguments: {
                                                           'matchingEstimate': filteredData[index],
                                                           'description': "",
-                                                          'remarks': '',
+                                                          'remarks' : '',
                                                         },
                                                       );
                                                     },

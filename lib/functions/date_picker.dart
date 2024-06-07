@@ -22,7 +22,7 @@ String toDate(DateTime dateTime) {
 }
 
 String toTime(DateTime dateTime) {
-  final date = DateFormat('hh:mm a').format(dateTime);
+  final date = DateFormat('hh:mm').format(dateTime);
   return date;
 }
 

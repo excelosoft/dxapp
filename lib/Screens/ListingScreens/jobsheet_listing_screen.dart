@@ -298,13 +298,13 @@ class _JobSheetState extends State<JobSheet> {
                                             ),
                                             DataColumn(
                                               label: Text(
-                                                'VECHILE NUMBER',
+                                                'VEHICLE NUMBER',
                                                 style: GoogleFonts.inter(color: Colors.grey),
                                               ),
                                             ),
                                             DataColumn(
                                               label: Text(
-                                                'Assigned Worker',
+                                                'ASSIGNED WORKER',
                                                 style: GoogleFonts.inter(color: Colors.grey),
                                               ),
                                             ),

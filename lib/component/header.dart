@@ -64,19 +64,19 @@ class _HeaderState extends State<Header> {
                 automaticallyImplyLeading: false,
                 leading: Get.currentRoute != '/' && Get.currentRoute != '/dashboard' ?
                 IconButton(
+                  onPressed: () {
+                    if (drawerKey.currentState != null) {
+                      drawerKey.currentState?.openDrawer();
+                    }
+                  },
+                  icon: Icon(Icons.menu, color: AppColors.white),
+                ):IconButton(
                         onPressed: () => Get.back(),
                         icon: Icon(
                           Icons.arrow_back,
                           color: AppColors.white,
                         ),
-                      ):IconButton(
-            onPressed: () {
-          if (drawerKey.currentState != null) {
-    drawerKey.currentState?.openDrawer();
-    }
-    },
-      icon: Icon(Icons.menu, color: AppColors.white),
-    ),
+                      ),
 
 
                 scrolledUnderElevation: 0.0,

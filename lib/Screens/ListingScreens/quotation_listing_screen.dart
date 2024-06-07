@@ -270,6 +270,9 @@ class _QuotationListingState extends State<QuotationListing> {
                               return SizedBox(); // Return an empty SizedBox as the UI will be updated after setState
                             }
 
+
+
+
                             return Column(
 
                               children: [
@@ -304,13 +307,13 @@ class _QuotationListingState extends State<QuotationListing> {
                                         ),
                                         DataColumn(
                                           label: Text(
-                                            'VECHILE NUMBER',
+                                            'VEHICLE NUMBER',
                                             style: GoogleFonts.inter(color: Colors.grey),
                                           ),
                                         ),
                                         DataColumn(
                                           label: Text(
-                                            'Services',
+                                            'SERVICES',
                                             style: GoogleFonts.inter(color: Colors.grey),
                                           ),
                                         ),
@@ -322,8 +325,13 @@ class _QuotationListingState extends State<QuotationListing> {
                                           size: ColumnSize.L,
                                         ),
                                       ],
+
+
                                       rows: List<DataRow>.generate(
                                         paginatedData.length,
+
+
+
                                         (index) => DataRow(
                                           cells: [
                                             DataCell(
@@ -336,13 +344,13 @@ class _QuotationListingState extends State<QuotationListing> {
                                             ),
                                             DataCell(
                                               Text(
-                                                capitalizeFirstLetterOfEachWord(filteredData[index].segment ?? 'N/A'),
+                                                capitalizeFirstLetterOfEachWord(paginatedData[index].segment ?? 'N/A'),
                                                 style: GoogleFonts.inter(color: Colors.black),
                                               ),
                                             ),
                                             DataCell(
                                               Text(
-                                                capitalizeFirstLetterOfEachWord(filteredData[index].model ?? 'N/A'),
+                                                capitalizeFirstLetterOfEachWord(paginatedData[index].model ?? 'N/A'),
                                                 style: GoogleFonts.inter(
                                                   color: Colors.black,
                                                 ),
@@ -350,16 +358,22 @@ class _QuotationListingState extends State<QuotationListing> {
                                             ),
                                             DataCell(
                                               Text(
-                                                filteredData[index].vehicleNumber.toString(),
+                                                paginatedData[index].vehicleNumber.toString(),
                                                 style: GoogleFonts.inter(color: Colors.black),
                                               ),
                                             ),
                                             DataCell(
-                                              Text(
-                                                capitalizeFirstLetterOfEachWord(filteredData[index].services?.replaceAll('"', '') ?? 'N/A'),
-                                                style: GoogleFonts.inter(color: Colors.black),
-                                              ),
-                                            ),
+                          Text(
+                          capitalizeFirstLetterOfEachWord(
+                          (paginatedData[index].services != null && paginatedData[index].services!.isNotEmpty)
+                          ? paginatedData[index].services!.first.replaceAll('"', '')
+                              : 'N/A',
+                          ),
+                          style: GoogleFonts.inter(color: Colors.black),
+                          ),
+                          ),
+
+
                                             DataCell(
                                               Row(
                                                 mainAxisAlignment: MainAxisAlignment.start,

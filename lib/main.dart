@@ -41,8 +41,7 @@ class _MyAppState extends State<MyApp> {
         debugShowCheckedModeBanner: false,
         title: 'Detaling Xperts',
         theme: ThemeData(
-          primarySwatch: const MaterialColor(
-            0xFFED2626,
+          primarySwatch: const MaterialColor(0xFFED2626,
             <int, Color>{
               50: Color(0x1AED2626),
               100: Color(0x33ED2626),

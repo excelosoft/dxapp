@@ -70,6 +70,10 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
   TextEditingController cardWashWarrantyController = TextEditingController();
   TextEditingController noOfMaintenanceController = TextEditingController();
 TextEditingController  selectePackageController = TextEditingController();
+
+
+
+
   List<String> selectedServiceList = [];
 
   var serviceList = [];
@@ -100,6 +104,9 @@ TextEditingController  selectePackageController = TextEditingController();
     super.initState();
 
     if (billData != null) {
+
+
+
       name.text = billData?.name ?? '';
       date.text = billData?.date ?? '';
       phoneNo.text = billData?.phone ?? '';
@@ -118,29 +125,36 @@ TextEditingController  selectePackageController = TextEditingController();
       AssignedWorkers.text = billData?.assignedWorker ?? '';
       modelId = billData?.modalName ?? 13;
       model.text = billData!.modalName ?? 'Swift';
-      selectePackage=billData!.selectServices![0].package.toString();
+      selectePackage=billData!.selectServices![0].package.toString()??'4 year';
       selectePackageController.text=billData!.selectServices![0].package.toString();
-
-      updateMaintenanceValue(billData!.selectServices![0].package.toString());
-      divideService(billData!.selectServices![0].package.toString(),value.first);
+      RegExp regExp = RegExp(r'\d+');
+      Match? match = regExp.firstMatch(billData!.selectServices![0].package.toString());
+      //int years = int.parse(selectedPackage.split(' ')[0]??'0');
+      int years = match != null ? int.parse(match.group(0)!) : 0;
+      updateMaintenanceValue(billData!.selectServices![0].package.toString()??'0');
+      divideService(years,value.first);
     }
     estimatedata();
   }
   void updateMaintenanceValue(String? selectedPackage) {
     if (selectedPackage != null) {
-      int years = int.parse(selectedPackage.split(' ')[0]);
+      RegExp regExp = RegExp(r'\d+');
+      Match? match = regExp.firstMatch(selectedPackage);
+      //int years = int.parse(selectedPackage.split(' ')[0]??'0');
+      int years = match != null ? int.parse(match.group(0)!) : 0;
+
       int numberOfMaintenance = 2 * years - 1;
       noOfMaintenance = numberOfMaintenance;
     }
   }
 
   List<DateTime> serviceDates = [];
-  List<DateTime> divideService( String years,String estDatas) {
+  List<DateTime> divideService( int years,String estDatas) {
     DateTime parsedDate = DateTime.parse(estDatas);
 
 
-    int yearsCount = int.parse(years.split(' ')[0]);
-    int totalMonths = yearsCount * 12;
+   // int yearsCount = int.parse(years.split(' ')[0]);
+    int totalMonths = years * 12;
 
     // Calculate the number of services needed in total
     int totalServices = totalMonths ~/ 6;
@@ -788,8 +802,7 @@ TextEditingController  selectePackageController = TextEditingController();
 
                             //   return false;
                             // }).toList();
-                            selectedServiceList = billData!.selectServices!
-                                .where((service) {
+                            selectedServiceList = billData!.selectServices!.where((service) {
                                   if (service.name != null) {
                                     return allowedServices.contains(service.name) || service.name!.toLowerCase().contains('ppf');
                                   }
@@ -1090,7 +1103,7 @@ TextEditingController  selectePackageController = TextEditingController();
                                 warrantyData["ppf_services_type"] = billData?.ppfServices?.map((service) => service.type).toList() ?? [];
                                 warrantyData["ppf_services_package"] = billData?.ppfServices?.map((service) => service.package).toList() ?? [];
 
-                                warrantyData["estimated_delivery_time"] =   estimatedDeliveryTime;
+                                warrantyData["estimated_delivery_time"] =   estDate.text.toString()+ ' ' +estTime.text.toString();
 
 
                                 // int years = int.parse(selectePackage.split(' ')[0]); // Extract the number of years
@@ -1111,7 +1124,7 @@ TextEditingController  selectePackageController = TextEditingController();
                                 // }
 
                                 warrantyData["maintenance_number"] = noOfMaintenance.toString();
-                                List<String> serviceDateStrings = serviceDates.map((dateTime) => dateTime.toIso8601String()).toList();
+                                List<String> serviceDateStrings = serviceDates.map((dateTime) => dateTime.toIso8601String().split('T')[0]).toList();
                                 warrantyData["due_date"] = serviceDateStrings;
                                 warrantyData["done_date"] = [];
 

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_dashboard/Services/Apis.dart';
 import 'package:responsive_dashboard/component/custom/custom_fields.dart';
@@ -23,6 +24,7 @@ import '../dataModel/calendar_model.dart';
 import '../functions/date_picker.dart';
 import '../functions/mainger_provider.dart';
 import '../routes/RoutePath.dart';
+import 'ListingScreens/bills_listing_screen.dart';
 import 'calendar_screen.dart';
 import 'event_data.dart';
 
@@ -34,7 +36,7 @@ late List<CalendarItem> calendarList;
 class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
 
 
-
+  TextEditingController searchController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey1 = GlobalKey<ScaffoldState>();
 
   late TabController tabviewController;
@@ -47,6 +49,9 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
   List<String?> currentStatus = [];
   late Stream<CalendarModel?> stream;
   late var _calendarDataSource;
+
+  int _currentPage = 1;
+  int _rowsPerPage = 10; // Number of rows per page
   @override
 
   void initState() {
@@ -56,6 +61,17 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
     stream = estimateStreamCalandar(Duration(seconds: 1));
     super.initState();
   }
+
+
+  void fetchData() {
+    // Fetch your data and update paginatedData
+    // For example:
+    // paginatedData = fetchDataFromApi();
+    // After fetching data, initialize currentStatus
+
+    setState(() {});
+  }
+
 
   @override
   void setState(VoidCallback fn) {
@@ -316,14 +332,46 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                           }
 
                           if (snapshot.hasData) {
-                            print('build');
-                            List<EstimateData> data = snapshot.data?.data ?? [];
+                            final billsDataList = snapshot.data?.data;
 
-                            currentStatus = data.map((e) => e.currentStatus ?? 'Deleivered').toList();
+                            final filteredData = billsDataList!.where((estimate) {
+                              final searchQuery = searchController.text.toLowerCase();
+                              final nameMatches = estimate.name != null && estimate.name!.toLowerCase().contains(searchQuery);
+                              final vehicleNumberMatches = estimate.vehicleNumber != null && estimate.vehicleNumber!.toLowerCase().contains(searchQuery);
+                              return nameMatches || vehicleNumberMatches;
+                            }).toList();
 
-                            if (selectedFilter != null) {
-                              data = data.where((item) => item.currentStatus == selectedFilter).toList();
+                            if (filteredData.isEmpty) {
+                              return NoDataFound();
                             }
+
+                            // Calculate total pages based on filtered data
+                            final totalPages = (filteredData.length / _rowsPerPage).ceil();
+
+                            // Ensure that current page index is within valid range
+                            _currentPage = (_currentPage > totalPages) ? totalPages : _currentPage;
+
+                            // Calculate start and end index for the current page
+                            final startIndex = (_currentPage - 1) * _rowsPerPage;
+                            final endIndex = startIndex + _rowsPerPage;
+
+                            // Ensure that endIndex is within the valid range of data indices
+                            final endValidIndex = endIndex.clamp(0, filteredData.length);
+
+                            // Slice the filtered data to get the data for the current page
+                            final paginatedData = filteredData.sublist(startIndex, endValidIndex);
+
+                            if (paginatedData.isEmpty && _currentPage > 1) {
+                              // If there's no data on the current page and it's not the first page,
+                              // decrement the current page value to navigate back to the previous page.
+                              setState(() {
+                                _currentPage--;
+                              });
+                              return SizedBox(); // Return an empty SizedBox as the UI will be updated after setState
+                            }
+                            currentStatus = List<String?>.filled(paginatedData.length, null);
+
+
 
                             return Container(
                               width: width,
@@ -394,7 +442,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                                             ),
                                             DataColumn(
                                               label: Text(
-                                                'VECHILE NUMBER',
+                                                'VEHICLE NUMBER',
                                                 style: GoogleFonts.inter(color: Colors.grey),
                                               ),
                                             ),
@@ -416,7 +464,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                                                     tooltip: '',
                                                     padding: EdgeInsets.zero,
                                                     color: Colors.white.withOpacity(1),
-                                                    offset: const Offset(10, 40),
+                                                    offset: const Offset(20, 70),
                                                     itemBuilder: (context) {
                                                       // currentStatus = data![index].currentStatus!;
 
@@ -435,7 +483,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                                                       child: Row(
                                                         children: [
                                                           Text(
-                                                            'Status',
+                                                            'STATUS  ',
                                                             style: GoogleFonts.inter(
                                                               color: Colors.grey,
                                                             ),
@@ -461,26 +509,26 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                                             ),
                                           ],
                                           rows: List<DataRow>.generate(
-                                            data.length,
-                                            (index) {
+                                            paginatedData.length, // Use paginatedData instead of filteredData
+                                                (index) {
+
+                                              final actualIndex = startIndex + index + 1;
+                                              // Use paginatedData[index] instead of filteredData[index]
+                                              String formattedAmount = 'N/A'; // Default value
+                                              if (paginatedData[index].totalServicesAmount != null) {
+                                                // Assuming the amount is stored as a String that can be parsed to a double
+                                                double amount = double.tryParse(paginatedData[index].totalServicesAmount!) ?? 0;
+                                                formattedAmount = NumberFormat('#,##0.00', 'en_US').format(amount) + '/-';
+                                              }
                                               return DataRow(
-                                                onSelectChanged: (value) {
-                                                  Get.toNamed(
-                                                    RoutePath.estimateAddScreen,
-                                                    arguments: data[index],
-                                                    parameters: {
-                                                      'isEdit': 'true',
-                                                    },
-                                                  );
-                                                },
                                                 cells: [
                                                   DataCell(
                                                     GestureDetector(
                                                       onTap: () {
                                                         print('hello');
                                                       },
-                                                      child: Text(
-                                                        "${index + 1}.",
+                                                      child:  Text(
+                                                        "${actualIndex}.",
                                                         style: GoogleFonts.inter(
                                                           color: Colors.black,
                                                         ),
@@ -489,13 +537,13 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                                                   ),
                                                   DataCell(
                                                     Text(
-                                                      capitalizeFirstLetterOfEachWord(data[index].name ?? "N/A"),
+                                                      capitalizeFirstLetterOfEachWord(paginatedData[index].name ?? 'N/A'),
                                                       style: GoogleFonts.inter(color: Colors.black),
                                                     ),
                                                   ),
                                                   DataCell(
                                                     Text(
-                                                      '${capitalizeFirstLetterOfEachWord(data[index].segment ?? 'N/A')} ${capitalizeFirstLetterOfEachWord(data[index].makeId ?? 'N/A')}',
+                                                      '${capitalizeFirstLetterOfEachWord(paginatedData[index].segment ?? 'N/A')} ${capitalizeFirstLetterOfEachWord(paginatedData[index].makeId ?? 'N/A')}',
                                                       style: GoogleFonts.inter(
                                                         color: Colors.black,
                                                       ),
@@ -503,64 +551,63 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                                                   ),
                                                   DataCell(
                                                     Text(
-                                                      data[index].vehicleNumber ?? 'N/A',
+                                                      paginatedData[index].vehicleNumber ?? 'N/A',
                                                       style: GoogleFonts.inter(color: Colors.black),
                                                     ),
                                                   ),
                                                   DataCell(
                                                     Text(
-                                                      data[index].estimatedDeliveryTime ?? 'N/A',
+                                                      paginatedData[index].estimatedDeliveryTime ?? 'N/A',
                                                       style: GoogleFonts.inter(color: Colors.black),
                                                     ),
                                                   ),
                                                   DataCell(
-                                                    StatefulBuilder(builder: (context, setstate) {
-                                                      return PopupMenuButton(
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.circular(10),
-                                                        ),
-                                                        initialValue: '',
-                                                        tooltip: '',
-                                                        padding: EdgeInsets.zero,
-                                                        color: Colors.white.withOpacity(1),
-                                                        offset: const Offset(10, 40),
-                                                        itemBuilder: (context) {
-                                                          // currentStatus = data![index].currentStatus!;
-
-                                                          return dropDownStatusDataList
-                                                              .map((e) => popupMenuItem(
-                                                                    e.toString(),
-                                                                    selectedValue: currentStatus[index],
-                                                                  ))
-                                                              .toList();
-                                                        },
-                                                        onSelected: (value) async {
-                                                          currentStatus[index] = value.toString();
-                                                          setstate(() {});
-
-                                                          ApiProvider().changeStatusForEstimate(data[index].id.toString(), value.toString());
-                                                        },
-                                                        child: IntrinsicWidth(
-                                                          child: Row(
-                                                            children: [
-                                                              Text(
-                                                                currentStatus[index] ?? data[index].currentStatus!,
-                                                                style: GoogleFonts.inter(
-                                                                  color: Colors.black,
-                                                                ),
-                                                              ),
-                                                              Icon(
-                                                                Icons.expand_more_outlined,
-                                                              )
-                                                            ],
+                                                    StatefulBuilder(
+                                                      builder: (context, setState) {
+                                                        return PopupMenuButton(
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.circular(10),
                                                           ),
-                                                        ),
-                                                      );
-                                                    }),
+                                                          initialValue: '',
+                                                          tooltip: '',
+                                                          padding: EdgeInsets.zero,
+                                                          color: Colors.white.withOpacity(1),
+                                                          offset: const Offset(10, 40),
+                                                          itemBuilder: (context) {
+                                                            return dropDownStatusDataList.map((e) => PopupMenuItem(
+                                                              value: e.toString(),
+                                                              child: Text(e.toString()),
+                                                            )).toList();
+                                                          },
+
+
+                                                          onSelected: (value) async {
+
+                                                            ApiProvider().changeStatusForEstimate(paginatedData[index].id.toString(), value.toString());
+                                                            setState(() {
+                                                              currentStatus[index] = value.toString();
+                                                            });
+
+
+                                                          },
+                                                          child: IntrinsicWidth(
+                                                            child: Row(
+                                                              children: [
+                                                                Text(
+                                                                  currentStatus[index] ?? 'N/A',
+                                                                  style: GoogleFonts.inter(color: Colors.black),
+                                                                ),
+                                                                Icon(Icons.expand_more_outlined),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
                                                   ),
                                                   DataCell(
                                                     Text(
-                                                      capitalizeFirstLetterOfEachWord(data[index].assignedWorker ?? 'N/A'),
+                                                      capitalizeFirstLetterOfEachWord(paginatedData[index].assignedWorker ?? 'N/A'),
                                                       style: GoogleFonts.inter(
                                                         color: Colors.black,
                                                       ),
@@ -570,10 +617,30 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                                               );
                                             },
                                           ),
+
                                         ),
                                       ),
                                     ),
-                                  )
+                                  ),
+
+                                  SizedBox(height: 20),
+                                  Row(
+                                    children: [
+                                      Spacer(),
+                                      Align(
+                                        alignment: Alignment.bottomLeft,
+                                        child: PaginationControls(
+                                          currentPage: _currentPage,
+                                          totalPages: totalPages,
+                                          onPageChanged: (int newPage) {
+                                            setState(() {
+                                              _currentPage = newPage;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             );
@@ -643,192 +710,86 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
       ),
     );
   }
-}
+  void showAddCalendarModal({
+    required BuildContext context,
+    required bool isEdit,
+    CalendarItem? calendarModel,
+  }) {
+    final formkey = GlobalKey<FormState>();
+    final width = MediaQuery.of(context).size.width;
 
-List<String> dropDownStatusDataList = [
-  'Deleivered',
-  'In Progress',
-  'Not Deleivered',
-  'Closed',
-];
+    TextEditingController descriptionController = TextEditingController(text: isEdit ? calendarModel?.description : '');
+    TextEditingController titleController = TextEditingController(text: isEdit ? calendarModel?.title : '');
+    TextEditingController dateController = TextEditingController(text: isEdit ? calendarModel?.startDate : '');
+    TextEditingController timeController = TextEditingController(text: isEdit ? '1:20 Am' : '');
 
-List<String> filterList = [
-  'Day',
-  'Week',
-  'Month',
-  'Year',
-];
-
-PopupMenuEntry<String> popupMenuItem(
-  String title, {
-  String? selectedValue,
-}) {
-  return PopupMenuItem(
-    onTap: null,
-    value: title,
-    height: 5,
-    padding: const EdgeInsets.symmetric(vertical: 2),
-    child: Center(
-      child: Container(
-        width: 200,
-        margin: const EdgeInsets.symmetric(vertical: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: selectedValue == title ? AppColors.secondary : AppColors.white,
-          borderRadius: BorderRadius.circular(5),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontFamily: GoogleFonts.dmSans().fontFamily,
-                letterSpacing: 0.4,
-                fontSize: 13,
-                color: selectedValue == title ? Colors.black : const Color(0xFF454545),
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(builder: (context, innerSetState) {
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Dialog(
+              insetPadding: const EdgeInsets.all(15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
-            ),
-            if (selectedValue == title)
-              Icon(
-                Icons.done,
-                size: 20,
-                color: AppColors.black,
-              )
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-void showAddCalendarModal({
-  required BuildContext context,
-  required bool isEdit,
-  CalendarItem? calendarModel,
-}) {
-  final formkey = GlobalKey<FormState>();
-  final width = MediaQuery.of(context).size.width;
-
-  TextEditingController descriptionController = TextEditingController(text: isEdit ? calendarModel?.title : '');
-  TextEditingController titleController = TextEditingController(text: isEdit ? calendarModel?.title : '');
-  TextEditingController dateController = TextEditingController(text: isEdit ? calendarModel?.startDate : '');
-  TextEditingController timeController = TextEditingController(text: isEdit ? '1:20 Am' : '');
-
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return StatefulBuilder(builder: (context, innerSetState) {
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(15),
-          child: Dialog(
-            insetPadding: const EdgeInsets.all(15),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: SingleChildScrollView(
-              child: Container(
-                padding: const EdgeInsets.all(15),
-                // height: 550,
-                width: Responsive.isMobile(context) ? width : 650,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Form(
-                  key: formkey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const SizedBox(),
-                          CustomText(
-                            softWrap: true,
-                            textAlign: TextAlign.center,
-                            size: Responsive.isMobile(context) ? 20 : 30,
-                            title: 'Add Calendar Item',
-                            fontWeight: FontWeight.bold,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Icon(
-                              Icons.close,
-                              size: 25,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      textFieldForWarranty(
-                        width: Responsive.isMobile(context) ? width / 3.5 : width,
-                        labelColor: Colors.black,
-                        context: context,
-                        textEditingController: titleController,
-                        labelText: "Title",
-                        hintext: "Enter Title",
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      if (Responsive.isMobile(context)) ...[
-                        Wrap(
-                          runSpacing: 10,
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: const EdgeInsets.all(15),
+                  // height: 550,
+                  width: Responsive.isMobile(context) ? width : 650,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Form(
+                    key: formkey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            textFieldForWarranty(
-                              labelColor: Colors.black,
-                              context: context,
-                              textEditingController: dateController,
-                              labelText: "Date",
-                              hintext: 'DD/MM/YYYY',
-                              isRightIcon: true,
-                              rightIcon: Icons.calendar_month,
-                              readOnly: true,
-                              onTap: () {
-                                pickFromDateTime(
-                                  pickDate: true,
-                                  // pickedDate: pickedDate,
-                                  context: context,
-                                  controller: dateController,
-                                  // timeController: timeController,
-                                );
-                              },
+                            const SizedBox(),
+                            CustomText(
+                              softWrap: true,
+                              textAlign: TextAlign.center,
+                              size: Responsive.isMobile(context) ? 20 : 30,
+                              title: 'Add Calendar Item',
+                              fontWeight: FontWeight.bold,
                             ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            textFieldForWarranty(
-                              context: context,
-                              textEditingController: timeController,
-                              labelText: "Time",
-                              labelColor: Colors.black,
-                              isRightIcon: true,
-                              isvalidationTrue: true,
-                              rightIcon: Icons.watch_later_outlined,
-                              readOnly: true,
+                            GestureDetector(
                               onTap: () {
-                                pickFromDateTime(
-                                  pickDate: false,
-                                  context: context,
-                                  controller: timeController,
-                                );
+                                Navigator.of(context).pop();
                               },
-                              hintext: "Estimated Delivery Time",
+                              child: const Icon(
+                                Icons.close,
+                                size: 25,
+                              ),
                             ),
                           ],
                         ),
-                      ] else ...[
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: textFieldForWarranty(
-                                context: context,
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        textFieldForWarranty(
+                          width: Responsive.isMobile(context) ? width / 3.5 : width,
+                          labelColor: Colors.black,
+                          context: context,
+                          textEditingController: titleController,
+                          labelText: "Title",
+                          hintext: "Enter Title",
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        if (Responsive.isMobile(context)) ...[
+                          Wrap(
+                            runSpacing: 10,
+                            children: [
+                              textFieldForWarranty(
                                 labelColor: Colors.black,
+                                context: context,
                                 textEditingController: dateController,
                                 labelText: "Date",
                                 hintext: 'DD/MM/YYYY',
@@ -845,13 +806,10 @@ void showAddCalendarModal({
                                   );
                                 },
                               ),
-                            ),
-                            const SizedBox(
-                              width: 8,
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: textFieldForWarranty(
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              textFieldForWarranty(
                                 context: context,
                                 textEditingController: timeController,
                                 labelText: "Time",
@@ -869,143 +827,269 @@ void showAddCalendarModal({
                                 },
                                 hintext: "Estimated Delivery Time",
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      textFieldForWarranty(
-                        width: width,
-                        labelColor: Colors.black,
-                        labelText: 'Details',
-                        context: context,
-                        hintext: 'Details',
-                        textEditingController: descriptionController,
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            if (isEdit)
-                              if (Responsive.isMobile(context)) ...[
-                                GestureDetector(
+                            ],
+                          ),
+                        ] else ...[
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: textFieldForWarranty(
+                                  context: context,
+                                  labelColor: Colors.black,
+                                  textEditingController: dateController,
+                                  labelText: "Date",
+                                  hintext: 'DD/MM/YYYY',
+                                  isRightIcon: true,
+                                  rightIcon: Icons.calendar_month,
+                                  readOnly: true,
                                   onTap: () {
-                                    Navigator.of(context).pop();
+                                    pickFromDateTime(
+                                      pickDate: true,
+                                      // pickedDate: pickedDate,
+                                      context: context,
+                                      controller: dateController,
+                                      // timeController: timeController,
+                                    );
                                   },
-                                  child: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                    size: 25,
-                                  ),
                                 ),
-                              ] else ...[
-                                CustomButton(
-                                  buttonColor: Colors.red,
-                                  text: 'Delete',
-                                  onPressed: () async {
-                                    final id = calendarModel!.id;
-
-                                    var storeEstimateRes = await ApiProvider().deleteEstimateApi(id!);
-
-                                    if (storeEstimateRes['status'] == "1") {
-                                      dateController.text = '';
-                                      titleController.text = '';
-                                      descriptionController.text = '';
-                                      toastification.show(
-                                        context: context,
-                                        type: ToastificationType.success,
-                                        title: Text(storeEstimateRes["message"]),
-                                        autoCloseDuration: const Duration(seconds: 5),
-                                      );
+                              ),
+                              const SizedBox(
+                                width: 8,
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: textFieldForWarranty(
+                                  context: context,
+                                  textEditingController: timeController,
+                                  labelText: "Time",
+                                  labelColor: Colors.black,
+                                  isRightIcon: true,
+                                  isvalidationTrue: true,
+                                  rightIcon: Icons.watch_later_outlined,
+                                  readOnly: true,
+                                  onTap: () {
+                                    pickFromDateTime(
+                                      pickDate: false,
+                                      context: context,
+                                      controller: timeController,
+                                    );
+                                  },
+                                  hintext: "Estimated Delivery Time",
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        textFieldForWarranty(
+                          width: width,
+                          labelColor: Colors.black,
+                          labelText: 'Details',
+                          context: context,
+                          hintext: 'Details',
+                          textEditingController: descriptionController,
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              if (isEdit)
+                                if (Responsive.isMobile(context)) ...[
+                                  GestureDetector(
+                                    onTap: () {
                                       Navigator.of(context).pop();
+                                    },
+                                    child: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                      size: 25,
+                                    ),
+                                  ),
+                                ] else ...[
+                                  CustomButton(
+                                    buttonColor: Colors.red,
+                                    text: 'Delete',
+                                    onPressed: () async {
+                                      final id = calendarModel!.id;
+
+                                      var storeEstimateRes = await ApiProvider().deleteEstimateApi(id!);
+
+                                      if (storeEstimateRes['status'] == "1") {
+                                        dateController.text = '';
+                                        titleController.text = '';
+                                        descriptionController.text = '';
+                                        toastification.show(
+                                          context: context,
+                                          type: ToastificationType.success,
+                                          title: Text(storeEstimateRes["message"]),
+                                          autoCloseDuration: const Duration(seconds: 5),
+                                        );
+
+                                        stream = estimateStreamCalandar(Duration(seconds: 1));
+                                        setState(() {});
+                                        Navigator.of(context).pop();
+                                      }
+                                    },
+                                    width: 80,
+                                    height: 39,
+                                  ),
+                                ],
+                              const SizedBox(),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: CustomButton(
+                                  buttonColor: AppColors.buttonColor,
+                                  text: isEdit ? 'Update' : 'Save',
+                                  onPressed: () async {
+                                    if (formkey.currentState!.validate()) {
+                                      if (isEdit) {
+                                        Map estimateData = Map();
+                                        estimateData["user_id"] = AppConst.getAccessToken();
+                                        estimateData["title"] = titleController.text.isNotEmpty ? titleController.text : "N/A";
+                                        estimateData["description"] = titleController.text.isNotEmpty ? descriptionController.text : "N/A";
+                                        estimateData["start_date"] = dateController.text.isNotEmpty ? dateController.text : "N/A";
+                                        estimateData["end_date"] = dateController.text.isNotEmpty ? dateController.text : "N/A";
+
+                                        var storeEstimateRes = await ApiProvider().updateCalendarEvent(
+                                          estimateData,
+                                          calendarModel!.id.toString(),
+                                        );
+
+                                        if (storeEstimateRes['status'] == "1") {
+                                          dateController.text = '';
+                                          titleController.text = '';
+                                          descriptionController.text = '';
+                                          toastification.show(
+                                            context: context,
+                                            type: ToastificationType.success,
+                                            title: Text(storeEstimateRes["message"]),
+
+                                            autoCloseDuration: const Duration(seconds: 5),
+
+                                          );
+                                          stream = estimateStreamCalandar(Duration(seconds: 1));
+                                          setState(() {});
+
+                                          Navigator.of(context).pop();
+                                        }
+                                      } else {
+                                        Map estimateData = Map();
+                                        estimateData["user_id"] = AppConst.getAccessToken();
+                                        estimateData["title"] = titleController.text.isNotEmpty ? titleController.text : "N/A";
+                                        estimateData["description"] = titleController.text.isNotEmpty ? descriptionController.text : "N/A";
+                                        estimateData["start_date"] = dateController.text.isNotEmpty ? dateController.text : "N/A";
+                                        estimateData["end_date"] = dateController.text.isNotEmpty ? dateController.text : "N/A";
+
+                                        var storeEstimateRes = await ApiProvider().createCalendarEvent(
+                                          estimateData,
+                                        );
+
+                                        if (storeEstimateRes['status'] == "1") {
+                                          dateController.text = '';
+                                          titleController.text = '';
+                                          descriptionController.text = '';
+                                          toastification.show(
+                                            context: context,
+                                            type: ToastificationType.success,
+                                            title: Text(storeEstimateRes["message"]),
+                                            autoCloseDuration: const Duration(seconds: 5),
+                                          );
+
+
+                                          stream = estimateStreamCalandar(Duration(seconds: 1));
+                                          setState(() {});
+                                          Navigator.of(context).pop();
+                                        }
+                                      }
                                     }
                                   },
-                                  width: 80,
+                                  width: 85,
                                   height: 39,
                                 ),
-                              ],
-                            const SizedBox(),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: CustomButton(
-                                buttonColor: AppColors.buttonColor,
-                                text: isEdit ? 'Update' : 'Save',
-                                onPressed: () async {
-                                  if (formkey.currentState!.validate()) {
-                                    if (isEdit) {
-                                      Map estimateData = Map();
-                                      estimateData["user_id"] = AppConst.getAccessToken();
-                                      estimateData["title"] = titleController.text.isNotEmpty ? titleController.text : "N/A";
-                                      estimateData["start_date"] = dateController.text.isNotEmpty ? dateController.text : "N/A";
-                                      estimateData["end_date"] = dateController.text.isNotEmpty ? dateController.text : "N/A";
-
-                                      var storeEstimateRes = await ApiProvider().updateCalendarEvent(
-                                        estimateData,
-                                        calendarModel!.id.toString(),
-                                      );
-
-                                      if (storeEstimateRes['status'] == "1") {
-                                        dateController.text = '';
-                                        titleController.text = '';
-                                        descriptionController.text = '';
-                                        toastification.show(
-                                          context: context,
-                                          type: ToastificationType.success,
-                                          title: Text(storeEstimateRes["message"]),
-                                          autoCloseDuration: const Duration(seconds: 5),
-                                        );
-                                        Navigator.of(context).pop();
-                                      }
-                                    } else {
-                                      Map estimateData = Map();
-                                      estimateData["user_id"] = AppConst.getAccessToken();
-                                      estimateData["title"] = titleController.text.isNotEmpty ? titleController.text : "N/A";
-                                      estimateData["start_date"] = dateController.text.isNotEmpty ? dateController.text : "N/A";
-                                      estimateData["end_date"] = dateController.text.isNotEmpty ? dateController.text : "N/A";
-
-                                      var storeEstimateRes = await ApiProvider().createCalendarEvent(
-                                        estimateData,
-                                      );
-
-                                      if (storeEstimateRes['status'] == "1") {
-                                        dateController.text = '';
-                                        titleController.text = '';
-                                        descriptionController.text = '';
-                                        toastification.show(
-                                          context: context,
-                                          type: ToastificationType.success,
-                                          title: Text(storeEstimateRes["message"]),
-                                          autoCloseDuration: const Duration(seconds: 5),
-                                        );
-                                        Navigator.of(context).pop();
-                                      }
-                                    }
-                                  }
-                                },
-                                width: 85,
-                                height: 39,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
+          );
+        });
+      },
+    );
+  }
+
+  PopupMenuEntry<String> popupMenuItem(
+      String title, {
+        String? selectedValue,
+      }) {
+    return PopupMenuItem(
+      onTap: null,
+      value: title,
+      height: 5,
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Center(
+        child: Container(
+          width: 200,
+          margin: const EdgeInsets.symmetric(vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: selectedValue == title ? AppColors.secondary : AppColors.white,
+            borderRadius: BorderRadius.circular(5),
           ),
-        );
-      });
-    },
-  );
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontFamily: GoogleFonts.dmSans().fontFamily,
+                  letterSpacing: 0.4,
+                  fontSize: 13,
+                  color: selectedValue == title ? Colors.black : const Color(0xFF454545),
+                ),
+              ),
+              if (selectedValue == title)
+                Icon(
+                  Icons.done,
+                  size: 20,
+                  color: AppColors.black,
+                )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
+
+List<String> dropDownStatusDataList = [
+  'Deleivered',
+  'In Progress',
+  'Not Deleivered',
+  'Closed',
+];
+
+List<String> filterList = [
+  'Day',
+  'Week',
+  'Month',
+  'Year',
+];
+
+
+
+
 
 
 

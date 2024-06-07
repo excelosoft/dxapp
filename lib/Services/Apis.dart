@@ -146,7 +146,7 @@ class ApiProvider {
     }
     return [] as QuatationModel;
   }
-  Future<List<MaintainestData>> getMaintenceList() async {
+  Future <MaintanceModel> getMaintenceList() async {
     try {
       Map<String, dynamic> data = await postRequest(
         url: 'https://excelosoft.com/dxapp/public/api/maintenanceList',
@@ -155,12 +155,12 @@ class ApiProvider {
       );
 
       if (data['status'] != null && (data['status'] == '1' || data['status'] == 1)) {
-        List<MaintainestData> maintenanceList = [];
-        List<dynamic> dataList = data['data'] ?? [];
-        for (var item in dataList) {
-          maintenanceList.add(MaintainestData.fromJson(item));
-        }
-        return maintenanceList;
+        // List<MaintainestData> maintenanceList = [];
+        // List<dynamic> dataList = data['data'] ?? [];
+        // for (var item in dataList) {
+        //   maintenanceList.add(MaintainestData.fromJson(item));
+        // }
+        return MaintanceModel.fromJson(data);
       } else {
         // Handle if status is not valid
         // For example: show an error message to the user
@@ -419,17 +419,44 @@ class ApiProvider {
     print(data);
     return data;
   }
-
+  // storeMaintenance(Map dataMap, String id) async {
+  //   dataMap["user_id"] = userid;
+  //
+  //   var headers = {'Content-Type': 'application/json'};
+  //   var response = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/maintenanceUpdate/$id',), headers: headers, body: jsonEncode(dataMap));
+  //
+  //   var data = jsonDecode(response.body.toString());
+  //   print(data);
+  //   return data;
+  //
+  // }
   storeMaintenance(Map dataMap, String id) async {
-      dataMap["user_id"] = userid;
+    // Assume userid is defined somewhere in your code
+    dataMap["user_id"] = userid;
 
-      var headers = {'Content-Type': 'application/json'};
-      var response = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/maintenanceUpdate/$id',), headers: headers, body: jsonEncode(dataMap));
+    var headers = {'Content-Type': 'application/json'};
 
-          var data = jsonDecode(response.body.toString());
-      print(data);
-      return data;
+    try {
+      var response = await http.post(
+        Uri.parse('https://excelosoft.com/dxapp/public/api/maintenanceUpdate/$id'),
+        headers: headers,
+        body: jsonEncode(dataMap),
+      );
 
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body.toString());
+        print(data);
+        return data;
+      } else {
+        // Handle different status codes here
+        print('Failed to update maintenance. Status code: ${response.statusCode}');
+        return {'error': 'Failed to update maintenance', 'statusCode': response.statusCode};
+      }
+    } catch (e) {
+      // Handle exceptions such as network issues, invalid JSON, etc.
+      print('An error occurred: $e');
+      return {'error': 'An error occurred', 'details': e.toString()};
+    }
   }
 
   storeInvoiceNumber(String invoiceNumber, String id) async {

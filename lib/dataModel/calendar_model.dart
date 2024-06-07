@@ -33,11 +33,14 @@ class CalendarItem {
   String? title;
   String? startDate;
   String? endDate;
+  String? description;
+  String? startTime;
+  String? endTime;
   String? createdAt;
   String? updatedAt;
   String? franchisee;
 
-  CalendarItem({this.id, this.userId, this.title, this.startDate, this.endDate, this.createdAt, this.updatedAt, this.franchisee});
+  CalendarItem({this.id, this.userId, this.title, this.startDate, this.endDate, this.createdAt, this.updatedAt, this.franchisee,this.description});
 
   CalendarItem.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -45,11 +48,13 @@ class CalendarItem {
     title = json['title'];
     startDate = json['start_date'];
     endDate = json['end_date'];
+    description = json['description'];
+    startTime = json['start_time'];
+    endTime = json['end_time'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     franchisee = json['franchisee'];
   }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;

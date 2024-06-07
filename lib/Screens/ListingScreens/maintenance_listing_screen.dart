@@ -28,7 +28,7 @@ class MaintenanceListingScreen extends StatefulWidget {
 }
 
 class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
-  late Future<List<MaintainestData>> estimateFuture;
+  late Future <MaintanceModel> estimateFuture;
   TextEditingController searchController = TextEditingController();
   int _currentPage = 1;
   int _rowsPerPage = 10;
@@ -45,8 +45,8 @@ class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
   void getDataForMaintence() async{
 
       try {
-        estimateFuture =  ApiProvider().getMaintenceList();
-        print(estimateFuture); // or whatever you want to do with the data
+         estimateFuture=  ApiProvider().getMaintenceList();
+
       } catch (e) {
         print('Error fetching maintenance data: $e');
         // Handle the error gracefully, such as showing an error message to the user
@@ -227,7 +227,7 @@ class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
                     SizedBox(
                       height: 20,
                     ),
-                    FutureBuilder<List<MaintainestData>>(
+                    FutureBuilder<MaintanceModel>(
                         future: estimateFuture,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -240,7 +240,7 @@ class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
                           }
 
                           if (snapshot.hasData) {
-                            final maintenanceDataList = snapshot.data;
+                            final maintenanceDataList = snapshot.data?.data;
 
                             final filteredData = maintenanceDataList!.where((estimate) {
                               final searchQuery = searchController.text.toLowerCase();
@@ -312,13 +312,13 @@ class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
                                       ),
                                       DataColumn(
                                         label: Text(
-                                          'VECHILE NUMBER',
+                                          'VEHICLE NUMBER',
                                           style: GoogleFonts.inter(color: Colors.grey),
                                         ),
                                       ),
                                       DataColumn(
                                         label: Text(
-                                          'Warranty',
+                                          'WARRANTY',
                                           style: GoogleFonts.inter(color: Colors.grey),
                                         ),
                                       ),
@@ -343,13 +343,13 @@ class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
                                           ),
                                           DataCell(
                                             Text(
-                                              capitalizeFirstLetter(filteredData[index].name.toString()),
+                                              capitalizeFirstLetter(paginatedData[index].name.toString()),
                                               style: GoogleFonts.inter(color: Colors.black),
                                             ),
                                           ),
                                           DataCell(
                                             Text(
-                                              '${capitalizeFirstLetter(filteredData[index].modalName ?? 'N/A')} (${capitalizeFirstLetter(filteredData[index].makeId ?? 'N/A')})',
+                                              '${capitalizeFirstLetter(paginatedData[index].modalName ?? 'N/A')} (${capitalizeFirstLetter(filteredData[index].makeId ?? 'N/A')})',
                                               style: GoogleFonts.inter(
                                                 color: Colors.black,
                                               ),
@@ -357,13 +357,13 @@ class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
                                           ),
                                           DataCell(
                                             Text(
-                                              filteredData[index].vehicleNumber ?? 'N/A',
+                                              paginatedData[index].vehicleNumber ?? 'N/A',
                                               style: GoogleFonts.inter(color: Colors.black),
                                             ),
                                           ),
                                           DataCell(
                                             Text(
-                                              '${filteredData[index].selectServicesName}(${filteredData[index].selectServicesPackage})',
+                                              '${paginatedData[index].selectServicesName}(${paginatedData[index].selectServicesPackage})',
                                               style: GoogleFonts.inter(color: Colors.black),
                                             ),
                                           ),
@@ -374,9 +374,9 @@ class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
                                               children: [
                                                 IconButton(
                                                   onPressed: () async {
-                                                    // final id = filteredData[index].id.toString();
+                                                     final id = paginatedData[index].id.toString();
 
-                                                    // html.window.open('https://excelosoft.com/dxapp/public/maintenances/$id/pdf', '_blank');
+                                                     html.window.open('https://excelosoft.com/dxapp/public/maintenances/$id/pdf', '_blank');
                                                   },
                                                   icon: Icon(Icons.print_outlined),
                                                 ),
@@ -399,19 +399,19 @@ class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
                                                   visible: data.maingerStatus,
                                                   child: IconButton(
                                                     onPressed: () async {
-                                                      // customConfirmationAlertDialog(
-                                                      //   context,
-                                                      //   () async {
-                                                      //     final id = filteredData[index].id;
-                                                      //     await ApiProvider().deleteEstimateApi(id!);
-                                                      //     getDataForMaintence();
-                                                      //     Navigator.of(context).pop();
-                                                      //     setState(() {});
-                                                      //   },
-                                                      //   'Delete',
-                                                      //   'Are you sure you want to delete this maintainance?',
-                                                      //   'Delete',
-                                                      // );
+                                                      customConfirmationAlertDialog(
+                                                        context,
+                                                        () async {
+                                                          final id = paginatedData[index].id;
+                                                          await ApiProvider().deleteEstimateApi(id!);
+                                                          getDataForMaintence();
+                                                          Navigator.of(context).pop();
+                                                          setState(() {});
+                                                        },
+                                                        'Delete',
+                                                        'Are you sure you want to delete this maintainance?',
+                                                        'Delete',
+                                                      );
                                                     },
                                                     icon: Icon(
                                                       Icons.delete_outline_rounded,

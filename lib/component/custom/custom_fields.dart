@@ -15,6 +15,7 @@ Widget textFieldForWarranty({
   required String labelText,
   Color? labelColor,
   VoidCallback? onTap,
+  Function(String)? onChange,
   bool isRightIcon = false,
   bool showLabel = true,
   IconData? rightIcon,
@@ -33,6 +34,8 @@ Widget textFieldForWarranty({
     onlyDigits: isDigitOnly,
     readonly: readOnly,
     ontap: onTap,
+    onChanged: onChange,
+
     width: width,
     initialvalue: initialvalue,
     validator: (value) => isvalidationTrue ? validateForNameField(props: labelText, value: value) : null,
@@ -71,6 +74,7 @@ Widget textFieldForFullWidth({
   required String hintext,
   required String labelText,
   VoidCallback? onTap,
+  Function(String)? onchage,
   bool isRightIcon = false,
   IconData? rightIcon,
   bool isDigitOnly = false,
@@ -96,7 +100,10 @@ Widget textFieldForFullWidth({
         padding: EdgeInsets.symmetric(horizontal: 15),
         child: TextFormField(
           onTap: onTap,
+          onChanged: onchage,
+
           maxLines: maxlines,
+
           readOnly: readOnly,
           inputFormatters: isDigitOnly ? [FilteringTextInputFormatter.digitsOnly] : null,
           controller: textEditingController,

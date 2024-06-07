@@ -8,7 +8,7 @@ import '../constants/string_methods.dart';
 
 class MaintenanceDetailTableWidget extends StatelessWidget {
   final int numberOfMaintenance;
-  List<DateTime> serviceDueDates = [];
+  final List<DateTime> serviceDueDates;
   final List<String> doneDate;
 
   MaintenanceDetailTableWidget({
@@ -21,7 +21,7 @@ class MaintenanceDetailTableWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<String> arr = List.generate(numberOfMaintenance, (index) => '${getOrdinal(index + 1)} Maintenance');
-    List<DateTime> validServiceDates =  serviceDueDates.sublist(1);
+    List<DateTime> validServiceDates = serviceDueDates.sublist(1);
     return Container(
       child: Theme(
         data: Theme.of(context).copyWith(
@@ -39,7 +39,7 @@ class MaintenanceDetailTableWidget extends StatelessWidget {
             children: [
               _buildTableRow(
                 context,
-                ['MAINTENANCE', 'DUE DATE', 'Done ON'],
+                ['MAINTENANCE', 'DUE DATE', 'DONE ON'],
                 color: AppColors.buttonColor,
               ),
               ...List.generate(
@@ -48,10 +48,8 @@ class MaintenanceDetailTableWidget extends StatelessWidget {
                   context,
                   [
                     arr[index], // Maintenance entry
-
-                    _getFormattedDate(serviceDueDates.length > index ? validServiceDates[index] : null),// Service date
-
-                  doneDate[index],
+                    _getFormattedDate(serviceDueDates.length > index ? validServiceDates[index] : null), // Service date
+                    doneDate.length > index ? doneDate[index] : 'N/A',
                   ],
                 ),
               ),
@@ -61,6 +59,63 @@ class MaintenanceDetailTableWidget extends StatelessWidget {
       ),
     );
   }
+
+
+// class MaintenanceDetailTableWidget extends StatelessWidget {
+//   final int numberOfMaintenance;
+//   final List<DateTime> serviceDueDates;
+//   final List<String> doneDate;
+//
+//   MaintenanceDetailTableWidget({
+//     Key? key,
+//     required this.numberOfMaintenance,
+//     required this.serviceDueDates,
+//     required this.doneDate,
+//
+//   }) : super(key: key);
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     List<String> arr = List.generate(numberOfMaintenance, (index) => '${getOrdinal(index + 1)} Maintenance');
+//    // List<DateTime> validServiceDates = serviceDueDates.sublist(1);
+//     return Container(
+//       child: Theme(
+//         data: Theme.of(context).copyWith(
+//           hoverColor: Colors.transparent,
+//           splashColor: Colors.transparent,
+//         ),
+//         child: Container(
+//           decoration: BoxDecoration(
+//             borderRadius: BorderRadius.circular(8),
+//             color: Colors.white,
+//           ),
+//           child: Table(
+//             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+//             border: TableBorder.all(color: Colors.black),
+//             children: [
+//               _buildTableRow(
+//                 context,
+//                 ['MAINTENANCE', 'DUE DATE', 'Done ON'],
+//                 color: AppColors.buttonColor,
+//               ),
+//               ...List.generate(
+//                 numberOfMaintenance, (index) => _buildTableRow(
+//                   context,
+//                   [
+//                     arr[index], // Maintenance entry
+//                     _getFormattedDate(serviceDueDates.length > index ? serviceDueDates[index] : null), // Service date
+//                     doneDate.length >index ? doneDate[index] : 'N/A',
+//                   ],
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+
 
   String _getFormattedDate(DateTime? date) {
     if (date != null) {

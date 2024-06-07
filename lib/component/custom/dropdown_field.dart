@@ -259,6 +259,7 @@ class CustomMultiSearchableDropdownFormField<T> extends StatefulWidget {
   final String? hintText;
   final double borderRadius;
   final T? value;
+  final List<String>? initValue;
   final List<String> items;
   final ValueChanged<List<String?>> onChanged;
   final String? Function(T?)? validator;
@@ -290,7 +291,7 @@ class CustomMultiSearchableDropdownFormField<T> extends StatefulWidget {
     this.isMandatory = false,
     this.focusNode,
     this.disabled = false,
-    this.width,
+    this.width, this.initValue,
   }) : super(key: key);
 
   @override
@@ -300,6 +301,17 @@ class CustomMultiSearchableDropdownFormField<T> extends StatefulWidget {
 class _CustomMultiSearchableDropdownFormFieldState<T> extends State<CustomMultiSearchableDropdownFormField<T>> {
   final _popupCustomValidationKey = GlobalKey<DropdownSearchState<String>>();
 
+  List<String> _selectedValues = []; // Track selected values
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize selected values with the provided initial values
+    if (widget.initValue != null) {
+      _selectedValues = widget.initValue!;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -307,31 +319,7 @@ class _CustomMultiSearchableDropdownFormFieldState<T> extends State<CustomMultiS
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (widget.label != null)
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: widget.label,
-                    style: TextStyle(
-                      fontFamily: GoogleFonts.dmSans().fontFamily,
-                      color: Colors.white,
-                      fontSize: widget.labelFontSize,
-                      fontWeight: widget.labelFontWeight,
-                    ),
-                  ),
-                  // if (widget.isMandatory)
-                  //   const TextSpan(
-                  //     text: ' *',
-                  //     style: TextStyle(
-                  //       fontSize: 12,
-                  //       fontWeight: FontWeight.w500,
-                  //       color: Colors.red,
-                  //     ),
-                  //   ),
-                ],
-              ),
-            ),
+          // Your label code here
           const SizedBox(height: 10),
           Container(
             decoration: BoxDecoration(
@@ -342,10 +330,11 @@ class _CustomMultiSearchableDropdownFormFieldState<T> extends State<CustomMultiS
             child: DropdownSearch<String>.multiSelection(
               key: _popupCustomValidationKey,
               items: widget.items,
+              selectedItems: _selectedValues, // Pass selected values
               popupProps: PopupPropsMultiSelection.menu(
                 validationWidgetBuilder: (ctx, selectedItems) {
                   return Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding:  EdgeInsets.all(8.0),
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: MaterialButton(
@@ -364,10 +353,11 @@ class _CustomMultiSearchableDropdownFormFieldState<T> extends State<CustomMultiS
                         textColor: Colors.white,
                         onPressed: () {
                           List<String> selectedValues = _popupCustomValidationKey.currentState!.popupGetSelectedItems;
-                          if (selectedValues.length > 0) {
-                            widget.onChanged(selectedValues);
-                            Navigator.of(context).pop();
-                          }
+                          setState(() {
+                            _selectedValues = selectedValues; // Update selected values
+                          });
+                          widget.onChanged(selectedValues);
+                          Navigator.of(context).pop();
                         },
                       ),
                     ),
@@ -377,10 +367,9 @@ class _CustomMultiSearchableDropdownFormFieldState<T> extends State<CustomMultiS
               dropdownDecoratorProps: DropDownDecoratorProps(
                 dropdownSearchDecoration: InputDecoration(
                   fillColor: Colors.white,
-                  hintText: widget.hintText,
-                  // label: Text('Select Model'),
+                  //hintText: widget.hintText,
                   isDense: true,
-                  contentPadding: EdgeInsets.only(left: 10, top: 12),
+                  contentPadding: EdgeInsets.only(left: 10, top: 12,bottom: 15),
                 ),
               ),
             ),

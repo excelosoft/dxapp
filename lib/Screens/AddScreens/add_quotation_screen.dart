@@ -18,6 +18,7 @@ import 'package:responsive_dashboard/dataModel/quatation_model.dart';
 import 'package:responsive_dashboard/routes/RoutePath.dart';
 import 'package:responsive_dashboard/style/colors.dart';
 import 'package:toastification/toastification.dart';
+import 'package:universal_html/html.dart';
 
 import '../../config/responsive.dart';
 
@@ -48,10 +49,14 @@ class _AddQuickState extends State<AddQuick> {
   var selectedppfServiceList = [];
   List<String> serviceList = [];
   List selectedService = [];
+  List selectedService1 = [];
   List<String> models = [];
-
+  List<String> checkvalue = [];
   var _intervalValue = 'Swift';
   var _selectedService = "Services";
+
+  List selectService1=[];
+
   List colors = [];
 
   // List<bool> isChecked = [];
@@ -94,9 +99,34 @@ class _AddQuickState extends State<AddQuick> {
       vehicleNo.text = existingQuatation?.vehicleNumber ?? '';
       deliveryDate.text = existingQuatation?.deliveryDate ?? '';
       advance.text = existingQuatation?.advance ?? '';
+
+      selectedService1 = existingQuatation!.services ?? [];
+      checkvalue = selectedService1.map((service) => service.toString()).toList();
+
+      initStateFunction();
+
     }
     estimatedata();
   }
+
+     initStateFunction() async {
+      for (var item in selectedService1) {
+        var dataRes = await ApiProvider().getServiceByName(item.toString(), segment.text);
+        if (dataRes['status'] == 1) {
+          // Check if the service is already present in selectedService
+          bool serviceExists = selectedService.any((element) => element[0]['id'] == dataRes['services'][0]['id']);
+          if (!serviceExists) {
+            // Add the service to selectedService
+            selectedService.add(dataRes['services']);
+setState(() {
+
+});
+
+          }
+        }
+      }
+    }
+
 
   estimatedata() async {
     var responseData = await http.get(
@@ -135,7 +165,7 @@ class _AddQuickState extends State<AddQuick> {
         });
 
         if (isEdit) {
-          _selectedService = existingQuatation?.services ?? "";
+          _selectedService = existingQuatation?.services?.join(", ") ?? "";
           var dataRes = await ApiProvider().getServiceByName(_selectedService, segment.text);
           //selectedService.add(dataRes["services"]);
 
@@ -229,6 +259,9 @@ class _AddQuickState extends State<AddQuick> {
 
   @override
   Widget build(BuildContext context) {
+
+    final double itemHeight = 220.0; // Estimated height of each item
+    final double containerHeight = selectedService.length * itemHeight;
     SizeConfig().init(context);
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -328,9 +361,7 @@ class _AddQuickState extends State<AddQuick> {
                                     validator: (value) => validateForNormalFeild(value: value, props: "Select Model"),
                                     onChanged: (value) async {
                                       print("Testtt");
-                                      var responseData = await http.post(
-                                        Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
-                                      );
+                                      var responseData = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),);
                                       print(responseData.body);
                                       var model = jsonDecode(responseData.body.toString());
                                       print(model);
@@ -519,6 +550,7 @@ class _AddQuickState extends State<AddQuick> {
                                 CustomMultiSearchableDropdownFormField<String>(
                                   width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
                                   isMandatory: true,
+                                  initValue: checkvalue,
                                   labelFontWeight: FontWeight.w500,
                                   label: 'Services',
                                   hintText: "Select Services",
@@ -535,6 +567,7 @@ class _AddQuickState extends State<AddQuick> {
                                       );
                                       return;
                                     }
+                                    selectedService.clear();
                                     // var dataRes = await ApiProvider().getServiceByName(value[0].toString(), segment.text);
                                     for (var item in value) {
                                       var dataRes = await ApiProvider().getServiceByName(item.toString(), segment.text);
@@ -550,7 +583,7 @@ class _AddQuickState extends State<AddQuick> {
 
                                     // selectedService = dataRes["services"];
                                     setState(() {
-                                      _selectedService = value[0] ?? '';
+                                     // _selectedService = value[0] ?? '';
                                     });
                                   },
                                 ),
@@ -570,12 +603,13 @@ class _AddQuickState extends State<AddQuick> {
                           ),
                           if (selectedService.isNotEmpty)
                             SizedBox(
-                              height: 400,
+                              height: containerHeight,
+
                               child: ListView.builder(
                                 itemCount: Set.from(selectedService).toList().length,
                                 itemBuilder: (context, index) {
                                   return Container(
-                                    margin: EdgeInsets.symmetric(vertical: 40),
+                                    margin: EdgeInsets.symmetric(vertical: 20),
                                     decoration: BoxDecoration(border: Border.all(color: Colors.white)),
                                     child: Column(
                                       children: [
@@ -586,9 +620,9 @@ class _AddQuickState extends State<AddQuick> {
                                           alignment: Alignment.center,
                                           boxDecoration: BoxDecoration(border: Border.all(color: Colors.white)),
                                           paddingTop: 10,
-                                          paddingBottom: 10,
+                                          paddingBottom: 30,
                                         ),
-                                        if (selectedService[index][0]["service_name"] == 'Ceramic Coating' || selectedService[index][0]["service_name"] == 'Graphene Coating') ...[
+                                        if (selectedService[index][0]["service_name"] =='Ceramic Coating' || selectedService[index][0]["service_name"] == 'Graphene Coating') ...[
                                           Row(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
@@ -688,11 +722,14 @@ class _AddQuickState extends State<AddQuick> {
                                   List<String> serviceNames = [];
 
 // Iterate through each list in selectedService
+                                  Set<String> uniqueServiceNames = {};
+
+// Iterate through each list in selectedService
                                   for (var list in selectedService) {
                                     // Iterate through each map inside the current list
                                     for (var map in list) {
-                                      // Extract the "service_name" from the current map and add it to the serviceNames list
-                                      serviceNames.add(map["service_name"].toString());
+                                      // Extract the "service_name" from the current map and add it to the uniqueServiceNames set
+                                      uniqueServiceNames.add(map["service_name"].toString());
                                     }
                                   }
                                   Random random = Random();
@@ -707,7 +744,7 @@ class _AddQuickState extends State<AddQuick> {
                                   quickQuat["delivery_date"] = deliveryDate.text;
                                   quickQuat["advance"] = advance.text;
                                   quickQuat["segment"] = segment.text;
-                                  quickQuat["services"] =serviceNames;
+                                  quickQuat["services"] =uniqueServiceNames.toList();
                                   print(quickQuat);
                                   var storeEstimateRes;
                                   if (isEdit) {

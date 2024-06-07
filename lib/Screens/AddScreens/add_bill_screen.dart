@@ -954,10 +954,8 @@ if(data!.selectServices![0].name=='Graphene Coating'){
                                       bool isSele = selectedppfServiceList.contains(f);
                                       return GestureDetector(
                                         child: Container(
-                                          decoration: BoxDecoration(
-                                                            color: isSele ? Colors.white : Colors.white,
-                                            border: Border.all(color: Color(0xFF282f61), width: 2.0),
-                                                             borderRadius: BorderRadius.all(Radius.circular(20.0) //                 <--- border radius here
+                                          decoration: BoxDecoration(color: isSele ? Colors.white : Colors.white,
+                                            border: Border.all(color: Color(0xFF282f61), width: 2.0), borderRadius: BorderRadius.all(Radius.circular(20.0) //                 <--- border radius here
                                                                  ),
                                           ),
                                           child: ElevatedButton.icon(
@@ -986,7 +984,7 @@ if(data!.selectServices![0].name=='Graphene Coating'){
                                                 print(selectedppfServiceList);
                                               }
                                             },
-                                            icon: isSele ? Icon(Icons.check_box,color: Colors.blue,) : Icon(Icons.check_box_outline_blank_rounded), // Show select icon based on isSele flag
+                                            icon: isSele ? Icon(Icons.check_box,color: Colors.deepPurple,) : Icon(Icons.check_box_outline_blank_rounded), // Show select icon based on isSele flag
                                             label: Text(
                                               '$f',
                                               style: TextStyle(
@@ -1352,7 +1350,7 @@ if(data!.selectServices![0].name=='Graphene Coating'){
                                     estimateData["vin"] = vin.text.isNotEmpty ? vin.text : "N/A ";
                                     estimateData["gst"] = gstNo.text.isNotEmpty ? gstNo.text : "N/A ";
                                     estimateData["segment"] = segment.text.isNotEmpty ? segment.text : "N/A";
-                                    estimateData["estimated_delivery_time"] = (estDate.text + estTime.text).isNotEmpty ? estDate.text + " " + estTime.text : "N/A";
+                                    estimateData["estimated_delivery_time"] = estDate.text.toString() + ' ' + estTime.text.toString();
                                     estimateData["assigned_worker"] = assignedWorkersController.text.isNotEmpty ? assignedWorkersController.text : "N/A";
 
                                     estimateData["services_selected"] = data!.selectServices?.map((e) => e.name).toList();

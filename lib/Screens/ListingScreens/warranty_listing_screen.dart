@@ -311,7 +311,7 @@ class _WarrantyState extends State<Warranty> {
                                               ),
                                               DataColumn(
                                                 label: Text(
-                                                  'VECHILE NUMBER',
+                                                  'VEHICLE NUMBER',
                                                   style: GoogleFonts.inter(color: Colors.grey),
                                                 ),
                                               ),
@@ -330,7 +330,7 @@ class _WarrantyState extends State<Warranty> {
                                               ),
                                             ],
                                             rows: List<DataRow>.generate(paginatedData.length, (index) {
-                                              final WarrantyCardData? warrantList = filteredData[index];
+                                              final WarrantyCardData? warrantList = paginatedData[index];
                                               return DataRow(
                                                 cells: [
                                                   DataCell(

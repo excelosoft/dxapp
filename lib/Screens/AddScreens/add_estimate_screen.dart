@@ -105,6 +105,7 @@ class _EstimateAddState extends State<EstimateAdd> {
   bool isloadingForApplyButton = false;
   var _colorValue;
   var ppfType;
+
   // List<bool> isChecked = [];
   List ppfServices = [];
 
@@ -288,12 +289,24 @@ class _EstimateAddState extends State<EstimateAdd> {
       //    setState(() {});
 
       var dataRes = await ApiProvider().getServiceByName(f, segment.text);
+      if(dataRes['status']==0){
 
-      selectedServiceList.add(SelectServices(
-          name: dataRes["services"][0]['service_name'],
-          type: dataRes["services"][0]['service_type'],
-          amount: dataRes["services"][0]['rate'],
-          package: dataRes["services"][0]['package_time']));
+          toastification.show(
+            context: context,
+            type: ToastificationType.error,
+            title: Text('That Service Not Available'),
+            autoCloseDuration: const Duration(seconds: 5),
+          );
+          return;
+
+      }
+      if (!selectedServiceList.any((element) => element.name == dataRes["services"][0]['service_name'])) {
+        selectedServiceList.add(SelectServices(
+            name: dataRes["services"][0]['service_name'],
+            type: dataRes["services"][0]['service_type'],
+            amount: dataRes["services"][0]['rate'],
+            package: dataRes["services"][0]['package_time']));
+
       // print('data res ---  ${dataRes}');
 
       servicesByNameData = dataRes["services"];
@@ -352,7 +365,7 @@ class _EstimateAddState extends State<EstimateAdd> {
       dataMap["controllerMap"] = controllerMap;
       selectedResponseServerRes[f] = dataMap;
       setState(() {});
-    } else {
+    } }else {
       print('remove');
 
       selectedServiceList.removeWhere((element) => element.name == f);
@@ -510,7 +523,8 @@ class _EstimateAddState extends State<EstimateAdd> {
                           ],
                         ),
                       ] else ...[
-                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
                           textFieldForWarranty(
                             context: context,
                             textEditingController: addressController,
@@ -572,6 +586,9 @@ class _EstimateAddState extends State<EstimateAdd> {
                                 setState(() {
                                     selectedServiceList = [];
                                   _intervalValue = value!;
+
+                                   // selectedppfServiceList.clear();
+
                                 });
                               },
                             ),
@@ -647,6 +664,15 @@ class _EstimateAddState extends State<EstimateAdd> {
                                 setState(() {
                                   selectedServiceList.clear();
                                   _intervalValue = value!;
+                                  selectedppfAmountList.clear();
+                                  selectedppfServiceList.clear();
+                                  ppfAmount.text = '0';
+                                  var amount= int.parse(ppfAmount.text);
+                                  totalServiceAmt.value-=totalServiceAmt.value;
+
+
+                                  calculateTotalBill(totalServiceAmt.value);
+
                                 });
                               },
                             ),
@@ -923,6 +949,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                         ),
                         Container(
                           child: ListView.builder(
+
                             shrinkWrap: true,
                             itemCount: selectedServiceList.length,
                             itemBuilder: (BuildContext context, int index) {
@@ -1003,7 +1030,8 @@ class _EstimateAddState extends State<EstimateAdd> {
                                       ),
                                     ),
                                     onTap: () async {
-                                      // return;
+
+
                                       if (segment.text.isEmpty) {
                                         toastification.show(
                                           context: context,
@@ -1013,6 +1041,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                                         );
                                         return;
                                       }
+
                                       makeServicesFields(f, true);
                                     });
                               }).toList(),
@@ -1032,6 +1061,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           CustomDropdownFormField<String>(
+
                               width: MediaQuery.of(context).size.width / 3.5,
                               hintText: "Type",
                               label: "Type",
@@ -1039,7 +1069,18 @@ class _EstimateAddState extends State<EstimateAdd> {
                               items: ["Gloss", "Matte", "Black", "Coloured"],
                               onChanged: ((value) {
                                 setState(() {
+
                                   ppfType = value;
+                                  selectedppfServiceList.clear();
+                                  selectedppfAmountList.clear();
+
+                                 var amount= int.parse(ppfAmount.text);
+                                  totalServiceAmt.value -= amount;
+
+                                  ppfAmount.text = '0';
+                                  calculateTotalBill(totalServiceAmt.value);
+
+
                                 });
                               })),
                           textFieldForWarranty(
@@ -1090,12 +1131,36 @@ class _EstimateAddState extends State<EstimateAdd> {
                                       child: ElevatedButton.icon(
                                           style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent),
                                           onPressed: () {
-                                            var selectedPPFRateData;
-                                            ppfserviceRateDataList.forEach((element) {
-                                              if (element["ppfservice_id"] == f) {
-                                                selectedPPFRateData = element;
-                                              }
-                                            });
+                                            if (segment.text.isEmpty||ppfType==null) {
+                                              toastification.show(
+                                                context: context,
+                                                type: ToastificationType.error,
+                                                title: Text('Please select model and Type'),
+                                                autoCloseDuration: const Duration(seconds: 5),
+                                              );
+                                              return;
+                                            }
+
+                                            var selectedPPFRateData = ppfserviceRateDataList.firstWhere((element) => element["ppfservice_id"] == f && element["service_type"].toLowerCase() == ppfType.toLowerCase()&&element["segment_name"].toLowerCase()==segment.text.toLowerCase(),
+                                              orElse: () => null,
+                                            );
+                                            // var selectedPPFRateData;
+                                            // ppfserviceRateDataList.forEach((element) {
+                                            //   if (element["ppfservice_id"] == f) {
+                                            //     selectedPPFRateData = element;
+                                            //   }
+                                            // });
+
+                                            if (selectedPPFRateData == null || selectedPPFRateData["rate"] == null || selectedPPFRateData["rate"].isEmpty) {
+                                              toastification.show(
+                                                context: context,
+                                                type: ToastificationType.error,
+                                                title: Text('That Service Not Available'),
+                                                autoCloseDuration: const Duration(seconds: 5),
+                                              );
+                                              return;
+                                            }
+
                                             print("selectedPPFRateData $selectedPPFRateData");
                                             print("selectedPPFRateData $selectedppfServiceList");
                                             if (!selectedppfServiceList.contains(f)) {
@@ -1110,7 +1175,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                                               ppfAmount.text = (int.parse(ppfAmount.text) + ((selectedPPFRateData != null && selectedPPFRateData["rate"] != null) ? int.parse(selectedPPFRateData["rate"]) : 0)).toString();
                                               totalServiceAmt.value += int.parse(ppfAmount.text);
                                               calculateTotalBill(totalServiceAmt.value);
-                                              setState(() {});
+
                                               // }
                                             } else {
                                               // ppfAmount.text = (int.parse(ppfAmount.text) -
@@ -1120,17 +1185,19 @@ class _EstimateAddState extends State<EstimateAdd> {
                                               // calculateTotalBill(totalServiceAmt.value);
                                               // selectedppfServiceList.removeWhere((element) => element == f);
                                               // setState(() {});
+
+                                              setState(() {});
                                               selectedppfServiceList.removeWhere((element) => element == f);
+
 
                                               int rateToRemove = int.parse(selectedPPFRateData["rate"] ?? '0');
 
                                               selectedppfAmountList.remove(rateToRemove);
-                                              ppfAmount.text = (int.parse(ppfAmount.text) - rateToRemove).toString();
+                                              ppfAmount.text = (int.parse(ppfAmount.text) - ((selectedPPFRateData != null && selectedPPFRateData["rate"] != null) ?rateToRemove:0)).toString();
                                               totalServiceAmt.value -= rateToRemove;
                                               calculateTotalBill(totalServiceAmt.value);
                                               print(selectedppfServiceList);
                                               // print(selectedppfServiceList);
-                                              setState(() {});
                                             }
                                           },
                                           icon: Icon(isSele ? Icons.check_box : Icons.check_box_outline_blank_rounded),
@@ -1148,19 +1215,19 @@ class _EstimateAddState extends State<EstimateAdd> {
                                       //   ),
                                       // ),
                                       ),
-                                  onTap: () {
-                                    if (!selectedppfServiceList.contains(f)) {
-                                      // if (serviceList.length < 5) {
-                                      selectedppfServiceList.add(f);
-                                      setState(() {});
-                                      print(selectedppfServiceList);
-                                      // }
-                                    } else {
-                                      selectedppfServiceList.removeWhere((element) => element == f);
-                                      setState(() {});
-                                      print(selectedppfServiceList);
-                                    }
-                                  },
+                                  // onTap: () {
+                                  //   if (!selectedppfServiceList.contains(f)) {
+                                  //     // if (serviceList.length < 5) {
+                                  //     selectedppfServiceList.add(f);
+                                  //     setState(() {});
+                                  //     print(selectedppfServiceList);
+                                  //     // }
+                                  //   } else {
+                                  //     selectedppfServiceList.removeWhere((element) => element == f);
+                                  //     setState(() {});
+                                  //     print(selectedppfServiceList);
+                                  //   }
+                                  // },
                                 );
                               }).toList(),
                             ),
