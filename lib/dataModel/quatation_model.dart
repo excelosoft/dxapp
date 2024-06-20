@@ -36,6 +36,7 @@ class QuotationData {
   String? model;
   String? makeId;
   String? date;
+  String? name;
   int? mobile;
   String? deliveryDate;
   String? advance;
@@ -51,6 +52,7 @@ class QuotationData {
         this.userId,
         this.vehicleNumber,
         this.model,
+        this.name,
         this.makeId,
         this.date,
         this.mobile,
@@ -75,6 +77,9 @@ class QuotationData {
     }
     if (json["model"] is String) {
       model = json["model"];
+    }
+    if (json["name"] is String) {
+      name = json["name"];
     }
     if (json["make_id"] is String) {
       makeId = json["make_id"];

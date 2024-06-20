@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -44,6 +45,7 @@ class _AddQuickState extends State<AddQuick> {
   );
   TextEditingController advance = TextEditingController(text: "0");
   TextEditingController segment = TextEditingController();
+  TextEditingController nameController=TextEditingController();
   bool isEdit = false;
   var selectedServiceList = [];
   var selectedppfServiceList = [];
@@ -52,7 +54,7 @@ class _AddQuickState extends State<AddQuick> {
   List selectedService1 = [];
   List<String> models = [];
   List<String> checkvalue = [];
-  var _intervalValue = 'Swift';
+  var _intervalValue = 'Select Model';
   var _selectedService = "Services";
 
   List selectService1=[];
@@ -96,6 +98,7 @@ class _AddQuickState extends State<AddQuick> {
       make.text = existingQuatation?.makeId ?? '';
       segment.text = existingQuatation?.segment ?? '';
       date.text = existingQuatation?.date ?? '';
+      nameController.text=existingQuatation?.name ??'';
       vehicleNo.text = existingQuatation?.vehicleNumber ?? '';
       deliveryDate.text = existingQuatation?.deliveryDate ?? '';
       advance.text = existingQuatation?.advance ?? '';
@@ -127,8 +130,21 @@ setState(() {
       }
     }
 
+  var ppfserviceRateDataList = [];
+  var ppfType;
+
 
   estimatedata() async {
+
+    var ppfRateResponse = await http.get(
+      Uri.parse('https://excelosoft.com/dxapp/public/api/getPpfServicesRate'),
+    );
+    var ppfRateData = jsonDecode(ppfRateResponse.body.toString());
+    List ppfRateList = ppfRateData["services"];
+    ppfserviceRateDataList = ppfRateList;
+
+
+
     var responseData = await http.get(
       Uri.parse('https://excelosoft.com/dxapp/public/api/getModels'),
     );
@@ -206,17 +222,23 @@ setState(() {
     print(ppfdata);
     if (ppfdata['status'] != 0) {
       List ppservices = ppfdata['services'];
-      ppservices.forEach((element) {
-        ppfServices.add(element['ppfservice_name']);
-      });
+      ppfServices = ppservices;
+      // ppservices.forEach((element) {
+      //   // Ensure element is correctly structured and add to ppfServices
+      //   ppfServices.add({
+      //     'ppfservice_name': element['ppfservice_name'],
+      //     'id': element['id'],
+      //   });
+      // });
     } else {
       ppfServices = [];
     }
     print('serviceList=======');
-    print(serviceList);
-    // isChecked = List<bool>.filled(serviceList.length, false);
+    print(ppfServices);
     setState(() {});
   }
+
+
 
   // getColors(String selectedModel) async {
   //   var responseData = await http.post(
@@ -257,10 +279,19 @@ setState(() {
     );
   }
 
+  String getRate(String id, String serviceType,String segment) {
+    for (var rate in ppfserviceRateDataList) {
+      if (rate['ppfservice_id'] == id && rate['service_type'] == serviceType && rate['segment_name']==segment) {
+        return rate['rate'].toString();
+      }
+    }
+    return 'Not available';
+  }
+
   @override
   Widget build(BuildContext context) {
 
-    final double itemHeight = 220.0; // Estimated height of each item
+    final double itemHeight = 320.0; // Estimated height of each item
     final double containerHeight = selectedService.length * itemHeight;
     SizeConfig().init(context);
     final width = MediaQuery.of(context).size.width;
@@ -326,6 +357,14 @@ setState(() {
                                     },
                                   ),
                                 ),
+
+                                textFieldForWarranty(
+                                  width: Responsive.isMobile(context) ? width : null,
+                                  context: context,
+                                  textEditingController: nameController,
+                                  labelText: "Name",
+                                  hintext: "Name",
+                                ),
                                 textFieldForWarranty(
                                   width: Responsive.isMobile(context) ? width : null,
                                   context: context,
@@ -334,14 +373,8 @@ setState(() {
                                   hintext: "Make",
                                   readOnly: true,
                                 ),
-                                textFieldForWarranty(
-                                  width: Responsive.isMobile(context) ? width : null,
-                                  context: context,
-                                  textEditingController: segment,
-                                  labelText: "Segment",
-                                  hintext: "Segment",
-                                  readOnly: true,
-                                ),
+
+
                               ],
                             ),
                           ] else ...[
@@ -360,24 +393,62 @@ setState(() {
                                     items: models,
                                     validator: (value) => validateForNormalFeild(value: value, props: "Select Model"),
                                     onChanged: (value) async {
-                                      print("Testtt");
-                                      var responseData = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),);
-                                      print(responseData.body);
-                                      var model = jsonDecode(responseData.body.toString());
-                                      print(model);
-                                      if (model['status'] != 0) {
-                                        var data = model['model'];
-                                        make = TextEditingController(text: '${data['make_name']}');
-                                        segment = TextEditingController(text: '${data['segment_name']}');
-                                        colors = data['colors_name'];
-                                        // _colorValue = colors.first;
-                                        // modelId = data['id'];
+                                      try {
+                                        var response = await http.post(
+                                          Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+                                        );
+
+                                        if (response.statusCode == 200) {
+                                          print(response.body);
+                                          var model = jsonDecode(response.body.toString());
+                                          print(model);
+
+                                          if (model['status'] != 0) {
+                                            var data = model['model'];
+                                            make = TextEditingController(text: '${data['make_name']}');
+                                            segment = TextEditingController(text: '${data['segment_name']}');
+                                            colors = data['colors_name'];
+                                            // _colorValue = colors.first;
+                                            // modelId = data['id'];
+                                          } else {
+
+                                            toastification.show(
+                                              context: context,
+                                              type: ToastificationType.error,
+                                              title: Text('${model['message']}'),
+                                              autoCloseDuration: const Duration(seconds: 5),
+                                            );
+
+                                            // Handle the error based on your application's requirement
+                                          }
+                                        } else {
+                                          print('Error: HTTP request failed with status ${response.statusCode}');
+                                          // Handle the error based on your application's requirement
+                                        }
+                                      } catch (e) {
+                                        toastification.show(
+                                          context: context,
+                                          type: ToastificationType.error,
+                                          title: Text('Data Not Found'),
+                                          autoCloseDuration: const Duration(seconds: 5),
+                                        );
+
+                                        // Handle the error based on your application's requirement
                                       }
                                       setState(() {
                                         _intervalValue = value!;
                                       });
                                     },
                                   ),
+                                ),
+
+                                textFieldForWarranty(
+                                  width: Responsive.isMobile(context) ? width : null,
+                                  context: context,
+                                  textEditingController: nameController,
+                                  labelText: "Name",
+                                  hintext: "Name",
+
                                 ),
                                 textFieldForWarranty(
                                   width: Responsive.isMobile(context) ? width : null,
@@ -387,14 +458,7 @@ setState(() {
                                   hintext: "Make",
                                   readOnly: true,
                                 ),
-                                textFieldForWarranty(
-                                  width: Responsive.isMobile(context) ? width : null,
-                                  context: context,
-                                  textEditingController: segment,
-                                  labelText: "Segment",
-                                  hintext: "Segment",
-                                  readOnly: true,
-                                ),
+
                               ],
                             ),
                           ],
@@ -408,16 +472,12 @@ setState(() {
                                 textFieldForWarranty(
                                   width: Responsive.isMobile(context) ? width : null,
                                   context: context,
-                                  textEditingController: date,
-                                  labelText: "Date",
-                                  isRightIcon: true,
+                                  textEditingController: segment,
+                                  labelText: "Segment",
+                                  hintext: "Segment",
                                   readOnly: true,
-                                  rightIcon: Icons.calendar_month,
-                                  onTap: () {
-                                    showDateDailog(date);
-                                  },
-                                  hintext: "Date",
                                 ),
+
                                 textFieldForWarranty(
                                   width: Responsive.isMobile(context) ? width : null,
                                   context: context,
@@ -450,16 +510,12 @@ setState(() {
                                 textFieldForWarranty(
                                   width: Responsive.isMobile(context) ? width : null,
                                   context: context,
-                                  textEditingController: date,
-                                  labelText: "Date",
-                                  isRightIcon: true,
+                                  textEditingController: segment,
+                                  labelText: "Segment",
+                                  hintext: "Segment",
                                   readOnly: true,
-                                  rightIcon: Icons.calendar_month,
-                                  onTap: () {
-                                    showDateDailog(date);
-                                  },
-                                  hintext: "Date",
                                 ),
+
                                 textFieldForWarranty(
                                   width: Responsive.isMobile(context) ? width : null,
                                   context: context,
@@ -493,6 +549,19 @@ setState(() {
                             Wrap(
                               // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
+                                textFieldForWarranty(
+                                  width: Responsive.isMobile(context) ? width : null,
+                                  context: context,
+                                  textEditingController: date,
+                                  labelText: "Date",
+                                  isRightIcon: true,
+                                  readOnly: true,
+                                  rightIcon: Icons.calendar_month,
+                                  onTap: () {
+                                    showDateDailog(date);
+                                  },
+                                  hintext: "Date",
+                                ),
                                 textFieldForWarranty(
                                   width: Responsive.isMobile(context) ? width : null,
                                   context: context,
@@ -535,8 +604,24 @@ setState(() {
                             ),
                           ] else ...[
                             Row(
-                              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
+                                textFieldForWarranty(
+                                  width: Responsive.isMobile(context) ? width : null,
+                                  context: context,
+                                  textEditingController: date,
+                                  labelText: "Date",
+                                  isRightIcon: true,
+                                  readOnly: true,
+                                  rightIcon: Icons.calendar_month,
+                                  onTap: () {
+                                    showDateDailog(date);
+                                  },
+                                  hintext: "Date",
+                                ),
+                                SizedBox(
+                                  width: width / 20,
+                                ),
                                 textFieldForWarranty(
                                   width: Responsive.isMobile(context) ? width : null,
                                   context: context,
@@ -548,7 +633,7 @@ setState(() {
                                   width: width / 20,
                                 ),
                                 CustomMultiSearchableDropdownFormField<String>(
-                                  width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
+                                  width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.7,
                                   isMandatory: true,
                                   initValue: checkvalue,
                                   labelFontWeight: FontWeight.w500,
@@ -568,14 +653,14 @@ setState(() {
                                       return;
                                     }
                                     selectedService.clear();
-                                    // var dataRes = await ApiProvider().getServiceByName(value[0].toString(), segment.text);
+                                    //// var dataRes = await ApiProvider().getServiceByName(value[0].toString(), segment.text);
                                     for (var item in value) {
                                       var dataRes = await ApiProvider().getServiceByName(item.toString(), segment.text);
                                       if (dataRes['status'] == 1) {
-                                        // Check if the service is already present in selectedService
+                                        //// Check if the service is already present in selectedService
                                         bool serviceExists = selectedService.any((element) => element[0]['id'] == dataRes['services'][0]['id']);
                                         if (!serviceExists) {
-                                          // Add the service to selectedService
+                                          //// Add the service to selectedService
                                           selectedService.add(dataRes['services']);
                                         }
                                       }
@@ -598,6 +683,8 @@ setState(() {
                               ],
                             ),
                           ],
+
+
                           SizedBox(
                             height: SizeConfig.blockSizeVertical! * 4,
                           ),
@@ -606,6 +693,7 @@ setState(() {
                               height: containerHeight,
 
                               child: ListView.builder(
+                                physics: NeverScrollableScrollPhysics(),
                                 itemCount: Set.from(selectedService).toList().length,
                                 itemBuilder: (context, index) {
                                   return Container(
@@ -622,12 +710,36 @@ setState(() {
                                           paddingTop: 10,
                                           paddingBottom: 30,
                                         ),
-                                        if (selectedService[index][0]["service_name"] =='Ceramic Coating' || selectedService[index][0]["service_name"] == 'Graphene Coating') ...[
+
+                                        // SizedBox(
+                                        //   width: double.infinity,
+                                        //   child: DataTable(
+                                        //     border: TableBorder.all(color: Colors.white),
+                                        //     columns: [
+                                        //       DataColumn(label: AppText(text: 'Package')),
+                                        //       DataColumn(label: AppText(text: 'Price')),
+                                        //       DataColumn(label: AppText(text: 'Coverage')),
+                                        //     ],
+                                        //     rows: List<DataRow>.generate(
+                                        //       selectedService[index].length,
+                                        //           (i) => DataRow(
+                                        //         cells: [
+                                        //           DataCell(AppText(text: selectedService[index][i]["package_time"])),
+                                        //           DataCell(AppText(text: selectedService[index][i]["rate"])),
+                                        //           DataCell(AppText(text: selectedService[index][i]["Coverage"])),
+                                        //
+                                        //         ],
+                                        //       ),
+                                        //     ),
+                                        //   ),
+                                        // ),
+                                        // if (selectedService[index][0]["service_name"] =='Ceramic Coating' || selectedService[index][0]["service_name"] == 'Graphene Coating') ...[
                                           Row(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
+
                                               SizedBox(
-                                                width: width / 1.5,
+                                                width: width /1.5,
                                                 child: DataTable(
                                                   border: TableBorder.all(color: Colors.white),
                                                   columns: [
@@ -635,8 +747,7 @@ setState(() {
                                                     DataColumn(label: AppText(text: 'Price')),
                                                   ],
                                                   rows: List<DataRow>.generate(
-                                                    selectedService[index].length,
-                                                    (i) => DataRow(
+                                                    selectedService[index].length, (i) => DataRow(
                                                       cells: [
                                                         DataCell(AppText(text: selectedService[index][i]["package_time"])),
                                                         DataCell(AppText(text: selectedService[index][i]["rate"])),
@@ -645,62 +756,138 @@ setState(() {
                                                   ),
                                                 ),
                                               ),
-                                              SizedBox(width: 16), // Add spacing between DataTable and Coverage section
-                                              Column(
-                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    'Coverage:',
-                                                    style: TextStyle(
-                                                      fontWeight: FontWeight.bold,
-                                                      color: Colors.white,
-                                                      fontSize: 18,
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 8), // Add spacing between header and description
-                                                  DottedPointList(
-                                                    points: [
-                                                      'COMPLETE INTERIOR & EXTERIOR DETAILING',
-                                                      'PAINT CORRECTION (AS PER REQUIREMENT',
-                                                      'ALLOYS DETAILING AND POLISHING',
-                                                      'ALLOYS DETAILING AND POLISHING',
-                                                      'COMPLETE PAINT PART CERAMIC COATING',
-                                                      'GLASS NANO COATING (FIXED GLASSES)',
-                                                      'HEADLIGHT AND TAIL LIGHT COATING',
-                                                      'EXTERIOR PLASTIC TRIMS & CLADDINGS COATING',
+                                              // Add spacing between DataTable and Coverage section
+                                              Expanded(
+                                                child: Container(
+
+                                                  decoration: BoxDecoration(border: Border.all(color: Colors.white)),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                      Text(
+                                                        'Coverage:',
+                                                        style: TextStyle(
+                                                          fontWeight: FontWeight.bold,
+                                                          color: Colors.white,
+                                                          fontSize: 18,
+                                                        ),
+                                                      ),
+                                                      SizedBox(height: 8), // Add spacing between header and description
+                                                      DottedPointList(
+                                                        points: selectedService[index].isNotEmpty
+                                                            ? selectedService[index][0]["Coverage"].split(',')
+                                                            : [],
+                                                        // points: [
+                                                        //   'COMPLETE INTERIOR & EXTERIOR DETAILING',
+                                                        //   'PAINT CORRECTION (AS PER REQUIREMENT',
+                                                        //   'ALLOYS DETAILING AND POLISHING',
+                                                        //   'ALLOYS DETAILING AND POLISHING',
+                                                        //   'COMPLETE PAINT PART CERAMIC COATING',
+                                                        //   'GLASS NANO COATING (FIXED GLASSES)',
+                                                        //   'HEADLIGHT AND TAIL LIGHT COATING',
+                                                        //   'EXTERIOR PLASTIC TRIMS & CLADDINGS COATING',
+                                                        // ],
+                                                      ),
                                                     ],
                                                   ),
-                                                ],
+                                                ),
                                               ),
                                             ],
                                           ),
-                                        ] else ...[
-                                          SizedBox(
-                                            width: double.infinity,
-                                            child: DataTable(
-                                              border: TableBorder.all(color: Colors.white),
-                                              columns: [
-                                                DataColumn(label: AppText(text: 'Package')),
-                                                DataColumn(label: AppText(text: 'Price')),
-                                              ],
-                                              rows: List<DataRow>.generate(
-                                                selectedService[index].length,
-                                                (i) => DataRow(
-                                                  cells: [
-                                                    DataCell(AppText(text: selectedService[index][i]["package_time"])),
-                                                    DataCell(AppText(text: selectedService[index][i]["rate"])),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                         // ]
+                                                // else ...[
+                                          // SizedBox(
+                                          //   width: double.infinity,
+                                          //   child: DataTable(
+                                          //     border: TableBorder.all(color: Colors.white),
+                                          //     columns: [
+                                          //       DataColumn(label: AppText(text: 'Package')),
+                                          //       DataColumn(label: AppText(text: 'Price')),
+                                          //     ],
+                                          //     rows: List<DataRow>.generate(
+                                          //       selectedService[index].length,
+                                          //       (i) => DataRow(
+                                          //         cells: [
+                                          //           DataCell(AppText(text: selectedService[index][i]["package_time"])),
+                                          //           DataCell(AppText(text: selectedService[index][i]["rate"])),
+                                          //         ],
+                                          //       ),
+                                          //     ),
+                                          //   ),
+                                          // ),
+                                        // ],
                                       ],
                                     ),
                                   );
                                 },
                               ),
                             ),
+                          SizedBox(
+                            height: SizeConfig.blockSizeVertical! * 4,
+                          ),
+                          if ( _intervalValue != 'Select Model')
+                            SizedBox(
+                              height: itemHeight+400,
+                              child: ListView.builder(
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: 1,
+                                itemBuilder: (context, index) {
+                                  var service = ppfServices[index];
+
+
+
+                                  return Container(
+                                    margin: EdgeInsets.symmetric(vertical: 20),
+                                    decoration: BoxDecoration(border: Border.all(color: Colors.white)),
+                                    child: Column(
+                                      children: [
+                                        CustomContainer(
+                                          AppText(
+                                            text: 'PPF Services',
+                                          ),
+                                          alignment: Alignment.center,
+                                          boxDecoration: BoxDecoration(border: Border.all(color: Colors.white)),
+                                          paddingTop: 10,
+                                          paddingBottom: 30,
+                                        ),
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: DataTable(
+                                            border: TableBorder.all(color: Colors.white),
+                                            columns: [
+                                              DataColumn(label: AppText(text: 'Service Name')),
+                                              DataColumn(label: AppText(text: 'Gloss')),
+                                              DataColumn(label: AppText(text: 'Matte')),
+                                              DataColumn(label: AppText(text: 'Black')),
+                                              DataColumn(label: AppText(text: 'Coloured')),
+                                            ],
+                                            rows: ppfServices.map((service) {
+                                              String serviceName = service["ppfservice_name"]?.toString() ?? 'Unknown';
+                                              String serviceId = service['ppfservice_name'].toString();
+
+                                              String glossRate = getRate(serviceId, 'gloss', segment.text);
+                                              String matteRate = getRate(serviceId, 'matte', segment.text);
+                                              String blackRate = getRate(serviceId, 'black', segment.text);
+                                              String colouredRate = getRate(serviceId, 'coloured', segment.text);
+                                              return DataRow(
+                                                cells: [
+                                                  DataCell(AppText(text: serviceName)),
+                                                  DataCell(AppText(text: glossRate)),
+                                                  DataCell(AppText(text: matteRate)),
+                                                  DataCell(AppText(text: blackRate)),
+                                                  DataCell(AppText(text: colouredRate)),
+                                                ],
+                                              );
+                                            }).toList(),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+
                           SizedBox(
                             height: SizeConfig.blockSizeVertical! * 4,
                           ),
@@ -744,6 +931,7 @@ setState(() {
                                   quickQuat["delivery_date"] = deliveryDate.text;
                                   quickQuat["advance"] = advance.text;
                                   quickQuat["segment"] = segment.text;
+                                  quickQuat['name']=nameController.text;
                                   quickQuat["services"] =uniqueServiceNames.toList();
                                   print(quickQuat);
                                   var storeEstimateRes;

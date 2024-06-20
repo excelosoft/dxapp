@@ -1,8 +1,10 @@
 {
   "projects": {
     "default": "detailing-xperts",
-    "yes": "fir-getx-app-e4266"
+    "yes": "fir-getx-app-e4266",
+    "y": "detailing-xperts"
   },
   "targets": {},
-  "etags": {}
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
 }

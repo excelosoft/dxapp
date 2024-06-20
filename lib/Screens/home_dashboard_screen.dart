@@ -721,7 +721,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
     TextEditingController descriptionController = TextEditingController(text: isEdit ? calendarModel?.description : '');
     TextEditingController titleController = TextEditingController(text: isEdit ? calendarModel?.title : '');
     TextEditingController dateController = TextEditingController(text: isEdit ? calendarModel?.startDate : '');
-    TextEditingController timeController = TextEditingController(text: isEdit ? '1:20 Am' : '');
+    TextEditingController timeController = TextEditingController(text: isEdit ? calendarModel?.startTime : '');
 
     showDialog(
       context: context,
@@ -919,7 +919,7 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                                     onPressed: () async {
                                       final id = calendarModel!.id;
 
-                                      var storeEstimateRes = await ApiProvider().deleteEstimateApi(id!);
+                                      var storeEstimateRes = await ApiProvider().deleteCalendarItemById(id!);
 
                                       if (storeEstimateRes['status'] == "1") {
                                         dateController.text = '';
@@ -953,9 +953,10 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                                         Map estimateData = Map();
                                         estimateData["user_id"] = AppConst.getAccessToken();
                                         estimateData["title"] = titleController.text.isNotEmpty ? titleController.text : "N/A";
-                                        estimateData["description"] = titleController.text.isNotEmpty ? descriptionController.text : "N/A";
+                                        estimateData["description"] = descriptionController.text.isNotEmpty ? descriptionController.text : "N/A";
                                         estimateData["start_date"] = dateController.text.isNotEmpty ? dateController.text : "N/A";
                                         estimateData["end_date"] = dateController.text.isNotEmpty ? dateController.text : "N/A";
+                                        estimateData['start_time']=timeController.text.isNotEmpty? timeController.text:"N/A";
 
                                         var storeEstimateRes = await ApiProvider().updateCalendarEvent(
                                           estimateData,
@@ -983,9 +984,10 @@ class _DashboardState extends State<Dashboard> with TickerProviderStateMixin {
                                         Map estimateData = Map();
                                         estimateData["user_id"] = AppConst.getAccessToken();
                                         estimateData["title"] = titleController.text.isNotEmpty ? titleController.text : "N/A";
-                                        estimateData["description"] = titleController.text.isNotEmpty ? descriptionController.text : "N/A";
+                                        estimateData["description"] = descriptionController.text.isNotEmpty ? descriptionController.text : "N/A";
                                         estimateData["start_date"] = dateController.text.isNotEmpty ? dateController.text : "N/A";
                                         estimateData["end_date"] = dateController.text.isNotEmpty ? dateController.text : "N/A";
+                                        estimateData['start_time']=timeController.text.isNotEmpty? timeController.text:"N/A";
 
                                         var storeEstimateRes = await ApiProvider().createCalendarEvent(
                                           estimateData,

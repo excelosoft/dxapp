@@ -119,6 +119,7 @@ class _BillAddState extends State<BillAdd> {
   List ppfServices = [];
 
   String counponCode = '';
+  String pachageTime='';
 
   var totalServiceAmt = 0.0.obs;
   var discountAmt = 0.0.obs;
@@ -795,101 +796,113 @@ if(data!.selectServices![0].name=='Graphene Coating'){
                             // ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: data!.selectServices != null ? data!.selectServices!.map((e) => Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                              children: data!.selectServices != null ? data!.selectServices!.map((e){
+
+                                if (e.name == 'Ceramic Coating' || e.name == 'Graphene Coating'){
+                                  pachageTime=e.package.toString();
+                                }
+
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: data!.selectServices != null ? data!.selectServices!.map((e) => Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        if (Responsive.isMobile(context)) ...[
+                                          Container(
+                                            constraints: BoxConstraints(minWidth: 200),
+                                            padding: const EdgeInsets.only(top: 20.0, bottom: 10),
+                                            child: Text(
+                                              '${data!.selectServices!.indexOf(e) + 1}. ${e.name}',
+                                              style: GoogleFonts.inter(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 22,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          buildServiceFields(data, data!.selectServices!.indexOf(e)),
+                                        ] else ...[
+                                          Wrap(
+                                            crossAxisAlignment: WrapCrossAlignment.end,
                                             children: [
-                                              if (Responsive.isMobile(context)) ...[
-                                                Container(
-                                                  constraints: BoxConstraints(minWidth: 200),
-                                                  padding: const EdgeInsets.only(top: 20.0, bottom: 10),
-                                                  child: Text(
-                                                    '${data!.selectServices!.indexOf(e) + 1}. ${e.name}',
-                                                    style: GoogleFonts.inter(
-                                                      fontWeight: FontWeight.bold,
-                                                      fontSize: 22,
-                                                      color: Colors.white,
-                                                    ),
+                                              Container(
+                                                constraints: BoxConstraints(minWidth: 200),
+                                                padding: const EdgeInsets.only(top: 20.0, bottom: 10),
+                                                child: Text(
+                                                  '${data!.selectServices!.indexOf(e) + 1}. ${e.name}',
+                                                  style: GoogleFonts.inter(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 22,
+                                                    color: Colors.white,
                                                   ),
                                                 ),
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                                buildServiceFields(data, data!.selectServices!.indexOf(e)),
-                                              ] else ...[
-                                                Wrap(
-                                                  crossAxisAlignment: WrapCrossAlignment.end,
-                                                  children: [
-                                                    Container(
-                                                      constraints: BoxConstraints(minWidth: 200),
-                                                      padding: const EdgeInsets.only(top: 20.0, bottom: 10),
-                                                      child: Text(
-                                                        '${data!.selectServices!.indexOf(e) + 1}. ${e.name}',
-                                                        style: GoogleFonts.inter(
-                                                          fontWeight: FontWeight.bold,
-                                                          fontSize: 22,
-                                                          color: Colors.white,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    buildServiceFields(data, data!.selectServices!.indexOf(e)),
-                                                  ],
-                                                ),
-                                              ],
-                                              SizedBox(
-                                                height: 15,
                                               ),
-
-                                              if (e.name == 'Ceramic Coating' || e.name == 'Graphene Coating') ...[
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.start,
-                                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                                  children: [
-                                                    textFieldForWarranty(
-                                                      context: context,
-                                                      textEditingController: e.name == 'Ceramic Coating' ? ceramicBarcodeController : grapheneBarcodeController,
-                                                      labelText: "Scan Barcode or enter manually",
-                                                      hintext: "Enter Barcode",
-                                                    ),
-                                                    SizedBox(
-                                                      width: 20,
-                                                    ),
-                                                    if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)
-                                                      ElevatedButton(
-                                                        onPressed: () async {
-                                                          var res = await Navigator.push(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                builder: (context) => const SimpleBarcodeScannerPage(),
-                                                              ));
-                                                          setState(() {
-                                                            if (res is String) {
-                                                              if (e.name == 'Ceramic Coating') {
-                                                                // ceramicBarcodeController.text = res;
-                                                              } else {
-                                                                // grapheneBarcodeController.text = res;
-                                                              }
-                                                            }
-                                                          });
-                                                        },
-                                                        child: const Text('Open Scanner'),
-                                                      )
-                                                    // textFieldForWarranty(
-                                                    //   context: context,
-                                                    //   textEditingController: year,
-                                                    //   labelText: "Amount (Excluding GST)",
-                                                    //   hintext: "Year",
-                                                    // ),
-                                                  ],
-                                                ),
-                                              ]
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              buildServiceFields(data, data!.selectServices!.indexOf(e)),
                                             ],
                                           ),
+                                        ],
+                                        SizedBox(
+                                          height: 15,
                                         ),
+
+                                        if (e.name == 'Ceramic Coating' || e.name == 'Graphene Coating') ...[
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.end,
+                                            children: [
+                                              textFieldForWarranty(
+                                                context: context,
+                                                textEditingController: e.name == 'Ceramic Coating' ? ceramicBarcodeController : grapheneBarcodeController,
+                                                labelText: "Scan Barcode or enter manually",
+                                                hintext: "Enter Barcode",
+                                              ),
+                                              SizedBox(
+                                                width: 20,
+                                              ),
+                                              if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)
+                                                ElevatedButton(
+                                                  onPressed: () async {
+                                                    var res = await Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) => const SimpleBarcodeScannerPage(),
+                                                        ));
+                                                    setState(() {
+                                                      if (res is String) {
+                                                        if (e.name == 'Ceramic Coating') {
+                                                          // ceramicBarcodeController.text = res;
+                                                        } else {
+                                                          // grapheneBarcodeController.text = res;
+                                                        }
+                                                      }
+                                                    });
+                                                  },
+                                                  child: const Text('Open Scanner'),
+                                                )
+                                              // textFieldForWarranty(
+                                              //   context: context,
+                                              //   textEditingController: year,
+                                              //   labelText: "Amount (Excluding GST)",
+                                              //   hintext: "Year",
+                                              // ),
+                                            ],
+                                          ),
+                                        ]
+                                      ],
+                                    ),
+                                  ),
+                                  ).toList()
+                                      : [],
+                                );
+                              }
                                       ).toList()
                                   : [],
                             ),
@@ -1380,30 +1393,49 @@ if(data!.selectServices![0].name=='Graphene Coating'){
                                     estimateData["total_payable_amount"] = totalPayableAmt.value;
 
                                     if (isBillEdit == null && data!.selectServices != null && data!.selectServices!.isNotEmpty && data!.selectServices!.any((element) => element.name == 'Ceramic Coating') || data!.selectServices!.any((element) => element.name == 'Graphene Coating')) {
-                                      final list = await ApiProvider().fetchBarcodeList();
-                                      if (list.contains(ceramicBarcodeController.text) || list.contains(grapheneBarcodeController.text) ) {
-                                        if (ceramicBarcodeController.text.isNotEmpty) {
-                                          estimateData["service_barcode"] = ceramicBarcodeController.text;
-                                        } else {
-                                          estimateData["service_barcode"] = grapheneBarcodeController.text;
-                                        }
+
+                                      final barcodes = await ApiProvider().fetchBarcodeAndTimeList();
+                                      final List<Map<String, String>> barcodeList = barcodes.map((item) {
+                                        return {
+                                          'service_barcode': item['service_barcode'].toString(),
+                                          'package_time': item['package_time'].toString()
+                                        };
+                                      }).toList();
+
+
+
+
+
+                                      // Check if the barcode exists and has a package_time of '3year'
+                                      bool isValidBarcode(String barcode) {
+                                        List<String> parts = pachageTime.split(' ');
+
+
+                                        // Format the packageTime correctly
+                                        String formattedPackageTime = parts[0] + ' ' + parts[1][0].toUpperCase() + parts[1].substring(1).toLowerCase();
+
+                                        // Check if any item in the list matches the barcode and the formatted packageTime
+                                        return barcodeList.any((item) => item['service_barcode'] == barcode && item['package_time'] == formattedPackageTime);
+                                      }
+
+
+                                  if (isValidBarcode(ceramicBarcodeController.text) || isValidBarcode(grapheneBarcodeController.text)) {
+                                        estimateData["service_barcode"] = ceramicBarcodeController.text.isNotEmpty ? ceramicBarcodeController.text : grapheneBarcodeController.text;
                                         estimateData["qty"] = '0';
                                         billUpdated = true;
+
                                       } else {
                                         toastification.show(
                                           context: context,
                                           type: ToastificationType.warning,
-                                          title: Text('Your Barcode does not exist in inventory!'),
+                                          title: Text('Your Barcode  or package_time does not exist in inventory!'),
                                           autoCloseDuration: const Duration(seconds: 5),
                                         );
                                         return;
                                       }
                                     }
 
-                                    var storeEstimateRes = await ApiProvider().convertToBill(
-                                      estimateData,
-                                      data!.id.toString(),
-                                    );
+                                    var storeEstimateRes = await ApiProvider().convertToBill(estimateData, data!.id.toString(),);
 
                                     if (storeEstimateRes['status'] == "1") {
                                       if (isBillEdit == null) {
@@ -1445,6 +1477,8 @@ if(data!.selectServices![0].name=='Graphene Coating'){
 
   Widget buildServiceFields(
     EstimateData? selectedResponseServerRes,
+
+
     int index,
   ) {
     if (selectedResponseServerRes != null) {
@@ -1470,8 +1504,7 @@ if(data!.selectServices![0].name=='Graphene Coating'){
             width: 30,
           ),
           selectedResponseServerRes.selectServices == null || selectedResponseServerRes.selectServices!.isEmpty
-              ? Container()
-              : CustomDropdownFormField<String>(
+              ? Container() : CustomDropdownFormField<String>(
             readOnly: true,
                   width: MediaQuery.of(context).size.width / 3.5,
                   hintText: "Select Package Time (Year)",

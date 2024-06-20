@@ -48,7 +48,7 @@ class _AddMaintenance2State extends State<AddMaintenance2> {
   TextEditingController ceramicCoatingPackageController = TextEditingController();
   TextEditingController maintanenceDateController = TextEditingController();
   TextEditingController selectMaintenenceController = TextEditingController();
-  TextEditingController chargeController = TextEditingController(text: '1500');
+  TextEditingController chargeController = TextEditingController();
   TextEditingController searchController = TextEditingController();
 
   List<WarrantyCardData> searchResult = [];
@@ -93,7 +93,6 @@ class _AddMaintenance2State extends State<AddMaintenance2> {
   int numberOfMaintenance = 0;
 
   String invoiceNumber = '';
-
   var maintenancecharge = 0.0.obs;
   var taxAmount = 0.0.obs;
   var totalPayableAmt = 0.0.obs;
@@ -144,7 +143,10 @@ class _AddMaintenance2State extends State<AddMaintenance2> {
     assignedWorker=res.assignedWorker??'';
     selectServices=res.selectServices??[];
     ppfServices=res.ppfServices??[];
-    chargeController.text=res.charges??'';
+    chargeController.text = (res.charges != '' && res.charges.toString().isNotEmpty)
+        ? res.charges.toString()
+        : '1500';
+
 
 
 
@@ -170,7 +172,22 @@ class _AddMaintenance2State extends State<AddMaintenance2> {
 
     selectMaintenenceController.text = res.maintenanceNumber.toString();
     numberOfMaintenance = int.parse(res.maintenanceNumber.toString());
-    maintenancecharge.value = double.parse(chargeController.text);
+    double parsedValue = 0.0;
+    if (chargeController.text != null && chargeController.text.isNotEmpty) {
+      try {
+        parsedValue = double.parse(chargeController.text);
+      } catch (e) {
+        // Log the error and set parsedValue to 0.0 if parsing fails
+        print('Error parsing chargeController.text: $e');
+        parsedValue = 0.0;
+      }
+    }
+
+    // Update the observable variable
+    maintenancecharge.value = parsedValue;
+
+
+
     taxAmount.value = maintenancecharge.value * 0.18;
     totalPayableAmt.value = maintenancecharge.value + taxAmount.value;
 

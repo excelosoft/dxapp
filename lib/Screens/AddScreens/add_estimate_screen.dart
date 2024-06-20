@@ -775,8 +775,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                               labelFontWeight: FontWeight.w500,
                               label: 'Select Color',
                               hintText: "Select Color",
-                              value: colors.contains(_colorValue)
-                                  ? _colorValue
+                              value: colors.contains(_colorValue) ? _colorValue
                                   : colors.isNotEmpty
                                       ? colors.first
                                       : null,
@@ -1774,12 +1773,26 @@ class _EstimateAddState extends State<EstimateAdd> {
         SizedBox(
           width: 30,
         ),
-        textFieldForWarranty(
+        // textFieldForWarranty(
+        //   context: context,
+        //   textEditingController: selectedResponseServerRes[name]["controllerMap"]["rate"]?? 0,
+        //   labelText: "Amount",
+        //   hintext: "Amount",
+        // ),
+          textFieldForWarranty(
           context: context,
-          textEditingController: selectedResponseServerRes[name]["controllerMap"]["rate"],
-          labelText: "Amount",
-          hintext: "Amount",
-        ),
+    textEditingController: (selectedResponseServerRes != null &&
+    selectedResponseServerRes.containsKey(name) &&
+    selectedResponseServerRes[name] != null &&
+    selectedResponseServerRes[name].containsKey("controllerMap") &&
+    selectedResponseServerRes[name]["controllerMap"] != null &&
+    selectedResponseServerRes[name]["controllerMap"].containsKey("rate") &&
+    selectedResponseServerRes[name]["controllerMap"]["rate"] != null)
+    ? selectedResponseServerRes[name]["controllerMap"]["rate"]
+        : TextEditingController(),
+    labelText: "Amount",
+    hintext: "Amount",
+    ),
       ],
     );
     // }

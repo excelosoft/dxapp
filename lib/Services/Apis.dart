@@ -320,19 +320,41 @@ class ApiProvider {
     //   throw Exception('Failed to load barcode list');
     // }
   }
-
-  Future<List<String>> fetchBarcodeList() async {
+  Future<List<Map<String, String>>> fetchBarcodeAndTimeList() async {
     final response = await http.post(
       Uri.parse('https://excelosoft.com/dxapp/public/api/getProductBarcode'),
       headers: ApiHeaders.apiHeader,
       body: jsonEncode({"user_id": userid}),
     );
     print(response.body);
-    // if (json.decode(response.body)['status'] == '1' || json.decode(response.body)['status'] == 1) {
+
     final jsonData = json.decode(response.body);
     final List<dynamic> data = jsonData['data'] ?? [];
-    final List<String> barcodeList = data.map((item) => item['service_barcode'].toString()).toList();
-    return barcodeList;
+    final List<dynamic> filteredData = data.where((item) => item['qty'] == "1").toList();
+
+    // Extract both service_barcode and package_time from filtered data
+    final List<Map<String, String>> barcodeAndTimeList = filteredData.map((item) {
+      return {
+        'service_barcode': item['service_barcode'].toString(),
+        'package_time': item['package_time'].toString()
+      };
+    }).toList();
+
+    return barcodeAndTimeList;
+  }
+
+  // Future<List<String>> fetchBarcodeList() async {
+  //   final response = await http.post(
+  //     Uri.parse('https://excelosoft.com/dxapp/public/api/getProductBarcode'),
+  //     headers: ApiHeaders.apiHeader,
+  //     body: jsonEncode({"user_id": userid}),
+  //   );
+  //   print(response.body);
+  //   // if (json.decode(response.body)['status'] == '1' || json.decode(response.body)['status'] == 1) {
+  //   final jsonData = json.decode(response.body);
+  //   final List<dynamic> data = jsonData['data'] ?? [];
+  //   final List<String> barcodeList = data.map((item) => item['service_barcode'].toString()).toList();
+  //   return barcodeList;
     // } else {
     //   toastification.show(
     //     context: context,
@@ -342,7 +364,7 @@ class ApiProvider {
     //   );
     //   throw Exception('Failed to load barcode list');
     // }
-  }
+  //}
 
   // Store new items
   changeStatusForEstimate(String id, String selectedStatus) async {
