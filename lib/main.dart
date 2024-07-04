@@ -5,6 +5,7 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_dashboard/component/custom/dropdown_field.dart';
 import 'package:responsive_dashboard/firebase_options.dart';
 import 'package:responsive_dashboard/layout.dart';
 import 'package:responsive_dashboard/routes/ScreenRouter.dart';
@@ -35,6 +36,9 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider<MaingerProvide>(
           create: (context) => MaingerProvide(),
+        ),
+        ChangeNotifierProvider<QuotationListValue>(
+          create: (context) => QuotationListValue(),
         ),
       ],
       child: GetMaterialApp(

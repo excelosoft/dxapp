@@ -51,6 +51,7 @@ class _AddWarrantyCardState extends State<AddWarrantyCard> {
   TextEditingController make = TextEditingController();
   TextEditingController segment = TextEditingController();
   TextEditingController color = TextEditingController();
+  TextEditingController colorValue = TextEditingController();
   TextEditingController vin = TextEditingController();
   TextEditingController gstNo = TextEditingController();
   TextEditingController year = TextEditingController();
@@ -123,6 +124,7 @@ TextEditingController  selectePackageController = TextEditingController();
       estTime.text = value.last;
       vin.text = billData?.vin ?? '';
       AssignedWorkers.text = billData?.assignedWorker ?? '';
+      colorValue.text=billData?.color??'';
       modelId = billData?.modalName ?? 13;
       model.text = billData!.modalName ?? 'Swift';
       selectePackage=billData!.selectServices![0].package.toString()??'4 year';
@@ -160,7 +162,17 @@ TextEditingController  selectePackageController = TextEditingController();
     int totalServices = totalMonths ~/ 6;
 
     // Calculate the number of months between each service
-    int monthsBetweenServices = totalMonths ~/ totalServices;
+    int monthsBetweenServices =0;
+
+    if (totalServices > 0) {
+       monthsBetweenServices = totalMonths ~/ totalServices;
+    } else {
+      // Handle the case where totalServices is zero or less
+      // You might want to set a default value, show an error message, or take another action.
+      // Example:
+      // monthsBetweenServices = someDefaultValue;
+      // print('Error: totalServices is zero or less.');
+    }
 
     // Calculate the first service date
     DateTime currentDate = parsedDate;
@@ -589,20 +601,27 @@ TextEditingController  selectePackageController = TextEditingController();
                     if (Responsive.isMobile(context)) ...[
                       Wrap(
                         children: [
-                          CustomDropdownFormField<String>(
-                            width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
-                            labelFontWeight: FontWeight.w500,
-                            label: 'Select Color',
-                            hintText: "Select Color",
-                            value: _colorValue,
-                            items: colors,
-                            // validator: (value) => validateForNormalFeild(value: value, props: "Color"),
-                            onChanged: (value) async {
-                              setState(() {
-                                _colorValue = value!;
-                              });
-                            },
+                          textFieldForWarranty(
+                            width: Responsive.isMobile(context) ? width : null,
+                            context: context,
+                            textEditingController: colorValue,
+                            labelText: "Color",
+                            hintext: "Color",
                           ),
+                          // CustomDropdownFormField<String>(
+                          //   width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
+                          //   labelFontWeight: FontWeight.w500,
+                          //   label: 'Select Color',
+                          //   hintText: "Select Color",
+                          //   value: _colorValue,
+                          //   items: colors,
+                          //   // validator: (value) => validateForNormalFeild(value: value, props: "Color"),
+                          //   onChanged: (value) async {
+                          //     setState(() {
+                          //       _colorValue = value!;
+                          //     });
+                          //   },
+                          // ),
                           textFieldForWarranty(
                             width: Responsive.isMobile(context) ? width : null,
                             context: context,
@@ -623,21 +642,29 @@ TextEditingController  selectePackageController = TextEditingController();
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          CustomDropdownFormField<String>(
-                            width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
 
-                            labelFontWeight: FontWeight.w500,
-                            label: 'Select Color',
-                            hintText: "Select Color",
-                            value: _colorValue,
-                            items: colors,
-                            // validator: (value) => validateForNormalFeild(value: value, props: "Color"),
-                            onChanged: (value) async {
-                              setState(() {
-                                _colorValue = value!;
-                              });
-                            },
+                          textFieldForWarranty(
+                            width: Responsive.isMobile(context) ? width : null,
+                            context: context,
+                            textEditingController: colorValue,
+                            labelText: "Color",
+                            hintext: "Color",
                           ),
+                          // CustomDropdownFormField<String>(
+                          //   width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
+                          //
+                          //   labelFontWeight: FontWeight.w500,
+                          //   label: 'Select Color',
+                          //   hintText: "Select Color",
+                          //   value: _colorValue,
+                          //   items: colors,
+                          //   // validator: (value) => validateForNormalFeild(value: value, props: "Color"),
+                          //   onChanged: (value) async {
+                          //     setState(() {
+                          //       _colorValue = value!;
+                          //     });
+                          //   },
+                          // ),
                           textFieldForWarranty(
                             width: Responsive.isMobile(context) ? width : null,
                             context: context,
@@ -1078,7 +1105,7 @@ TextEditingController  selectePackageController = TextEditingController();
                                 warrantyData["modal_name"] = model.text.toString();
                                 warrantyData["make_id"] = make.text.toString();
                                 warrantyData["year"] = year.text.toString();
-                                warrantyData["color"] = _colorValue;
+                                warrantyData["color"] = colorValue.text.toString();
                                 warrantyData["vin"] = vin.text.toString();
                                 warrantyData["gst"] = gstNo.text.toString();
                                 warrantyData["segment"] = segment.text.toString();

@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:responsive_dashboard/Services/Apis.dart';
 import 'package:responsive_dashboard/component/custom/custom_fields.dart';
 import 'package:responsive_dashboard/component/custom/dropdown_field.dart';
@@ -29,9 +30,12 @@ class AddQuick extends StatefulWidget {
 }
 
 class _AddQuickState extends State<AddQuick> {
+
   final QuotationData? existingQuatation = Get.arguments;
 
   GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
+
+
   final _formKey = GlobalKey<FormState>();
   TextEditingController vehicleNo = TextEditingController();
   // TextEditingController model = TextEditingController();
@@ -341,6 +345,7 @@ setState(() {
                                     onChanged: (value) async {
                                       var responseData = await http.post(
                                         Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+
                                       );
                                       var model = jsonDecode(responseData.body.toString());
                                       if (model['status'] != 0) {
@@ -383,7 +388,9 @@ setState(() {
                               children: [
                                 Container(
                                   margin: Responsive.isMobile(context) ? EdgeInsets.symmetric(vertical: 10) : null,
-                                  child: CustomSearchableDropdownFormField<String>(
+                                  child: Consumer<QuotationListValue>(
+  builder: (context, provider, child) {
+  return CustomSearchableDropdownFormField<String>(
                                     width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
                                     isMandatory: true,
                                     labelFontWeight: FontWeight.w500,
@@ -393,6 +400,11 @@ setState(() {
                                     items: models,
                                     validator: (value) => validateForNormalFeild(value: value, props: "Select Model"),
                                     onChanged: (value) async {
+
+
+                                      selectedService.clear();
+                                      Provider.of<QuotationListValue>(context, listen: false).resetData();
+
                                       try {
                                         var response = await http.post(
                                           Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
@@ -437,9 +449,12 @@ setState(() {
                                       }
                                       setState(() {
                                         _intervalValue = value!;
+
                                       });
                                     },
-                                  ),
+                                  );
+  },
+),
                                 ),
 
                                 textFieldForWarranty(
@@ -619,9 +634,7 @@ setState(() {
                                   },
                                   hintext: "Date",
                                 ),
-                                SizedBox(
-                                  width: width / 20,
-                                ),
+
                                 textFieldForWarranty(
                                   width: Responsive.isMobile(context) ? width : null,
                                   context: context,
@@ -629,48 +642,71 @@ setState(() {
                                   labelText: "Vehicle No.",
                                   hintext: "Vehicle No.",
                                 ),
-                                SizedBox(
-                                  width: width / 20,
-                                ),
-                                CustomMultiSearchableDropdownFormField<String>(
-                                  width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.7,
-                                  isMandatory: true,
-                                  initValue: checkvalue,
-                                  labelFontWeight: FontWeight.w500,
-                                  label: 'Services',
-                                  hintText: "Select Services",
-                                  value: _selectedService,
-                                  items: serviceList,
-                                  validator: (value) => validateForNormalFeild(value: value, props: "Select services"),
-                                  onChanged: (value) async {
-                                    if (segment.text.isEmpty) {
-                                      toastification.show(
-                                        context: context,
-                                        type: ToastificationType.error,
-                                        title: Text('Please select model first!'),
-                                        autoCloseDuration: const Duration(seconds: 5),
-                                      );
-                                      return;
-                                    }
-                                    selectedService.clear();
-                                    //// var dataRes = await ApiProvider().getServiceByName(value[0].toString(), segment.text);
-                                    for (var item in value) {
-                                      var dataRes = await ApiProvider().getServiceByName(item.toString(), segment.text);
-                                      if (dataRes['status'] == 1) {
-                                        //// Check if the service is already present in selectedService
-                                        bool serviceExists = selectedService.any((element) => element[0]['id'] == dataRes['services'][0]['id']);
-                                        if (!serviceExists) {
-                                          //// Add the service to selectedService
-                                          selectedService.add(dataRes['services']);
-                                        }
-                                      }
-                                    }
 
-                                    // selectedService = dataRes["services"];
-                                    setState(() {
-                                     // _selectedService = value[0] ?? '';
-                                    });
-                                  },
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Select Services',style: GoogleFonts.inter(fontSize: 16, color: Colors.white),),
+                                    CustomMultiSearchableDropdownFormField<String>(
+                                      
+
+
+                                      width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
+                                      isMandatory: true,
+                                      initValue: checkvalue,
+                                      labelFontWeight: FontWeight.w500,
+                                      label: 'Services',
+                                      hintText: "Select Services",
+                                      value: _selectedService,
+                                      items: serviceList,
+                                      validator: (value) => validateForNormalFeild(value: value, props: "Select services"),
+                                      onChanged: (value) async {
+                                        if (segment.text.isEmpty) {
+                                          toastification.show(
+                                            context: context,
+                                            type: ToastificationType.error,
+                                            title: Text('Please select model first!'),
+                                            autoCloseDuration: const Duration(seconds: 5),
+                                          );
+                                          return;
+                                        }
+                                        selectedService.clear();
+
+
+
+
+                                        //// var dataRes = await ApiProvider().getServiceByName(value[0].toString(), segment.text);
+                                        for (var item in value) {
+                                          var dataRes = await ApiProvider().getServiceByName(item.toString(), segment.text);
+
+                                          if (dataRes['status'] == 1) {
+                                            // Check if the service is already present in selectedService
+                                            bool serviceExists = selectedService.any((element) => element[0]['id'] == dataRes['services'][0]['id']);
+
+                                            if (!serviceExists) {
+                                              // Add the service to selectedService
+                                              selectedService.add(dataRes['services']);
+                                            }
+                                          } else {
+                                            // Print the message and show a toast notification
+                                            print(dataRes);  // You can remove this if not needed
+                                            toastification.show(
+                                              context: context,
+                                              type: ToastificationType.error,
+                                              title: Text(dataRes['message'].toString()),
+                                              autoCloseDuration: const Duration(seconds: 5),
+                                            );
+                                          }
+                                        }
+
+                                        // selectedService = dataRes["services"];
+                                        setState(() {
+                                         // _selectedService = value[0] ?? '';
+                                        });
+                                      },
+                                    ),
+                                  ],
                                 ),
                                 // textFieldForWarranty(
                                 //   width: Responsive.isMobile(context) ? width : null,
@@ -688,139 +724,84 @@ setState(() {
                           SizedBox(
                             height: SizeConfig.blockSizeVertical! * 4,
                           ),
+
                           if (selectedService.isNotEmpty)
-                            SizedBox(
-                              height: containerHeight,
-
-                              child: ListView.builder(
-                                physics: NeverScrollableScrollPhysics(),
-                                itemCount: Set.from(selectedService).toList().length,
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    margin: EdgeInsets.symmetric(vertical: 20),
-                                    decoration: BoxDecoration(border: Border.all(color: Colors.white)),
-                                    child: Column(
-                                      children: [
-                                        CustomContainer(
-                                          AppText(
-                                            text: selectedService[index][0]["service_name"],
-                                          ),
-                                          alignment: Alignment.center,
-                                          boxDecoration: BoxDecoration(border: Border.all(color: Colors.white)),
-                                          paddingTop: 10,
-                                          paddingBottom: 30,
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: selectedService.length,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  margin: EdgeInsets.symmetric(vertical: 20),
+                                  decoration: BoxDecoration(border: Border.all(color: Colors.white)),
+                                  child: Column(
+                                    children: [
+                                      CustomContainer(
+                                        AppText(
+                                          text: selectedService[index][0]["service_name"] ?? 'N/A',
                                         ),
-
-                                        // SizedBox(
-                                        //   width: double.infinity,
-                                        //   child: DataTable(
-                                        //     border: TableBorder.all(color: Colors.white),
-                                        //     columns: [
-                                        //       DataColumn(label: AppText(text: 'Package')),
-                                        //       DataColumn(label: AppText(text: 'Price')),
-                                        //       DataColumn(label: AppText(text: 'Coverage')),
-                                        //     ],
-                                        //     rows: List<DataRow>.generate(
-                                        //       selectedService[index].length,
-                                        //           (i) => DataRow(
-                                        //         cells: [
-                                        //           DataCell(AppText(text: selectedService[index][i]["package_time"])),
-                                        //           DataCell(AppText(text: selectedService[index][i]["rate"])),
-                                        //           DataCell(AppText(text: selectedService[index][i]["Coverage"])),
-                                        //
-                                        //         ],
-                                        //       ),
-                                        //     ),
-                                        //   ),
-                                        // ),
-                                        // if (selectedService[index][0]["service_name"] =='Ceramic Coating' || selectedService[index][0]["service_name"] == 'Graphene Coating') ...[
-                                          Row(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-
-                                              SizedBox(
-                                                width: width /1.5,
-                                                child: DataTable(
-                                                  border: TableBorder.all(color: Colors.white),
-                                                  columns: [
-                                                    DataColumn(label: AppText(text: 'Package')),
-                                                    DataColumn(label: AppText(text: 'Price')),
+                                        alignment: Alignment.center,
+                                        boxDecoration: BoxDecoration(border: Border.all(color: Colors.white)),
+                                        paddingTop: 10,
+                                        paddingBottom: 30,
+                                      ),
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(
+                                            width: width / 1.5,
+                                            child: DataTable(
+                                              border: TableBorder.all(color: Colors.white),
+                                              columns: [
+                                                DataColumn(label: AppText(text: 'Package')),
+                                                DataColumn(label: AppText(text: 'Price')),
+                                              ],
+                                              rows: List<DataRow>.generate(
+                                                selectedService[index].length,
+                                                    (i) => DataRow(
+                                                  cells: [
+                                                    DataCell(AppText(
+                                                      text: selectedService[index][i]["package_time"] ?? 'N/A',
+                                                    )),
+                                                    DataCell(AppText(
+                                                      text: selectedService[index][i]["rate"] ?? 'N/A',
+                                                    )),
                                                   ],
-                                                  rows: List<DataRow>.generate(
-                                                    selectedService[index].length, (i) => DataRow(
-                                                      cells: [
-                                                        DataCell(AppText(text: selectedService[index][i]["package_time"])),
-                                                        DataCell(AppText(text: selectedService[index][i]["rate"])),
-                                                      ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Container(
+                                              decoration: BoxDecoration(border: Border.all(color: Colors.white)),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    'Coverage:',
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.white,
+                                                      fontSize: 18,
                                                     ),
                                                   ),
-                                                ),
-                                              ),
-                                              // Add spacing between DataTable and Coverage section
-                                              Expanded(
-                                                child: Container(
-
-                                                  decoration: BoxDecoration(border: Border.all(color: Colors.white)),
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                                    children: [
-                                                      Text(
-                                                        'Coverage:',
-                                                        style: TextStyle(
-                                                          fontWeight: FontWeight.bold,
-                                                          color: Colors.white,
-                                                          fontSize: 18,
-                                                        ),
-                                                      ),
-                                                      SizedBox(height: 8), // Add spacing between header and description
-                                                      DottedPointList(
-                                                        points: selectedService[index].isNotEmpty
-                                                            ? selectedService[index][0]["Coverage"].split(',')
-                                                            : [],
-                                                        // points: [
-                                                        //   'COMPLETE INTERIOR & EXTERIOR DETAILING',
-                                                        //   'PAINT CORRECTION (AS PER REQUIREMENT',
-                                                        //   'ALLOYS DETAILING AND POLISHING',
-                                                        //   'ALLOYS DETAILING AND POLISHING',
-                                                        //   'COMPLETE PAINT PART CERAMIC COATING',
-                                                        //   'GLASS NANO COATING (FIXED GLASSES)',
-                                                        //   'HEADLIGHT AND TAIL LIGHT COATING',
-                                                        //   'EXTERIOR PLASTIC TRIMS & CLADDINGS COATING',
-                                                        // ],
-                                                      ),
-                                                    ],
+                                                  SizedBox(height: 8),
+                                                  DottedPointList(
+                                                    points: selectedService[index].isNotEmpty &&
+                                                        selectedService[index][0]["Coverage"] != null
+                                                        ? selectedService[index][0]["Coverage"].split(',')
+                                                        : [],
                                                   ),
-                                                ),
+                                                ],
                                               ),
-                                            ],
+                                            ),
                                           ),
-                                         // ]
-                                                // else ...[
-                                          // SizedBox(
-                                          //   width: double.infinity,
-                                          //   child: DataTable(
-                                          //     border: TableBorder.all(color: Colors.white),
-                                          //     columns: [
-                                          //       DataColumn(label: AppText(text: 'Package')),
-                                          //       DataColumn(label: AppText(text: 'Price')),
-                                          //     ],
-                                          //     rows: List<DataRow>.generate(
-                                          //       selectedService[index].length,
-                                          //       (i) => DataRow(
-                                          //         cells: [
-                                          //           DataCell(AppText(text: selectedService[index][i]["package_time"])),
-                                          //           DataCell(AppText(text: selectedService[index][i]["rate"])),
-                                          //         ],
-                                          //       ),
-                                          //     ),
-                                          //   ),
-                                          // ),
-                                        // ],
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
                           SizedBox(
                             height: SizeConfig.blockSizeVertical! * 4,

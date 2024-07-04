@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -57,6 +58,7 @@ class _BillAddState extends State<BillAdd> {
   TextEditingController make = TextEditingController();
   TextEditingController segment = TextEditingController();
   TextEditingController color = TextEditingController();
+  TextEditingController colorValue=TextEditingController();
   TextEditingController vin = TextEditingController();
   TextEditingController gstNo = TextEditingController();
   TextEditingController year = TextEditingController();
@@ -244,6 +246,7 @@ class _BillAddState extends State<BillAdd> {
       vin.text = data?.vin ?? '';
       gstNo.text = data?.gst ?? '';
       segment.text = data?.segment ?? '';
+      colorValue.text=data?.color??'';
       List<String> splitList = data?.estimatedDeliveryTime?.split(' ') ?? [];
 
       estDate.text=splitList[0];
@@ -260,12 +263,26 @@ class _BillAddState extends State<BillAdd> {
       // print(data?.totalTaxebleAmt);
       // print(data!.totalApplicaleTaxAmt);
       // print(data!.totalPayableAmt);
-if(data!.selectServices![0].name=='Graphene Coating'){
 
-       grapheneBarcodeController = TextEditingController(text: paramsBarcode);
-}else{
-  ceramicBarcodeController = TextEditingController(text:paramsBarcode );
-}
+      if (data?.selectServices != null && data!.selectServices!.isNotEmpty) {
+        if (data!.selectServices![0].name=='Graphene Coating') {
+          grapheneBarcodeController = TextEditingController(text: paramsBarcode);
+          pachageTime=data!.selectServices![0].package.toString();
+
+        } else {
+          ceramicBarcodeController = TextEditingController(text: paramsBarcode);
+          pachageTime=data!.selectServices![0].package.toString();
+        }
+      } else {
+        // Handle the case where selectServices is null or empty
+        print('selectServices is null or empty');
+      }
+// if(data!.selectServices![0].name=='Graphene Coating'){
+//
+//        grapheneBarcodeController = TextEditingController(text: paramsBarcode);
+// }else{
+//   ceramicBarcodeController = TextEditingController(text:paramsBarcode );
+// }
 
       ppfAmount.text = data?.ppfServices?.isNotEmpty == true ? data!.ppfServices![0].amount ?? 'N/A' : '0';
       ppfType.text = data?.ppfServices?.isNotEmpty == true ? data!.ppfServices![0].type ?? 'N/A' : '0';
@@ -593,20 +610,28 @@ if(data!.selectServices![0].name=='Graphene Coating'){
                       if (Responsive.isMobile(context)) ...[
                         Wrap(
                           children: [
-                            CustomDropdownFormField<String>(
-                              width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
-                              labelFontWeight: FontWeight.w500,
-                              label: 'Select Color',
-                              hintText: "Select Color",
-                              value: _colorValue,
-                              items: colors,
-                              // validator: (value) => validateForNormalFeild(value: value, props: "Color"),
-                              onChanged: (value) async {
-                                setState(() {
-                                  _colorValue = value!;
-                                });
-                              },
-                            ),
+
+    textFieldForWarranty(
+    context: context,
+    textEditingController: colorValue,
+    labelText: "Color",
+    hintext: "Color",
+    ),
+
+                            // CustomDropdownFormField<String>(
+                            //   width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
+                            //   labelFontWeight: FontWeight.w500,
+                            //   label: 'Select Color',
+                            //   hintText: "Select Color",
+                            //   value: _colorValue,
+                            //   items: colors,
+                            //   // validator: (value) => validateForNormalFeild(value: value, props: "Color"),
+                            //   onChanged: (value) async {
+                            //     setState(() {
+                            //       _colorValue = value!;
+                            //     });
+                            //   },
+                            // ),
                             textFieldForWarranty(
                               width: Responsive.isMobile(context) ? width : null,
                               context: context,
@@ -627,20 +652,26 @@ if(data!.selectServices![0].name=='Graphene Coating'){
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            CustomDropdownFormField<String>(
-                              width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
-                              labelFontWeight: FontWeight.w500,
-                              label: 'Select Color',
-                              hintText: "Select Color",
-                              value: _colorValue,
-                              items: colors,
-                              // validator: (value) => validateForNormalFeild(value: value, props: "Color"),
-                              onChanged: (value) async {
-                                setState(() {
-                                  _colorValue = value!;
-                                });
-                              },
+                            textFieldForWarranty(
+                              context: context,
+                              textEditingController: colorValue,
+                              labelText: "Color",
+                              hintext: "Color",
                             ),
+                            // CustomDropdownFormField<String>(
+                            //   width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
+                            //   labelFontWeight: FontWeight.w500,
+                            //   label: 'Select Color',
+                            //   hintText: "Select Color",
+                            //   value: _colorValue,
+                            //   items: colors,
+                            //   // validator: (value) => validateForNormalFeild(value: value, props: "Color"),
+                            //   onChanged: (value) async {
+                            //     setState(() {
+                            //       _colorValue = value!;
+                            //     });
+                            //   },
+                            // ),
                             textFieldForWarranty(
                               context: context,
                               textEditingController: vin,
@@ -796,116 +827,210 @@ if(data!.selectServices![0].name=='Graphene Coating'){
                             // ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: data!.selectServices != null ? data!.selectServices!.map((e){
+                              children: data!.selectServices != null
+                                  ? data!.selectServices!.asMap().entries.map((entry) {
+                                int index = entry.key;
+                                var e = entry.value;
 
-                                if (e.name == 'Ceramic Coating' || e.name == 'Graphene Coating'){
-                                  pachageTime=e.package.toString();
-                                }
-
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: data!.selectServices != null ? data!.selectServices!.map((e) => Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        if (Responsive.isMobile(context)) ...[
-                                          Container(
-                                            constraints: BoxConstraints(minWidth: 200),
-                                            padding: const EdgeInsets.only(top: 20.0, bottom: 10),
-                                            child: Text(
-                                              '${data!.selectServices!.indexOf(e) + 1}. ${e.name}',
-                                              style: GoogleFonts.inter(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 22,
-                                                color: Colors.white,
-                                              ),
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      if (Responsive.isMobile(context)) ...[
+                                        Container(
+                                          constraints: BoxConstraints(minWidth: 200),
+                                          padding: const EdgeInsets.only(top: 20.0, bottom: 10),
+                                          child: Text(
+                                            '${index + 1}. ${e.name}',
+                                            style: GoogleFonts.inter(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 22,
+                                              color: Colors.white,
                                             ),
                                           ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          buildServiceFields(data, data!.selectServices!.indexOf(e)),
-                                        ] else ...[
-                                          Wrap(
-                                            crossAxisAlignment: WrapCrossAlignment.end,
-                                            children: [
-                                              Container(
-                                                constraints: BoxConstraints(minWidth: 200),
-                                                padding: const EdgeInsets.only(top: 20.0, bottom: 10),
-                                                child: Text(
-                                                  '${data!.selectServices!.indexOf(e) + 1}. ${e.name}',
-                                                  style: GoogleFonts.inter(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 22,
-                                                    color: Colors.white,
-                                                  ),
+                                        ),
+                                        SizedBox(height: 10),
+                                        buildServiceFields(data, index),
+                                      ] else ...[
+                                        Wrap(
+                                          crossAxisAlignment: WrapCrossAlignment.end,
+                                          children: [
+                                            Container(
+                                              constraints: BoxConstraints(minWidth: 200),
+                                              padding: const EdgeInsets.only(top: 20.0, bottom: 10),
+                                              child: Text(
+                                                '${index + 1}. ${e.name}',
+                                                style: GoogleFonts.inter(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 22,
+                                                  color: Colors.white,
                                                 ),
                                               ),
-                                              SizedBox(
-                                                width: 10,
-                                              ),
-                                              buildServiceFields(data, data!.selectServices!.indexOf(e)),
-                                            ],
-                                          ),
-                                        ],
-                                        SizedBox(
-                                          height: 15,
+                                            ),
+                                            SizedBox(width: 10),
+                                            buildServiceFields(data, index),
+                                          ],
                                         ),
-
-                                        if (e.name == 'Ceramic Coating' || e.name == 'Graphene Coating') ...[
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            crossAxisAlignment: CrossAxisAlignment.end,
-                                            children: [
-                                              textFieldForWarranty(
-                                                context: context,
-                                                textEditingController: e.name == 'Ceramic Coating' ? ceramicBarcodeController : grapheneBarcodeController,
-                                                labelText: "Scan Barcode or enter manually",
-                                                hintext: "Enter Barcode",
-                                              ),
-                                              SizedBox(
-                                                width: 20,
-                                              ),
-                                              if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)
-                                                ElevatedButton(
-                                                  onPressed: () async {
-                                                    var res = await Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder: (context) => const SimpleBarcodeScannerPage(),
-                                                        ));
-                                                    setState(() {
-                                                      if (res is String) {
-                                                        if (e.name == 'Ceramic Coating') {
-                                                          // ceramicBarcodeController.text = res;
-                                                        } else {
-                                                          // grapheneBarcodeController.text = res;
-                                                        }
-                                                      }
-                                                    });
-                                                  },
-                                                  child: const Text('Open Scanner'),
-                                                )
-                                              // textFieldForWarranty(
-                                              //   context: context,
-                                              //   textEditingController: year,
-                                              //   labelText: "Amount (Excluding GST)",
-                                              //   hintext: "Year",
-                                              // ),
-                                            ],
-                                          ),
-                                        ]
                                       ],
-                                    ),
+                                      SizedBox(height: 15),
+                                      if (e.name == 'Ceramic Coating' || e.name == 'Graphene Coating') ...[
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            textFieldForWarranty(
+                                              context: context,
+                                              textEditingController: e.name == 'Ceramic Coating'
+                                                  ? ceramicBarcodeController
+                                                  : grapheneBarcodeController,
+                                              labelText: "Scan Barcode or enter manually",
+                                              hintext: "Enter Barcode",
+                                            ),
+                                            SizedBox(width: 20),
+                                            if (defaultTargetPlatform == TargetPlatform.android ||
+                                                defaultTargetPlatform == TargetPlatform.iOS)
+                                              ElevatedButton(
+                                                onPressed: () async {
+                                                  var res = await Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                        const SimpleBarcodeScannerPage(),
+                                                      ));
+                                                  setState(() {
+                                                    if (res is String) {
+                                                      if (e.name == 'Ceramic Coating') {
+                                                        // ceramicBarcodeController.text = res;
+                                                      } else {
+                                                        // grapheneBarcodeController.text = res;
+                                                      }
+                                                    }
+                                                  });
+                                                },
+                                                child: const Text('Open Scanner'),
+                                              ),
+                                          ],
+                                        ),
+                                      ]
+                                    ],
                                   ),
-                                  ).toList()
-                                      : [],
                                 );
-                              }
-                                      ).toList()
+                              }).toList()
                                   : [],
                             ),
+                            // Column(
+                            //   crossAxisAlignment: CrossAxisAlignment.start,
+                            //   children: data!.selectServices != null ? data!.selectServices!.map((e){
+                            //
+                            //     if (e.name == 'Ceramic Coating' || e.name == 'Graphene Coating'){
+                            //       pachageTime=e.package.toString();
+                            //     }
+                            //
+                            //     return Column(
+                            //       crossAxisAlignment: CrossAxisAlignment.start,
+                            //       children: data!.selectServices != null ? data!.selectServices!.map((e) => Padding(
+                            //         padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            //         child: Column(
+                            //           crossAxisAlignment: CrossAxisAlignment.start,
+                            //           children: [
+                            //             if (Responsive.isMobile(context)) ...[
+                            //               Container(
+                            //                 constraints: BoxConstraints(minWidth: 200),
+                            //                 padding: const EdgeInsets.only(top: 20.0, bottom: 10),
+                            //                 child: Text(
+                            //                   '${data!.selectServices!.indexOf(e) + 1}. ${e.name}',
+                            //                   style: GoogleFonts.inter(
+                            //                     fontWeight: FontWeight.bold,
+                            //                     fontSize: 22,
+                            //                     color: Colors.white,
+                            //                   ),
+                            //                 ),
+                            //               ),
+                            //               SizedBox(
+                            //                 height: 10,
+                            //               ),
+                            //               buildServiceFields(data, data!.selectServices!.indexOf(e)),
+                            //             ] else ...[
+                            //               Wrap(
+                            //                 crossAxisAlignment: WrapCrossAlignment.end,
+                            //                 children: [
+                            //                   Container(
+                            //                     constraints: BoxConstraints(minWidth: 200),
+                            //                     padding: const EdgeInsets.only(top: 20.0, bottom: 10),
+                            //                     child: Text(
+                            //                       '${data!.selectServices!.indexOf(e) + 1}. ${e.name}',
+                            //                       style: GoogleFonts.inter(
+                            //                         fontWeight: FontWeight.bold,
+                            //                         fontSize: 22,
+                            //                         color: Colors.white,
+                            //                       ),
+                            //                     ),
+                            //                   ),
+                            //                   SizedBox(
+                            //                     width: 10,
+                            //                   ),
+                            //                   buildServiceFields(data, data!.selectServices!.indexOf(e)),
+                            //                 ],
+                            //               ),
+                            //             ],
+                            //             SizedBox(
+                            //               height: 15,
+                            //             ),
+                            //
+                            //             if (e.name == 'Ceramic Coating' || e.name == 'Graphene Coating') ...[
+                            //               Row(
+                            //                 mainAxisAlignment: MainAxisAlignment.start,
+                            //                 crossAxisAlignment: CrossAxisAlignment.end,
+                            //                 children: [
+                            //                   textFieldForWarranty(
+                            //                     context: context,
+                            //                     textEditingController: e.name == 'Ceramic Coating' ? ceramicBarcodeController : grapheneBarcodeController,
+                            //                     labelText: "Scan Barcode or enter manually",
+                            //                     hintext: "Enter Barcode",
+                            //                   ),
+                            //                   SizedBox(
+                            //                     width: 20,
+                            //                   ),
+                            //                   if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)
+                            //                     ElevatedButton(
+                            //                       onPressed: () async {
+                            //                         var res = await Navigator.push(
+                            //                             context,
+                            //                             MaterialPageRoute(
+                            //                               builder: (context) => const SimpleBarcodeScannerPage(),
+                            //                             ));
+                            //                         setState(() {
+                            //                           if (res is String) {
+                            //                             if (e.name == 'Ceramic Coating') {
+                            //                               // ceramicBarcodeController.text = res;
+                            //                             } else {
+                            //                               // grapheneBarcodeController.text = res;
+                            //                             }
+                            //                           }
+                            //                         });
+                            //                       },
+                            //                       child: const Text('Open Scanner'),
+                            //                     )
+                            //                   // textFieldForWarranty(
+                            //                   //   context: context,
+                            //                   //   textEditingController: year,
+                            //                   //   labelText: "Amount (Excluding GST)",
+                            //                   //   hintext: "Year",
+                            //                   // ),
+                            //                 ],
+                            //               ),
+                            //             ]
+                            //           ],
+                            //         ),
+                            //       ),
+                            //       ).toList()
+                            //           : [],
+                            //     );
+                            //   }
+                            //           ).toList()
+                            //       : [],
+                            // ),
                             SizedBox(
                               height: SizeConfig.blockSizeVertical! * 8,
                             ),
@@ -1359,7 +1484,7 @@ if(data!.selectServices![0].name=='Graphene Coating'){
                                     estimateData["model_id"] = modelId;
                                     estimateData["make_id"] = make.text.isNotEmpty ? make.text : "N/A";
                                     estimateData["year"] = year.text.isNotEmpty ? year.text : "N/A";
-                                    estimateData["color"] = _colorValue.isNotEmpty ? _colorValue : "N/A";
+                                    estimateData["color"] = colorValue.text.isNotEmpty ? colorValue.text : "N/A";
                                     estimateData["vin"] = vin.text.isNotEmpty ? vin.text : "N/A ";
                                     estimateData["gst"] = gstNo.text.isNotEmpty ? gstNo.text : "N/A ";
                                     estimateData["segment"] = segment.text.isNotEmpty ? segment.text : "N/A";
@@ -1408,6 +1533,7 @@ if(data!.selectServices![0].name=='Graphene Coating'){
 
                                       // Check if the barcode exists and has a package_time of '3year'
                                       bool isValidBarcode(String barcode) {
+                                        String year='3 year';
                                         List<String> parts = pachageTime.split(' ');
 
 
@@ -1477,6 +1603,7 @@ if(data!.selectServices![0].name=='Graphene Coating'){
 
   Widget buildServiceFields(
     EstimateData? selectedResponseServerRes,
+
 
 
     int index,

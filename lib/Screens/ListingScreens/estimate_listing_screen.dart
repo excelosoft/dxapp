@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_dashboard/component/custom/dropdown_field.dart';
 import 'package:responsive_dashboard/component/no_data_found.dart';
 
 import 'package:universal_html/html.dart' as html;
@@ -399,10 +400,15 @@ class _EstimateState extends State<Estimate> {
                                                   ),
                                                   Visibility(
                                                     visible: data.maingerStatus,
-                                                    child: IconButton(
+                                                    child: Consumer<QuotationListValue>(
+  builder: (context, provider, child) {
+
+  return IconButton(
                                                       tooltip: 'Edit',
                                                       onPressed: paginatedData[index].billsStatus == 1
                                                           ? null : () async {
+                                                        
+                                                        provider.setEditing(false);
                                                         print('filteredData[index] ===');
                                                         print(filteredData[index].estimatedDeliveryTime);
                                                         print(filteredData[index].date);
@@ -416,7 +422,9 @@ class _EstimateState extends State<Estimate> {
                                                       },
                                                       icon: Icon(Icons.edit_outlined),
                                                       color:paginatedData[index].billsStatus == 1 ? Colors.grey : Colors.black,
-                                                    ),
+                                                    );
+  },
+),
                                                   ),
                                                   Visibility(
                                                     visible: data.maingerStatus,

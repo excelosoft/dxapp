@@ -49,6 +49,7 @@ class _AddJobSheetState extends State<AddJobSheet> {
   TextEditingController make = TextEditingController();
   TextEditingController segment = TextEditingController();
   TextEditingController color = TextEditingController();
+  TextEditingController colorValue = TextEditingController();
   TextEditingController vin = TextEditingController();
   TextEditingController gstNo = TextEditingController();
   TextEditingController year = TextEditingController();
@@ -109,6 +110,7 @@ class _AddJobSheetState extends State<AddJobSheet> {
       segment.text = jobData?.segment ?? '';
       estDateTime.text = jobData?.estimatedDeliveryTime ?? '';
       vin.text = jobData?.vin ?? '';
+      colorValue.text=jobData?.color??'';
       AssignedWorkers.text = jobData?.assignedWorker ?? '';
       modelId = jobData?.modelId ?? 13;
       model.text = jobData?.modalName ?? "Punch";
@@ -406,22 +408,19 @@ class _AddJobSheetState extends State<AddJobSheet> {
                       height: SizeConfig.blockSizeVertical! * 4,
                     ),
 
+
+
                     if (Responsive.isMobile(context)) ...[
                       Wrap(
                         children: [
-                          CustomDropdownFormField<String>(
-                            width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
-                            labelFontWeight: FontWeight.w500,
-                            label: 'Select Color',
-                            hintText: "Select Color",
-                            value: _colorValue,
-                            items: colors,
-                            // validator: (value) => validateForNormalFeild(value: value, props: "Color"),
-                            onChanged: (value) async {
-                              setState(() {
-                                _colorValue = value!;
-                              });
-                            },
+
+                          textFieldForWarranty(
+                            width: width,
+                            context: context,
+                            textEditingController: colorValue,
+                            labelText: "Segment",
+                            hintext: "Segment",
+                            readOnly: true,
                           ),
                           textFieldForWarranty(
                             width: width,
@@ -447,29 +446,22 @@ class _AddJobSheetState extends State<AddJobSheet> {
                         ],
                       ),
                     ] else ...[
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          CustomDropdownFormField<String>(
-                            width: Responsive.isMobile(context) ? width : MediaQuery.of(context).size.width / 3.5,
-                            labelFontWeight: FontWeight.w500,
-                            label: 'Select Color',
-                            hintText: "Select Color",
-                            value: _colorValue,
-                            items: colors,
-                            // validator: (value) => validateForNormalFeild(value: value, props: "Color"),
-                            onChanged: (value) async {
-                              setState(() {
-                                _colorValue = value!;
-                              });
-                            },
+                          textFieldForWarranty(
+                            context: context,
+                            textEditingController: colorValue,
+                            labelText: "Color",
+                            hintext: "Color",
+                            readOnly: true,
                           ),
                           textFieldForWarranty(
                             context: context,
                             textEditingController: segment,
                             labelText: "Segment",
                             hintext: "Segment",
-                            readOnly: true,
                           ),
                           textFieldForWarranty(
                             context: context,
@@ -483,8 +475,42 @@ class _AddJobSheetState extends State<AddJobSheet> {
                             },
                             hintext: "Estimated Delivery Date/Time",
                           ),
+
                         ],
                       ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   children: [
+                      //
+                      //     textFieldForWarranty(
+                      //       width: width,
+                      //       context: context,
+                      //       textEditingController: colorValue,
+                      //       labelText: "Segment",
+                      //       hintext: "Segment",
+                      //       readOnly: true,
+                      //     ),
+                      //     textFieldForWarranty(
+                      //       context: context,
+                      //       textEditingController: segment,
+                      //       labelText: "Segment",
+                      //       hintext: "Segment",
+                      //       readOnly: true,
+                      //     ),
+                      //     textFieldForWarranty(
+                      //       context: context,
+                      //       textEditingController: estDateTime,
+                      //       labelText: "Estimated Delivery Date/Time",
+                      //       isRightIcon: true,
+                      //       readOnly: true,
+                      //       rightIcon: Icons.calendar_month,
+                      //       onTap: () {
+                      //         showDateDailog(estDateTime);
+                      //       },
+                      //       hintext: "Estimated Delivery Date/Time",
+                      //     ),
+                      //   ],
+                      // ),
                     ],
                     SizedBox(
                       height: SizeConfig.blockSizeVertical! * 4,
@@ -763,7 +789,7 @@ class _AddJobSheetState extends State<AddJobSheet> {
                                 "model_id": modelId,
                                 "make_id": make.text.isNotEmpty ? make.text : "N/A",
                                 "year": year.text.isNotEmpty ? year.text : "N/A",
-                                "color": _colorValue.isNotEmpty ? _colorValue : "N/A",
+                                "color": colorValue.text.isNotEmpty ? colorValue.text : "N/A",
                                 "vin": vin.text.isNotEmpty ? vin.text : "N/A",
                                 "gst": gstNo.text.isNotEmpty ? gstNo.text : "N/A",
                                 "segment": segment.text.isNotEmpty ? segment.text : "N/A",

@@ -3,7 +3,10 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:responsive_dashboard/style/colors.dart';
+
+import '../../functions/mainger_provider.dart';
 
 class CustomDropdownFormField<T> extends StatefulWidget {
   final String? label;
@@ -84,6 +87,7 @@ class _CustomDropdownFormFieldState<T> extends State<CustomDropdownFormField<T>>
             child: AbsorbPointer( // Use AbsorbPointer to disable interaction when read-only
               absorbing: widget.readOnly,
               child: DropdownButtonFormField<T>(
+
                 dropdownColor: Colors.white,
                 focusNode: widget.focusNode,
                 value: widget.value,
@@ -306,15 +310,23 @@ class _CustomMultiSearchableDropdownFormFieldState<T> extends State<CustomMultiS
   @override
   void initState() {
     super.initState();
+   final value= Provider.of<QuotationListValue>(context, listen: false);
     // Initialize selected values with the provided initial values
     if (widget.initValue != null) {
-      _selectedValues = widget.initValue!;
+      value._selectedValues = widget.initValue!;
     }
+  }
+  void clearSelectedValues() {
+    setState(() {
+      _selectedValues.clear(); // Clear selected values
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Consumer<QuotationListValue>(
+  builder: (context, provider, child) {
+  return Container(
       width: widget.width,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,7 +342,7 @@ class _CustomMultiSearchableDropdownFormFieldState<T> extends State<CustomMultiS
             child: DropdownSearch<String>.multiSelection(
               key: _popupCustomValidationKey,
               items: widget.items,
-              selectedItems: _selectedValues, // Pass selected values
+              selectedItems: provider._selectedValues, // Pass selected values
               popupProps: PopupPropsMultiSelection.menu(
                 validationWidgetBuilder: (ctx, selectedItems) {
                   return Padding(
@@ -352,9 +364,10 @@ class _CustomMultiSearchableDropdownFormFieldState<T> extends State<CustomMultiS
                         ),
                         textColor: Colors.white,
                         onPressed: () {
+
                           List<String> selectedValues = _popupCustomValidationKey.currentState!.popupGetSelectedItems;
                           setState(() {
-                            _selectedValues = selectedValues; // Update selected values
+                            provider._selectedValues = selectedValues; // Update selected values
                           });
                           widget.onChanged(selectedValues);
                           Navigator.of(context).pop();
@@ -377,6 +390,8 @@ class _CustomMultiSearchableDropdownFormFieldState<T> extends State<CustomMultiS
         ],
       ),
     );
+  },
+);
   }
 }
 
@@ -542,3 +557,21 @@ class _CustomMultiSearchableDropdownFormFieldState<T> extends State<CustomMultiS
 //     );
 //   }
 // }
+class QuotationListValue extends ChangeNotifier{
+  List<String> _selectedValues = [];
+
+  List<String> get selectedValues=>_selectedValues;
+  void resetData(){
+    _selectedValues=[];
+    notifyListeners();
+  }
+
+  bool _editing= false;
+  bool get editing=>_editing;
+  void setEditing(bool value){
+    _editing =value;
+    notifyListeners();
+
+  }
+  
+}
