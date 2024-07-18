@@ -155,7 +155,7 @@ class _BillAddState extends State<BillAdd> {
 
   getModels() async {
     var responseData = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getModels'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getModels'),
     );
     var model = jsonDecode(responseData.body.toString());
     if (model['status'] != 0) {
@@ -178,7 +178,7 @@ class _BillAddState extends State<BillAdd> {
 
   getColors(String selectedModel) async {
     var responseData = await http.post(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$selectedModel'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$selectedModel'),
     );
     var model = jsonDecode(responseData.body.toString());
 
@@ -197,7 +197,7 @@ class _BillAddState extends State<BillAdd> {
 
   getServices() async {
     var response = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getServices'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getServices'),
     );
     var data = jsonDecode(response.body.toString());
     if (data['status'] != 0) {
@@ -212,7 +212,7 @@ class _BillAddState extends State<BillAdd> {
 
   getPPFServices() async {
     var ppfresponse = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getPPFServices'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getPPFServices'),
     );
     var ppfdata = jsonDecode(ppfresponse.body.toString());
     if (ppfdata['status'] != 0) {
@@ -520,7 +520,7 @@ class _BillAddState extends State<BillAdd> {
                               validator: (value) => validateForNormalFeild(value: value, props: "Select Model"),
                               onChanged: (value) async {
                                 var responseData = await http.post(
-                                  Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+                                  Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$value'),
                                 );
                                 var model = jsonDecode(responseData.body.toString());
                                 if (model['status'] != 0) {
@@ -569,7 +569,7 @@ class _BillAddState extends State<BillAdd> {
                               validator: (value) => validateForNormalFeild(value: value, props: "Select Model"),
                               onChanged: (value) async {
                                 var responseData = await http.post(
-                                  Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+                                  Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$value'),
                                 );
                                 var model = jsonDecode(responseData.body.toString());
                                 if (model['status'] != 0) {
@@ -1447,7 +1447,7 @@ class _BillAddState extends State<BillAdd> {
                                   ),
                                   onPressed: () async {
                                     final id = data!.id.toString();
-                                    html.window.open('https://excelosoft.com/dxapp/public/bills/$id/pdf', '_blank');
+                                    html.window.open('https://admin.detailingxperts.in/public/bills/$id/pdf', '_blank');
                                   },
                                   child: Text(
                                     'Print Bill',
@@ -1517,7 +1517,7 @@ class _BillAddState extends State<BillAdd> {
                                     estimateData["total_applicable_tax"] = totalApplicaleTaxAmt.value;
                                     estimateData["total_payable_amount"] = totalPayableAmt.value;
 
-                                    if (isBillEdit == null && data!.selectServices != null && data!.selectServices!.isNotEmpty && data!.selectServices!.any((element) => element.name == 'Ceramic Coating') || data!.selectServices!.any((element) => element.name == 'Graphene Coating')) {
+                                    if (isBillEdit!= null && data!.selectServices != null && data!.selectServices!.isNotEmpty && data!.selectServices!.any((element) => element.name == 'Ceramic Coating') || data!.selectServices!.any((element) => element.name == 'Graphene Coating')) {
 
                                       final barcodes = await ApiProvider().fetchBarcodeAndTimeList();
                                       final List<Map<String, String>> barcodeList = barcodes.map((item) {

@@ -187,6 +187,7 @@ class _AddMaintenanceState extends State<AddMaintenance> {
                     final maintenance = results[index];
                     return GestureDetector(
                       onTap: () {
+                        print(index.toString());
                         // Navigate to details screen with selected maintenance item
                         Navigator.push(
                           context,

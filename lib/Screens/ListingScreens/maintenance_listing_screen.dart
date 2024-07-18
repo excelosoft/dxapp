@@ -376,25 +376,31 @@ class _MaintenanceListingScreenState extends State<MaintenanceListingScreen> {
                                                   onPressed: () async {
                                                      final id = paginatedData[index].id.toString();
 
-                                                     html.window.open('https://excelosoft.com/dxapp/public/maintenances/$id/pdf', '_blank');
+                                                     final url = 'https://admin.detailingxperts.in/public/maintenances/$id/pdf';
+                                                      html.AnchorElement(href: url)
+                                                       ..target = '_blank'
+                                                       ..click();
+
+
+                                                    // html.window.open('https://admin.detailingxperts.in/public/maintenances/$id/pdf', '_blank');
                                                   },
                                                   icon: Icon(Icons.print_outlined),
                                                 ),
-                                                Visibility(
-                                                  visible: data.maingerStatus,
-                                                  child: IconButton(
-                                                    onPressed: () async {
-                                                      // Get.toNamed(
-                                                      //   RoutePath.estimateAddScreen,
-                                                      //   arguments: filteredData.data?.data?[index],
-                                                      //   parameters: {
-                                                      //     'isEdit': 'true',
-                                                      //   },
-                                                      // );
-                                                    },
-                                                    icon: Icon(Icons.edit_outlined),
-                                                  ),
-                                                ),
+                                                // Visibility(
+                                                //   visible: data.maingerStatus,
+                                                //   child: IconButton(
+                                                //     onPressed: () async {
+                                                //       // Get.toNamed(
+                                                //       //   RoutePath.estimateAddScreen,
+                                                //       //   arguments: filteredData.data?.data?[index],
+                                                //       //   parameters: {
+                                                //       //     'isEdit': 'true',
+                                                //       //   },
+                                                //       // );
+                                                //     },
+                                                //     icon: Icon(Icons.edit_outlined),
+                                                //   ),
+                                                // ),
                                                 Visibility(
                                                   visible: data.maingerStatus,
                                                   child: IconButton(

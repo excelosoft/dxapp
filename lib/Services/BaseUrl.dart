@@ -1,5 +1,5 @@
 class BaseUrl {
-  static const String baseUrl = 'https://excelosoft.com/dxapp/public/api/';
+  static const String baseUrl = 'https://admin.detailingxperts.in/public/api/';
   static const String loginUrl = '${baseUrl}login';
   static const String getProfile = '${baseUrl}getProfile';
   static const String estimateList = '${baseUrl}estimatesList';

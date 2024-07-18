@@ -41,7 +41,7 @@ class JobSheetListData {
   String? assignedWorker;
   String? description;
   String? ppfDescription;
-  String? carphoto;
+  dynamic carphoto;
   String? remarks;
   List<SelectServices>? selectServices;
   List<PpfServices>? ppfServices;

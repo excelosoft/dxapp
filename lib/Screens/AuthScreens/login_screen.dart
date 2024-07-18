@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       try {
-        var response = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/login'),
+        var response = await http.post(Uri.parse('https://admin.detailingxperts.in/public/api/login'),
             headers: {"Content-Type": "application/json"},
             body: jsonEncode({
               "email": email.text,

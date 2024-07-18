@@ -362,9 +362,9 @@ class _BillState extends State<Bill> {
                                                   tooltip: 'Print',
                                                   onPressed: () async {
                                                     final id = paginatedData[index].id.toString();
-                                                  //  _launchInBrowser(Uri.parse('https://excelosoft.com/dxapp/public/bills/$id/pdf',));
+                                                  //  _launchInBrowser(Uri.parse('https://admin.detailingxperts.in/public/bills/$id/pdf',));
 
-                                                    html.window.open('https://excelosoft.com/dxapp/public/bills/$id/pdf', '_blank');
+                                                    html.window.open('https://admin.detailingxperts.in/public/bills/$id/pdf', '_blank');
                                                   },
                                                   icon: Icon(Icons.print_outlined),
                                                 ),

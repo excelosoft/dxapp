@@ -141,7 +141,7 @@ setState(() {
   estimatedata() async {
 
     var ppfRateResponse = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getPpfServicesRate'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getPpfServicesRate'),
     );
     var ppfRateData = jsonDecode(ppfRateResponse.body.toString());
     List ppfRateList = ppfRateData["services"];
@@ -150,7 +150,7 @@ setState(() {
 
 
     var responseData = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getModels'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getModels'),
     );
     print(responseData.body);
     var model = jsonDecode(responseData.body.toString());
@@ -171,7 +171,7 @@ setState(() {
     print(models);
 
     var response = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getServices'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getServices'),
     );
     print(response.body);
     var data = jsonDecode(response.body.toString());
@@ -219,7 +219,7 @@ setState(() {
     print(serviceList);
 
     var ppfresponse = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getPPFServices'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getPPFServices'),
     );
     print(ppfresponse.body);
     var ppfdata = jsonDecode(ppfresponse.body.toString());
@@ -246,7 +246,7 @@ setState(() {
 
   // getColors(String selectedModel) async {
   //   var responseData = await http.post(
-  //     Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$selectedModel'),
+  //     Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$selectedModel'),
   //   );
   //   var model = jsonDecode(responseData.body.toString());
 
@@ -320,7 +320,7 @@ setState(() {
                           Row(
                             children: [
                               Text(
-                                'Quick Quation',
+                                'Quick Quotation',
                                 style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.bold, color: AppColors.primary),
                               ),
                             ],
@@ -344,7 +344,7 @@ setState(() {
                                     validator: (value) => validateForNormalFeild(value: value, props: "Select Model"),
                                     onChanged: (value) async {
                                       var responseData = await http.post(
-                                        Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+                                        Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$value'),
 
                                       );
                                       var model = jsonDecode(responseData.body.toString());
@@ -407,7 +407,7 @@ setState(() {
 
                                       try {
                                         var response = await http.post(
-                                          Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+                                          Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$value'),
                                         );
 
                                         if (response.statusCode == 200) {

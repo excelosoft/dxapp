@@ -30,7 +30,7 @@ class ApiProvider {
   Future<String?> getNewInvoiceNumber() async {
     try {
       var response = await http.post(
-        Uri.parse('https://excelosoft.com/dxapp/public/api/invoiceList'),
+        Uri.parse('https://admin.detailingxperts.in/public/api/invoiceList'),
         headers: ApiHeaders.apiHeader,
         body: jsonEncode({"user_id": userid}),
       );
@@ -149,7 +149,7 @@ class ApiProvider {
   Future <MaintanceModel> getMaintenceList() async {
     try {
       Map<String, dynamic> data = await postRequest(
-        url: 'https://excelosoft.com/dxapp/public/api/maintenanceList',
+        url: 'https://admin.detailingxperts.in/public/api/maintenanceList',
         headers: ApiHeaders.apiHeader,
         body: {"user_id": userid},
       );
@@ -176,7 +176,7 @@ class ApiProvider {
   // Future<List<MaintanceModel>> getMaintenceList() async {
   //   MaintanceModel maintenceList = [];
   //   var responseData = await http.post(
-  //     Uri.parse('https://excelosoft.com/dxapp/public/api/maintenanceList'),
+  //     Uri.parse('https://admin.detailingxperts.in/public/api/maintenanceList'),
   //     headers: ApiHeaders.apiHeader,
   //     body: jsonEncode({"user_id": userid}),
   //   );
@@ -194,7 +194,7 @@ class ApiProvider {
   //
   // Future<MaintainestListModel> getMaintenceList() async {
   //   // var responseData = await http.post(
-  //   //   Uri.parse('https://excelosoft.com/dxapp/public/api/maintenanceList'),
+  //   //   Uri.parse('https://admin.detailingxperts.in/public/api/maintenanceList'),
   //   //   headers: ApiHeaders.apiHeader,
   //   //   body: jsonEncode({"user_id": userid}),
   //   // );
@@ -209,7 +209,7 @@ class ApiProvider {
   //   // }
   //   try {
   //     Map<String, dynamic> data = await postRequest(
-  //       url: 'https://excelosoft.com/dxapp/public/api/maintenanceList',
+  //       url: 'https://admin.detailingxperts.in/public/api/maintenanceList',
   //       headers: ApiHeaders.apiHeader,
   //       body: {"user_id": userid},
   //     );
@@ -260,7 +260,7 @@ class ApiProvider {
 
   serviceAPi() async {
     var response = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getServices'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getServices'),
       headers: {"Content-Type": "application/json"},
     );
 
@@ -272,7 +272,7 @@ class ApiProvider {
   getServiceByName(String serviceName, String segment) async {
     try {
       var response = await http.post(
-        Uri.parse('https://excelosoft.com/dxapp/public/api/getServiceByName'),
+        Uri.parse('https://admin.detailingxperts.in/public/api/getServiceByName'),
         headers: ApiHeaders.apiHeader,
         body: jsonEncode({
           "service_name": serviceName,
@@ -290,7 +290,7 @@ class ApiProvider {
 
   Future<List<InvantaryData>> fetchBarcodeListForInvontray() async {
     final response = await http.post(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getProductBarcode'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getProductBarcode'),
       headers: ApiHeaders.apiHeader,
       body: jsonEncode({"user_id": userid}),
     );
@@ -322,7 +322,7 @@ class ApiProvider {
   }
   Future<List<Map<String, String>>> fetchBarcodeAndTimeList() async {
     final response = await http.post(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getProductBarcode'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getProductBarcode'),
       headers: ApiHeaders.apiHeader,
       body: jsonEncode({"user_id": userid}),
     );
@@ -345,7 +345,7 @@ class ApiProvider {
 
   // Future<List<String>> fetchBarcodeList() async {
   //   final response = await http.post(
-  //     Uri.parse('https://excelosoft.com/dxapp/public/api/getProductBarcode'),
+  //     Uri.parse('https://admin.detailingxperts.in/public/api/getProductBarcode'),
   //     headers: ApiHeaders.apiHeader,
   //     body: jsonEncode({"user_id": userid}),
   //   );
@@ -369,7 +369,7 @@ class ApiProvider {
   // Store new items
   changeStatusForEstimate(String id, String selectedStatus) async {
     var response = await postRequest(
-      url: 'https://excelosoft.com/dxapp/public/api/currentStatusUpdate/${id}',
+      url: 'https://admin.detailingxperts.in/public/api/currentStatusUpdate/${id}',
       headers: ApiHeaders.apiHeader,
       body: {
         "current_status": selectedStatus,
@@ -385,7 +385,7 @@ class ApiProvider {
     print(jsonEncode(dataMap));
 
     var response = await http.post(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/jobsheetsUpdate/${dataMap["estimateId"]}'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/jobsheetsUpdate/${dataMap["estimateId"]}'),
       headers: ApiHeaders.apiHeader,
       body: jsonEncode(dataMap),
     );
@@ -399,7 +399,7 @@ class ApiProvider {
 
     try {
       var response = await http.post(
-        Uri.parse('https://excelosoft.com/dxapp/public/api/warrantyCardsUpdate/$id'),
+        Uri.parse('https://admin.detailingxperts.in/public/api/warrantyCardsUpdate/$id'),
         headers: ApiHeaders.apiHeader,
         body: jsonEncode(dataMap),
       );
@@ -417,7 +417,7 @@ class ApiProvider {
     try {
       var headers = {'Content-Type': 'application/json'};
       var response = await http.post(
-        Uri.parse('https://excelosoft.com/dxapp/public/api/estimatesStore'),
+        Uri.parse('https://admin.detailingxperts.in/public/api/estimatesStore'),
         headers: headers,
         body: jsonEncode(dataMap),
       );
@@ -433,7 +433,7 @@ class ApiProvider {
     dataMap["user_id"] = AppConst.getAccessToken();
 
     var response = await http.post(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/quickquotationsStore'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/quickquotationsStore'),
       headers: ApiHeaders.apiHeader,
       body: jsonEncode(dataMap),
     );
@@ -445,7 +445,7 @@ class ApiProvider {
   //   dataMap["user_id"] = userid;
   //
   //   var headers = {'Content-Type': 'application/json'};
-  //   var response = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/maintenanceUpdate/$id',), headers: headers, body: jsonEncode(dataMap));
+  //   var response = await http.post(Uri.parse('https://admin.detailingxperts.in/public/api/maintenanceUpdate/$id',), headers: headers, body: jsonEncode(dataMap));
   //
   //   var data = jsonDecode(response.body.toString());
   //   print(data);
@@ -460,7 +460,7 @@ class ApiProvider {
 
     try {
       var response = await http.post(
-        Uri.parse('https://excelosoft.com/dxapp/public/api/maintenanceUpdate/$id'),
+        Uri.parse('https://admin.detailingxperts.in/public/api/maintenanceUpdate/$id'),
         headers: headers,
         body: jsonEncode(dataMap),
       );
@@ -492,7 +492,7 @@ class ApiProvider {
 
       // Make API request to store the invoice number
       var response = await http.post(
-        Uri.parse('https://excelosoft.com/dxapp/public/api/invoiceStore'),
+        Uri.parse('https://admin.detailingxperts.in/public/api/invoiceStore'),
         body: jsonEncode(requestBody),
         headers: {'Content-Type': 'application/json'},
       );
@@ -516,7 +516,7 @@ class ApiProvider {
 
     var headers = {'Content-Type': 'application/json'};
     var response = await http.post(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/billsUpdate/$id'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/billsUpdate/$id'),
       headers: headers,
       body: jsonEncode(dataMap),
     );
@@ -527,7 +527,7 @@ class ApiProvider {
 
   createCalendarEvent(Map dataMap) async {
     var headers = {'Content-Type': 'application/json'};
-    var response = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/calendarEventsStore'), headers: headers, body: jsonEncode(dataMap));
+    var response = await http.post(Uri.parse('https://admin.detailingxperts.in/public/api/calendarEventsStore'), headers: headers, body: jsonEncode(dataMap));
     var data = jsonDecode(response.body.toString());
     print(data);
     return data;
@@ -536,7 +536,7 @@ class ApiProvider {
 // Update Items
   updateCalendarEvent(Map dataMap, String id) async {
     var headers = {'Content-Type': 'application/json'};
-    var response = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/calendarEventsUpdate/$id'), headers: headers, body: jsonEncode(dataMap));
+    var response = await http.post(Uri.parse('https://admin.detailingxperts.in/public/api/calendarEventsUpdate/$id'), headers: headers, body: jsonEncode(dataMap));
     var data = jsonDecode(response.body.toString());
     return data;
   }
@@ -545,7 +545,7 @@ class ApiProvider {
     dataMap["user_id"] = AppConst.getAccessToken();
 
     var response = await http.post(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/updateQuickQuotations'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/updateQuickQuotations'),
       headers: ApiHeaders.apiHeader,
       body: jsonEncode(dataMap),
     );
@@ -557,7 +557,7 @@ class ApiProvider {
   updateEstimateApi(Map dataMap, String id) async {
     var headers = {'Content-Type': 'application/json'};
 
-    var response = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/estimatesUpdate/$id'), headers: headers, body: jsonEncode(dataMap));
+    var response = await http.post(Uri.parse('https://admin.detailingxperts.in/public/api/estimatesUpdate/$id'), headers: headers, body: jsonEncode(dataMap));
 
     var data = jsonDecode(response.body.toString());
     print(data);
@@ -569,7 +569,7 @@ class ApiProvider {
     var dataMap = Map<String, String>();
     dataMap["id"] = id.toString();
     print(jsonEncode(dataMap));
-    var response = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/deleteEstimates'), headers: ApiHeaders.apiHeader, body: jsonEncode(dataMap));
+    var response = await http.post(Uri.parse('https://admin.detailingxperts.in/public/api/deleteEstimates'), headers: ApiHeaders.apiHeader, body: jsonEncode(dataMap));
     var data = jsonDecode(response.body.toString());
     print(data);
     return data;
@@ -578,7 +578,7 @@ class ApiProvider {
   deleteQuickQuatation(int id) async {
     var dataMap = Map<String, String>();
     dataMap["id"] = id.toString();
-    var response = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/deleteQuickQuotations'), headers: ApiHeaders.apiHeader, body: jsonEncode(dataMap));
+    var response = await http.post(Uri.parse('https://admin.detailingxperts.in/public/api/deleteQuickQuotations'), headers: ApiHeaders.apiHeader, body: jsonEncode(dataMap));
     var data = jsonDecode(response.body.toString());
     print(data);
     return data;
@@ -587,7 +587,7 @@ class ApiProvider {
   deleteCalendarItemById(int id) async {
     var dataMap = Map<String, String>();
     dataMap["id"] = id.toString();
-    var response = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/calendarEventsDelete'), headers: ApiHeaders.apiHeader, body: jsonEncode(dataMap));
+    var response = await http.post(Uri.parse('https://admin.detailingxperts.in/public/api/calendarEventsDelete'), headers: ApiHeaders.apiHeader, body: jsonEncode(dataMap));
     var data = jsonDecode(response.body.toString());
     print(data);
     return data;
@@ -596,7 +596,7 @@ class ApiProvider {
   deleteBillsById(int id) async {
     var dataMap = Map<String, String>();
     dataMap["id"] = id.toString();
-    var response = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/billsDelete'), headers: ApiHeaders.apiHeader, body: jsonEncode(dataMap));
+    var response = await http.post(Uri.parse('https://admin.detailingxperts.in/public/api/billsDelete'), headers: ApiHeaders.apiHeader, body: jsonEncode(dataMap));
     var data = jsonDecode(response.body.toString());
     print(data);
     return data;
@@ -605,7 +605,7 @@ class ApiProvider {
   deleteJobSheetById(int id) async {
     var dataMap = Map<String, String>();
     dataMap["id"] = id.toString();
-    var response = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/jobsheetsDelete'), headers: ApiHeaders.apiHeader, body: jsonEncode(dataMap));
+    var response = await http.post(Uri.parse('https://admin.detailingxperts.in/public/api/jobsheetsDelete'), headers: ApiHeaders.apiHeader, body: jsonEncode(dataMap));
     var data = jsonDecode(response.body.toString());
     print(data);
     return data;
@@ -614,7 +614,7 @@ class ApiProvider {
   deleteWarrantyById(int id) async {
     var dataMap = Map<String, String>();
     dataMap["id"] = id.toString();
-    var response = await http.post(Uri.parse('https://excelosoft.com/dxapp/public/api/warrantyCardsDelete'), headers: ApiHeaders.apiHeader, body: jsonEncode(dataMap));
+    var response = await http.post(Uri.parse('https://admin.detailingxperts.in/public/api/warrantyCardsDelete'), headers: ApiHeaders.apiHeader, body: jsonEncode(dataMap));
     var data = jsonDecode(response.body.toString());
     print(data);
     return data;

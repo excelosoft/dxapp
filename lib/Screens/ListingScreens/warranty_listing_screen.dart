@@ -379,7 +379,7 @@ class _WarrantyState extends State<Warranty> {
                                                           onPressed: () async {
                                                             final id = filteredData[index].id.toString();
 
-                                                            html.window.open('https://excelosoft.com/dxapp/public/warrantycards/$id/pdf', '_blank');
+                                                            html.window.open('https://admin.detailingxperts.in/public/warrantycards/$id/pdf', '_blank');
                                                           },
                                                           icon: Icon(Icons.print_outlined),
                                                         ),

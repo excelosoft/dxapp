@@ -97,7 +97,7 @@ TextEditingController  selectePackageController = TextEditingController();
   bool isCarWashVisible = false;
 
   String isSele = '';
-  String selectePackage = '4 year';
+  String selectePackage = '0 year';
   int noOfMaintenance=0;
 
   @override
@@ -127,14 +127,22 @@ TextEditingController  selectePackageController = TextEditingController();
       colorValue.text=billData?.color??'';
       modelId = billData?.modalName ?? 13;
       model.text = billData!.modalName ?? 'Swift';
-      selectePackage=billData!.selectServices![0].package.toString()??'4 year';
-      selectePackageController.text=billData!.selectServices![0].package.toString();
-      RegExp regExp = RegExp(r'\d+');
-      Match? match = regExp.firstMatch(billData!.selectServices![0].package.toString());
-      //int years = int.parse(selectedPackage.split(' ')[0]??'0');
-      int years = match != null ? int.parse(match.group(0)!) : 0;
-      updateMaintenanceValue(billData!.selectServices![0].package.toString()??'0');
-      divideService(years,value.first);
+      if (billData != null &&
+          billData!.selectServices != null &&
+          billData!.selectServices!.isNotEmpty) {
+        selectePackage = billData!.selectServices![0].package.toString() ?? '';
+        selectePackageController.text=billData!.selectServices![0].package.toString()??'0';
+        RegExp regExp = RegExp(r'\d+');
+        Match? match = regExp.firstMatch(billData!.selectServices![0].package.toString());
+        //int years = int.parse(selectedPackage.split(' ')[0]??'0');
+        int years = match != null ? int.parse(match.group(0)!) : 0;
+        updateMaintenanceValue(selectePackage);
+        divideService(years,value.first);
+      } else {
+        selectePackage = '0 year';
+      }
+
+
     }
     estimatedata();
   }
@@ -189,7 +197,7 @@ TextEditingController  selectePackageController = TextEditingController();
   estimatedata() async {
 
     var responseData = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getModels'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getModels'),
     );
     // print(responseData.body);
     var model = jsonDecode(responseData.body.toString());
@@ -222,7 +230,7 @@ TextEditingController  selectePackageController = TextEditingController();
     // print(models);
 
     var response = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getServices'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getServices'),
     );
     // print(response.body);
     var data = jsonDecode(response.body.toString());
@@ -239,7 +247,7 @@ TextEditingController  selectePackageController = TextEditingController();
     // print(serviceList);
 
     var ppfresponse = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getPPFServices'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getPPFServices'),
     );
     // print(ppfresponse.body);
     var ppfdata = jsonDecode(ppfresponse.body.toString());
@@ -260,7 +268,7 @@ TextEditingController  selectePackageController = TextEditingController();
 
   getColors(String selectedModel) async {
     var responseData = await http.post(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$selectedModel'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$selectedModel'),
     );
     var model = jsonDecode(responseData.body.toString());
     if (model['status'] != 0) {
@@ -496,13 +504,13 @@ TextEditingController  selectePackageController = TextEditingController();
                             labelFontWeight: FontWeight.w500,
                             label: 'Select Model',
                             hintText: "Select Model",
-                            value: _intervalValue,
-                            items: models,
+                            value: _intervalValue.toString(),
+                            items: models1,
                             validator: (value) => validateForNormalFeild(value: value, props: "Select Model"),
                             onChanged: (value) async {
                               print("Testtt");
                               var responseData = await http.post(
-                                Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+                                Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$value'),
                               );
                               print(responseData.body);
                               var model = jsonDecode(responseData.body.toString());
@@ -555,7 +563,7 @@ TextEditingController  selectePackageController = TextEditingController();
                             onChanged: (value) async {
                               print("Testtt");
                               var responseData = await http.post(
-                                Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+                                Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$value'),
                               );
                               print(responseData.body);
                               var model = jsonDecode(responseData.body.toString());
@@ -1054,9 +1062,9 @@ TextEditingController  selectePackageController = TextEditingController();
                               buttonColor: Colors.blue,
                               onPressed: () async {
                                 final id = billData!.id.toString();
-                                html.window.open('https://excelosoft.com/dxapp/public/warrantycards/$id', '_blank');
+                                html.window.open('https://admin.detailingxperts.in/public/warrantycards/$id', '_blank');
 
-                                // html.window.open('https://excelosoft.com/dxapp/public/api/getWarrantyCardsPDF/$id', '_blank');
+                                // html.window.open('https://admin.detailingxperts.in/public/api/getWarrantyCardsPDF/$id', '_blank');
                               },
                               text: "Print Warranty",
                               width: 180,

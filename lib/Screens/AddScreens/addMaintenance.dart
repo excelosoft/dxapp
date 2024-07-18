@@ -143,9 +143,7 @@ class _AddMaintenance2State extends State<AddMaintenance2> {
     assignedWorker=res.assignedWorker??'';
     selectServices=res.selectServices??[];
     ppfServices=res.ppfServices??[];
-    chargeController.text = (res.charges != '' && res.charges.toString().isNotEmpty)
-        ? res.charges.toString()
-        : '1500';
+    chargeController.text = (res.charges != '' && res.charges.toString().isNotEmpty) ? res.charges.toString() : '1500';
 
 
 
@@ -224,7 +222,7 @@ class _AddMaintenance2State extends State<AddMaintenance2> {
 
   estimatedata() async {
     var responseData = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getModels'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getModels'),
     );
     var model = jsonDecode(responseData.body.toString());
     if (model['status'] != 0) {
@@ -246,7 +244,7 @@ class _AddMaintenance2State extends State<AddMaintenance2> {
       models = [];
     }
     // var response = await http.get(
-    //   Uri.parse('https://excelosoft.com/dxapp/public/api/getServices'),
+    //   Uri.parse('https://admin.detailingxperts.in/public/api/getServices'),
     // );
     // print(response.body);
     // var data = jsonDecode(response.body.toString());
@@ -263,7 +261,7 @@ class _AddMaintenance2State extends State<AddMaintenance2> {
     // print(serviceList);
 
     // var ppfresponse = await http.get(
-    //   Uri.parse('https://excelosoft.com/dxapp/public/api/getPPFServices'),
+    //   Uri.parse('https://admin.detailingxperts.in/public/api/getPPFServices'),
     // );
     // print(response.body);
     // var ppfdata = jsonDecode(ppfresponse.body.toString());
@@ -308,15 +306,20 @@ class _AddMaintenance2State extends State<AddMaintenance2> {
   Widget build(BuildContext context) {
 
     bool showDetails = selectServices!.any((service) =>
-    service.name == 'Ceramic Coating' ||
-        service.name == 'Graphene Coating' ||
-        (service.name != null && service.name!.contains('PPF')));
+    service.name == 'Ceramic Coating' || service.name == 'Graphene Coating' || (service.name != null && service.name!.contains('PPF')));
     final width = MediaQuery.of(context).size.width;
-    List<String> arr = List.generate(numberOfMaintenance, (index) => '${index + 1}');
-     intialvalue=arr[0];
+    List<String> arr=[];
+
+    if (numberOfMaintenance > 0) {
+       arr = List.generate(numberOfMaintenance, (index) => '${index + 1}');
+      intialvalue=arr[0];
+    } else {
+
+      intialvalue = ''; // or handle it differently as per your requirement
+    }
 
 
-    print('arr, $arr');
+    //print('arr, $arr');
     return Scaffold(
       body: Form(
         key: _formKey,
@@ -453,7 +456,7 @@ class _AddMaintenance2State extends State<AddMaintenance2> {
                                 validator: (value) => validateForNormalFeild(value: value, props: "Select Model"),
                                 onChanged: (value) async {
                                   var responseData = await http.post(
-                                    Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+                                    Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$value'),
                                   );
                                   var model = jsonDecode(responseData.body.toString());
                                   if (model['status'] != 0) {
@@ -462,7 +465,7 @@ class _AddMaintenance2State extends State<AddMaintenance2> {
                                     segment = TextEditingController(text: '${data['segment_name']}');
                                     colors = data['colors_name'];
                                     // _colorValue = colors.first;
-                                    // modelId = data['id'];
+                                     //modelId = data['id'];
                                   }
                                   setState(() {
                                     _intervalValue = value!;
@@ -501,7 +504,7 @@ class _AddMaintenance2State extends State<AddMaintenance2> {
                                 validator: (value) => validateForNormalFeild(value: value, props: "Select Model"),
                                 onChanged: (value) async {
                                   var responseData = await http.post(
-                                    Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+                                    Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$value'),
                                   );
                                   var model = jsonDecode(responseData.body.toString());
                                   if (model['status'] != 0) {

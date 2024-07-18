@@ -67,6 +67,7 @@ class _EstimateAddState extends State<EstimateAdd> {
   TextEditingController ppfAmount = TextEditingController(text: "0");
   TextEditingController couponCodeController = TextEditingController();
   TextEditingController ColorValue=TextEditingController();
+  bool couponCheck=false;
 
   clearAllFields() {
     couponCodeController.clear();
@@ -128,8 +129,13 @@ class _EstimateAddState extends State<EstimateAdd> {
   void initState() {
     super.initState();
     estimatedata();
+    if(data==null){
+      Provider.of<QuotationListValue>(context, listen: false).setEditing(true);
+    }
+    
 
     if (data != null) {
+      
       print('data ====');
       name.text = data?.name ?? '';
       date.text = data?.date ?? '';
@@ -186,7 +192,12 @@ class _EstimateAddState extends State<EstimateAdd> {
 
       totalServiceAmt.value = double.parse(data?.totalServicesAmount != null && data!.totalServicesAmount!.isNotEmpty ? data!.totalServicesAmount! : '0');
       discountAmount.value = double.parse(data?.totalDiscount != null && data!.totalDiscount!.isNotEmpty ? data!.totalDiscount! : '0');
-      discountAmt.value = totalServiceAmt.value * (discountAmount.value / 100);
+      // if (totalServiceAmt.value != 0) {
+      //   discountAmt.value = (discountAmount.value / totalServiceAmt.value) * 100;
+      // }
+     discountAmt.value=double.parse(data?.totalDiscount != null && data!.totalDiscount!.isNotEmpty ? data!.totalDiscount! : '0');
+      //discountAmt.value = totalServiceAmt.value * (discountAmount.value / 100);
+
       totalTaxebleAmt.value = double.parse(data?.totalTaxableAmount != null && data!.totalTaxableAmount!.isNotEmpty ? data!.totalTaxableAmount! : '0');
       totalApplicaleTaxAmt.value = double.parse(data?.totalApplicableTax != null && data!.totalApplicableTax!.isNotEmpty ? data!.totalApplicableTax! : '0');
       totalPayableAmt.value = double.parse(data?.totalPayableAmount != null && data!.totalPayableAmount!.isNotEmpty ? data!.totalPayableAmount! : '0');
@@ -199,7 +210,7 @@ class _EstimateAddState extends State<EstimateAdd> {
 
   getColors(String selectedModel) async {
     var responseData = await http.post(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$selectedModel'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$selectedModel'),
     );
     var model = jsonDecode(responseData.body.toString());
 
@@ -222,7 +233,7 @@ class _EstimateAddState extends State<EstimateAdd> {
 
   estimatedata() async {
     var responseData = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getModels'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getModels'),
     );
     var model = jsonDecode(responseData.body.toString());
     if (model['status'] != 0) {
@@ -263,7 +274,7 @@ class _EstimateAddState extends State<EstimateAdd> {
         });
 
     var ppfresponse = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getPPFServices'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getPPFServices'),
     );
     var ppfdata = jsonDecode(ppfresponse.body.toString());
     if (ppfdata['status'] != 0) {
@@ -277,7 +288,7 @@ class _EstimateAddState extends State<EstimateAdd> {
     }
 
     var ppfRateResponse = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getPpfServicesRate'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getPpfServicesRate'),
     );
     var ppfRateData = jsonDecode(ppfRateResponse.body.toString());
     List ppfRateList = ppfRateData["services"];
@@ -383,6 +394,118 @@ class _EstimateAddState extends State<EstimateAdd> {
   // }
 
 
+  // makeServicesFields(f,package,amont, todo) async {
+  //   if (selectedServiceList.isEmpty || !selectedServiceList.any((element) => element.name == f)) {
+  //     print('add');
+  //     // if (serviceList.length < 5) {
+  //     //    setState(() {});
+  //
+  //
+  //
+  //     var dataRes = await ApiProvider().getServiceByName(f, segment.text);
+  //     if(dataRes['status']==0){
+  //
+  //         toastification.show(
+  //           context: context,
+  //           type: ToastificationType.error,
+  //           title: Text('That Service Not Available'),
+  //           autoCloseDuration: const Duration(seconds: 5),
+  //         );
+  //         return;
+  //
+  //     }
+  //
+  //
+  //
+  //     if (!selectedServiceList.any((element) => element.name == dataRes["services"][0]['service_name'])) {
+  //
+  //       if(todo!=false) {
+  //         selectedServiceList.add(SelectServices(
+  //           name: dataRes["services"][0]['service_name'],
+  //           type: dataRes["services"][0]['service_type'],
+  //           amount: dataRes["services"][0]['rate'],
+  //           package: dataRes['services'][0]['package_time'],));
+  //       }else{
+  //         selectedServiceList.add(SelectServices(
+  //           name: f,
+  //           type: dataRes["services"][0]['service_type'],
+  //           amount: amont,
+  //           package: package,));
+  //       }
+  //
+  //     // print('data res ---  ${dataRes}');
+  //       print(selectedServiceList);
+  //     servicesByNameData = dataRes["services"];
+  //
+  //     List servicesList = dataRes["services"];
+  //
+  //     List serviceTypeData = [];
+  //     List packageTimeData = [];
+  //
+  //     List rateData = [];
+  //     Map controllerMap = Map();
+  //
+  //     servicesList.toSet().forEach((element) {
+  //       TextEditingController a = TextEditingController();
+  //       TextEditingController b = TextEditingController();
+  //       TextEditingController c = TextEditingController();
+  //       if (element["service_type"] != null) {
+  //         a.text = element["service_type"];
+  //         if (controllerMap["service_type"] == null) {
+  //           controllerMap["service_type"] = a;
+  //         }
+  //         if (!serviceTypeData.contains(element["service_type"])) {
+  //           serviceTypeData.add(element["service_type"]);
+  //         }
+  //       }
+  //       if (element["package_time"] != null) {
+  //         b.text = element["package_time"];
+  //         if (controllerMap["package_time"] == null) {
+  //           controllerMap["package_time"] = b;
+  //         }
+  //         if (!packageTimeData.contains(element["package_time"])) {
+  //           packageTimeData.add(element["package_time"]);
+  //           rateData.add(element["rate"]);
+  //         }
+  //       }
+  //       if (element["rate"] != null) {
+  //         c.text = element["rate"];
+  //         if (controllerMap["rate"] == null) {
+  //           controllerMap["rate"] = c;
+  //           if (todo) {
+  //             totalServiceAmt.value = totalServiceAmt.value + double.parse(c.text);
+  //             calculateTotalBill(totalServiceAmt.value);
+  //           }
+  //         }
+  //
+  //         if (!rateData.contains(element["rate"])) {
+  //
+  //         }
+  //       }
+  //     });
+  //     Map<String, dynamic> dataMap = Map<String, dynamic>();
+  //     dataMap["serviceTypeData"] = serviceTypeData;
+  //     dataMap["packageTimeData"] = packageTimeData;
+  //     dataMap["rateData"] = rateData;
+  //     // dataMap["serviceTypeControllers"] = serviceTypeControllers;
+  //     // dataMap["packageTimeControllers"] = packageTimeControllers;
+  //     // dataMap["rateControllers"] = rateControllers;
+  //     dataMap["controllerMap"] = controllerMap;
+  //     selectedResponseServerRes[f] = dataMap;
+  //
+  //     setState(() {});
+  //   } }else {
+  //     print('remove');
+  //
+  //     selectedServiceList.removeWhere((element) => element.name == f);
+  //     totalServiceAmt.value = totalServiceAmt.value - double.parse(selectedResponseServerRes[f!]["controllerMap"]["rate"].text);
+  //     calculateTotalBill(totalServiceAmt.value);
+  //     selectedResponseServerRes.remove(f);
+  //     setState(() {});
+  //     // print(selectedServiceList);
+  //   }
+  // }
+
   makeServicesFields(f,package,amont, todo) async {
     if (selectedServiceList.isEmpty || !selectedServiceList.any((element) => element.name == f)) {
       print('add');
@@ -394,13 +517,13 @@ class _EstimateAddState extends State<EstimateAdd> {
       var dataRes = await ApiProvider().getServiceByName(f, segment.text);
       if(dataRes['status']==0){
 
-          toastification.show(
-            context: context,
-            type: ToastificationType.error,
-            title: Text('That Service Not Available'),
-            autoCloseDuration: const Duration(seconds: 5),
-          );
-          return;
+        toastification.show(
+          context: context,
+          type: ToastificationType.error,
+          title: Text('That Service Not Available'),
+          autoCloseDuration: const Duration(seconds: 5),
+        );
+        return;
 
       }
 
@@ -416,74 +539,76 @@ class _EstimateAddState extends State<EstimateAdd> {
             package: dataRes['services'][0]['package_time'],));
         }else{
           selectedServiceList.add(SelectServices(
-            name: dataRes["services"][0]['service_name'],
+            name: f,
             type: dataRes["services"][0]['service_type'],
             amount: amont,
-            package: package,));
+            package: package!=null? package:'',));
         }
 
-      // print('data res ---  ${dataRes}');
+        // print('data res ---  ${dataRes}');
         print(selectedServiceList);
-      servicesByNameData = dataRes["services"];
+        servicesByNameData = dataRes["services"];
 
-      List servicesList = dataRes["services"];
+        List servicesList = dataRes["services"];
 
-      List serviceTypeData = [];
-      List packageTimeData = [];
+        List serviceTypeData = [];
+        List packageTimeData = [];
 
-      List rateData = [];
-      Map controllerMap = Map();
+        List rateData = [];
+        Map controllerMap = Map();
 
-      servicesList.toSet().forEach((element) {
-        TextEditingController a = TextEditingController();
-        TextEditingController b = TextEditingController();
-        TextEditingController c = TextEditingController();
-        if (element["service_type"] != null) {
-          a.text = element["service_type"];
-          if (controllerMap["service_type"] == null) {
-            controllerMap["service_type"] = a;
-          }
-          if (!serviceTypeData.contains(element["service_type"])) {
-            serviceTypeData.add(element["service_type"]);
-          }
-        }
-        if (element["package_time"] != null) {
-          b.text = element["package_time"];
-          if (controllerMap["package_time"] == null) {
-            controllerMap["package_time"] = b;
-          }
-          if (!packageTimeData.contains(element["package_time"])) {
-            packageTimeData.add(element["package_time"]);
-            rateData.add(element["rate"]);
-          }
-        }
-        if (element["rate"] != null) {
-          c.text = element["rate"];
-          if (controllerMap["rate"] == null) {
-            controllerMap["rate"] = c;
-            if (todo) {
-              totalServiceAmt.value = totalServiceAmt.value + double.parse(c.text);
-              calculateTotalBill(totalServiceAmt.value);
+        servicesList.toSet().forEach((element) {
+          TextEditingController a = TextEditingController();
+          TextEditingController b = TextEditingController();
+          TextEditingController c = TextEditingController();
+          if (element["service_type"] != null) {
+            a.text = element["service_type"];
+            if (controllerMap["service_type"] == null) {
+              controllerMap["service_type"] = a;
+            }
+            if (!serviceTypeData.contains(element["service_type"])) {
+              serviceTypeData.add(element["service_type"]);
             }
           }
-
-          if (!rateData.contains(element["rate"])) {
-
+          if (element["package_time"] != null) {
+            b.text = element["package_time"];
+            if (controllerMap["package_time"] == null) {
+              controllerMap["package_time"] = b;
+            }
+            if (!packageTimeData.contains(element["package_time"])) {
+              packageTimeData.add(element["package_time"]);
+              rateData.add(element["rate"]);
+            }
           }
-        }
-      });
-      Map<String, dynamic> dataMap = Map<String, dynamic>();
-      dataMap["serviceTypeData"] = serviceTypeData;
-      dataMap["packageTimeData"] = packageTimeData;
-      dataMap["rateData"] = rateData;
-      // dataMap["serviceTypeControllers"] = serviceTypeControllers;
-      // dataMap["packageTimeControllers"] = packageTimeControllers;
-      // dataMap["rateControllers"] = rateControllers;
-      dataMap["controllerMap"] = controllerMap;
-      selectedResponseServerRes[f] = dataMap;
+          if (element["rate"] != null) {
+            c.text = element["rate"];
+            if (controllerMap["rate"] == null) {
+              rateData.add(element["rate"]);
+              controllerMap["rate"] = c;
+              if (todo) {
+                totalServiceAmt.value = totalServiceAmt.value + double.parse(c.text);
+                calculateTotalBill(totalServiceAmt.value);
+              }
+            }
 
-      setState(() {});
-    } }else {
+            if (!rateData.contains(element["rate"])) {
+
+            }
+          }
+        });
+        Map<String, dynamic> dataMap = Map<String, dynamic>();
+        dataMap["serviceTypeData"] = serviceTypeData;
+        dataMap["packageTimeData"] = packageTimeData;
+        dataMap["rateData"] = rateData;
+        // dataMap["serviceTypeControllers"] = serviceTypeControllers;
+        // dataMap["packageTimeControllers"] = packageTimeControllers;
+        // dataMap["rateControllers"] = rateControllers;
+        dataMap["controllerMap"] = controllerMap;
+        selectedResponseServerRes[f] = dataMap;
+        print(selectedResponseServerRes);
+
+        setState(() {});
+      } }else {
       print('remove');
 
       selectedServiceList.removeWhere((element) => element.name == f);
@@ -689,7 +814,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                                   });
                                 }
                                 var responseData = await http.post(
-                                  Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+                                  Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$value'),
                                 );
                                 var model = jsonDecode(responseData.body.toString());
                                 if (model['status'] != 0) {
@@ -766,7 +891,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                               validator: (value) => validateForNormalFeild(value: value, props: "Select Model"),
                               onChanged: (value) async {
                                 var responseData = await http.post(
-                                  Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+                                  Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$value'),
                                 );
                                 print(responseData.body);
                                 var model = jsonDecode(responseData.body.toString());
@@ -806,7 +931,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                             //   onChanged: (value) async {
                             //     print("Testtt");
                             //     var responseData = await http.post(
-                            //       Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+                            //       Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$value'),
                             //     );
                             //     print(responseData.body);
                             //     var model = jsonDecode(responseData.body.toString());
@@ -1085,6 +1210,8 @@ class _EstimateAddState extends State<EstimateAdd> {
                             itemCount: selectedServiceList.length,
                             itemBuilder: (BuildContext context, int index) {
                               TextEditingController amountController = TextEditingController();
+
+
                               return Padding(
                                 padding: const EdgeInsets.all(10.0),
                                 child: Column(
@@ -1100,8 +1227,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                                     Column(
                                       children: [
                                         buildServiceFields(
-                                          selectedServiceList[index].name,  selectedServiceList[index].package, selectedServiceList[index].amount.toString(), index,
-                                        ),
+                                          selectedServiceList[index].name,  selectedServiceList[index].package.toString(), selectedServiceList[index].amount.toString(), index,),
                                         SizedBox(
                                           height: SizeConfig.blockSizeVertical! * 4,
                                         ), // Optional: Add a divider between each set of input fields
@@ -1163,8 +1289,16 @@ class _EstimateAddState extends State<EstimateAdd> {
                                       ),
                                     ),
                                     onTap: () async {
+if(couponCheck!=true) {
+  setState(() {
+    discountAmount.value = 0;
+    discountAmt.value = 0;
 
-
+    couponCodeController.text = '';
+    couponCheck = true;
+    calculateTotalBill(totalServiceAmt.value);
+  });
+}
                                       if (segment.text.isEmpty) {
                                         toastification.show(
                                           context: context,
@@ -1174,6 +1308,9 @@ class _EstimateAddState extends State<EstimateAdd> {
                                         );
                                         return;
                                       }
+
+
+
 
                                       makeServicesFields(f, '','',true);
                                     });
@@ -1449,16 +1586,20 @@ class _EstimateAddState extends State<EstimateAdd> {
                                                     body: {"code": couponCodeController.text},
                                                   );
                                                   if (couponCodes["status"] == '1') {
+                                                    couponCheck=true;
                                                     discountAmount.value = couponCodes["data"]["discount"];
                                                     calculateTotalBill(totalServiceAmt.value);
                                                     errorText = "${discountAmount.value}% discount applied";
                                                     errorColor = Colors.green;
                                                     isloadingForApplyButton = false;
+
                                                     setState(() {});
                                                   } else {
                                                     setState(() {
                                                       discountAmount.value = 0;
                                                       discountAmt.value = 0;
+                                                      couponCheck=true;
+                                                      calculateTotalBill(totalServiceAmt.value);
                                                       errorColor = Colors.red;
                                                       if (couponCodeController.text.isEmpty) {
                                                         errorText = "Please enter coupon code";
@@ -1644,9 +1785,9 @@ class _EstimateAddState extends State<EstimateAdd> {
                                   onPressed: () async {
                                     final id = data!.id.toString();
                                     // https: //excelosoft.com/dxapp/public/estimates/116/pdf
-                                    html.window.open('https://excelosoft.com/dxapp/public/estimates/$id/pdf', '_blank');
+                                    html.window.open('https://admin.detailingxperts.in/public/estimates/$id/pdf', '_blank');
                                     // final id = data!.id;
-                                    // html.window.open('https://excelosoft.com/dxapp/public/api/getEstimatesPDF/$id', '_blank');
+                                    // html.window.open('https://admin.detailingxperts.in/public/api/getEstimatesPDF/$id', '_blank');
                                   },
                                   child: Text(
                                     'Print Estimate',
@@ -1692,7 +1833,7 @@ class _EstimateAddState extends State<EstimateAdd> {
                                     estimateData["estimated_delivery_time"] = estDate.text.toString() + ' ' + estTime.text.toString();
                                     estimateData["assigned_worker"] = assignedWorkerController.text;
 
-                                    // if (data == null) {
+                                     // if (data!= null) {
                                     var typeArr = [];
                                     var amountArr = [];
                                     var timeArr = [];
@@ -1790,9 +1931,23 @@ class _EstimateAddState extends State<EstimateAdd> {
     totalTaxebleAmt.value = 0.0;
     totalApplicaleTaxAmt.value = 0.0;
     totalPayableAmt.value = 0.0;
-    if (discountAmount.value > 0) {
-      discountAmt.value = totalServiceAmount * (discountAmount.value / 100);
+    if(data==null){
+      if (discountAmount.value > 0) {
+        discountAmt.value = totalServiceAmount * (discountAmount.value / 100);
+      }
+
+    }else{
+      if(couponCheck!=true)
+        {
+          final percent = (discountAmount.value / totalServiceAmt.value) * 100;
+          discountAmt.value = totalServiceAmount * (percent / 100);
+
+        }else{
+        discountAmt.value = totalServiceAmount * (discountAmount.value / 100);
+      }
+
     }
+
     totalTaxebleAmt.value = totalServiceAmt.value - discountAmt.value;
     totalApplicaleTaxAmt.value = (totalTaxebleAmt.value * 18) / 100;
     totalPayableAmt.value = totalTaxebleAmt.value + totalApplicaleTaxAmt.value;
@@ -1800,102 +1955,256 @@ class _EstimateAddState extends State<EstimateAdd> {
 
 
   Widget buildServiceFields(String? name,String? package, String amount ,int index) {
+    int indexs=0;
+    if(data!=null) {
+      if (selectedResponseServerRes[name]["packageTimeData"] != null && selectedResponseServerRes[name]["packageTimeData"] != "" &&selectedResponseServerRes[name]["packageTimeData"]!='N/A'&&selectedResponseServerRes[name]["packageTimeData"].isNotEmpty ) {
+      indexs = selectedResponseServerRes[name]["packageTimeData"].indexOf(package);
+      } else {
+        indexs = 0;
+      }
+    }
 
-    TextEditingController amountController = TextEditingController(text: amount);
-    bool _isFirstTime = true;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
+if(indexs==0) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.start,
+    children: [
 
 
-        if (selectedResponseServerRes[name] != null && selectedResponseServerRes[name!]["serviceTypeData"].isNotEmpty)
-          CustomDropdownFormField<String>(
-            width: MediaQuery.of(context).size.width / 3.5,
-            hintText: "Select Service Type'",
-            label: "Type",
-            value: selectedResponseServerRes[name]["controllerMap"]["service_type"].text,
-            items: selectedResponseServerRes[name]["serviceTypeData"],
+      if (selectedResponseServerRes[name] != null &&
+          selectedResponseServerRes[name!]["serviceTypeData"].isNotEmpty)
+        CustomDropdownFormField<String>(
+          width: MediaQuery
+              .of(context)
+              .size
+              .width / 3.5,
+          hintText: "Select Service Type'",
+          label: "Type",
+          value: selectedResponseServerRes[name]["controllerMap"]["service_type"]
+              .text,
+          items: selectedResponseServerRes[name]["serviceTypeData"],
+          onChanged: ((value) {
+            setState(() {
+              print('selected rate $servicesByNameData');
+              final index = selectedResponseServerRes[name]["serviceTypeData"].indexOf(value);
+
+              selectedResponseServerRes[name]["controllerMap"]["rate"].text = selectedResponseServerRes[name]["rateData"][index];
+
+              selectedResponseServerRes[name]["controllerMap"]["service_type"]
+                  .text = value!;
+              updateTotalAmount();
+            });
+          }),
+        ),
+      (selectedResponseServerRes[name] != null &&
+          selectedResponseServerRes[name!]["serviceTypeData"].isNotEmpty)
+          ? SizedBox(height: 10,)
+          : Container(),
+      (selectedResponseServerRes[name] != null &&
+          selectedResponseServerRes[name!]["packageTimeData"].isNotEmpty &&
+          selectedResponseServerRes[name!]["packageTimeData"][0] != '' &&
+          selectedResponseServerRes[name!]["packageTimeData"] != '') ? Consumer<
+          QuotationListValue>(
+        builder: (context, provider, child) {
+          return CustomDropdownFormField<String>(
+
+            width: MediaQuery
+                .of(context)
+                .size
+                .width / 3.5,
+            hintText: "Select Package Time (Year)",
+            label: "Package",
+            value: selectedResponseServerRes[name]["controllerMap"]["package_time"]
+                .text,
+            //             value: package != null && selectedResponseServerRes[name]["packageTimeData"].contains(package)
+            //  ? package : selectedResponseServerRes[name]["controllerMap"]["package_time"].text,
+            items: selectedResponseServerRes[name]["packageTimeData"],
             onChanged: ((value) {
+              provider.setEditing(true);
               setState(() {
-                print('selected rate $servicesByNameData');
-                final index = selectedResponseServerRes[name]["serviceTypeData"].indexOf(value);
-                selectedResponseServerRes[name]["controllerMap"]["rate"].text = selectedResponseServerRes[name]["rateData"][index];
-                selectedResponseServerRes[name]["controllerMap"]["service_type"].text = value!;
+                discountAmount.value = 0;
+                discountAmt.value = 0;
+                couponCodeController.text = '';
+                couponCheck = true;
+                calculateTotalBill(totalServiceAmt.value);
+
+
+                print(selectedResponseServerRes);
+                if (selectedResponseServerRes[name]["packageTimeData"]
+                    .isNotEmpty) {
+                  final index = selectedResponseServerRes[name]["packageTimeData"]
+                      .indexOf(value);
+                  selectedResponseServerRes[name]["controllerMap"]["rate"]
+                      .text = selectedResponseServerRes[name]["rateData"][index];
+                  selectedResponseServerRes[name]["controllerMap"]["package_time"]
+                      .text = value!;
+                } else {
+                  selectedResponseServerRes[name]["controllerMap"]["package_time"]
+                      .text = 'N/A';
+                }
                 updateTotalAmount();
               });
             }),
-          ),
-        (selectedResponseServerRes[name] != null && selectedResponseServerRes[name!]["serviceTypeData"].isNotEmpty) ? SizedBox(width: 10) : Container(),
-        (selectedResponseServerRes[name] != null && selectedResponseServerRes[name!]["packageTimeData"].isNotEmpty)
-            ? Consumer<QuotationListValue>(
-  builder: (context, provider, child) {
+          );
+        },
+      )
+          : Container(
 
-  return CustomDropdownFormField<String>(
-
-                width: MediaQuery.of(context).size.width / 3.5,
-                hintText: "Select Package Time (Year)",
-                label: "Package",
-                value: package != null && selectedResponseServerRes[name]["packageTimeData"].contains(package)
-    ? package
-        : selectedResponseServerRes[name]["controllerMap"]["package_time"].text,
-                items: selectedResponseServerRes[name]["packageTimeData"],
-                onChanged: ((value) {
-                  provider.setEditing(true);
-                  setState(() {
-                    print(selectedResponseServerRes);
-                    final index = selectedResponseServerRes[name]["packageTimeData"].indexOf(value);
-                    selectedResponseServerRes[name]["controllerMap"]["rate"].text = selectedResponseServerRes[name]["rateData"][index];selectedResponseServerRes[name]["controllerMap"]["package_time"].text = value!;
-                    updateTotalAmount();
-                  });
+      ),
+      SizedBox(
+        width: 30,
+      ),
 
 
-                }),
-              );
-  },
-)
-            : Container(),
-        SizedBox(
-          width: 30,
+      Consumer<QuotationListValue>(
+        builder: (context, provider, child) {
+          return textFieldForWarranty(
+            context: context,
+            textEditingController: selectedResponseServerRes[name]["controllerMap"]["rate"],
+            // textEditingController: provider.editing? selectedResponseServerRes[name]["controllerMap"]["rate"]:amountController,
+            labelText: "Amount",
+            hintext: "Amount",
+          );
+        },
+      ),
+      //     textFieldForWarranty(
+      //       context: context,
+      //       textEditingController: selectedResponseServerRes != null && selectedResponseServerRes.containsKey(name) &&
+      //           selectedResponseServerRes[name] != null && selectedResponseServerRes[name].containsKey("controllerMap") &&
+      //           selectedResponseServerRes[name]["controllerMap"] != null &&
+      //           selectedResponseServerRes[name]["controllerMap"].containsKey("rate") &&
+      //           selectedResponseServerRes[name]["controllerMap"]["rate"] != null
+      //           ? selectedResponseServerRes[name]["controllerMap"]["rate"]
+      //           : amountController,
+      //       labelText: "Amount",
+      //       hintext: "Amount",
+      //     ),
+      //       textFieldForWarranty(
+      //       context: context,
+      // textEditingController: (selectedResponseServerRes != null && selectedResponseServerRes.containsKey(name) && selectedResponseServerRes[name] != null && selectedResponseServerRes[name].containsKey("controllerMap") &&
+      // selectedResponseServerRes[name]["controllerMap"] != null &&
+      // selectedResponseServerRes[name]["controllerMap"].containsKey("rate") &&
+      // selectedResponseServerRes[name]["controllerMap"]["rate"] != null) ?
+      // selectedResponseServerRes[name]["controllerMap"]["rate"] : TextEditingController(),
+      // labelText: "Amount",
+      // hintext: "Amount",
+      //
+      // ),
+    ],
+  );
+}
+else{
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.start,
+    children: [
+
+
+      if (selectedResponseServerRes[name] != null && selectedResponseServerRes[name!]["serviceTypeData"].isNotEmpty)
+        CustomDropdownFormField<String>(
+          width: MediaQuery.of(context).size.width / 3.5,
+          hintText: "Select Service Type'",
+          label: "Type",
+          value: selectedResponseServerRes[name]["controllerMap"]["service_type"].text,
+          items: selectedResponseServerRes[name]["serviceTypeData"],
+          onChanged: ((value) {
+            setState(() {
+              print('selected rate $servicesByNameData');
+              final index = selectedResponseServerRes[name]["serviceTypeData"].indexOf(value);
+
+              selectedResponseServerRes[name]["controllerMap"]["rate"].text = selectedResponseServerRes[name]["rateData"][index];
+
+              selectedResponseServerRes[name]["controllerMap"]["service_type"].text = value!;
+              updateTotalAmount();
+            });
+          }),
         ),
+      (selectedResponseServerRes[name] != null && selectedResponseServerRes[name!]["serviceTypeData"].isNotEmpty) ?SizedBox(height: 10,)  : Container(),
+      (selectedResponseServerRes[name] != null && selectedResponseServerRes[name!]["packageTimeData"].isNotEmpty&& selectedResponseServerRes[name!]["packageTimeData"][0]!=''&& selectedResponseServerRes[name!]["packageTimeData"]!='') ? Consumer<QuotationListValue>(
+        builder: (context, provider, child) {
+
+          return CustomDropdownFormField<String>(
+
+            width: MediaQuery.of(context).size.width / 3.5,
+            hintText: "Select Package Time (Year)",
+            label: "Package",
+            value: provider.editing ?selectedResponseServerRes[name]["controllerMap"]["package_time"].text:selectedResponseServerRes[name]["packageTimeData"][indexs],
+            //             value: package != null && selectedResponseServerRes[name]["packageTimeData"].contains(package)
+            //  ? package : selectedResponseServerRes[name]["controllerMap"]["package_time"].text,
+            items: selectedResponseServerRes[name]["packageTimeData"],
+            onChanged:((value) {
+              provider.setEditing(true);
+              setState(() {
+                discountAmount.value = 0;
+                discountAmt.value = 0;
+                couponCodeController.text = '';
+                couponCheck = true;
+                calculateTotalBill(totalServiceAmt.value);
 
 
-        Consumer<QuotationListValue>(
-  builder: (context, provider, child) {
-  return textFieldForWarranty(
-          context: context,
-          textEditingController: provider.editing? selectedResponseServerRes[name]["controllerMap"]["rate"]:amountController,
-          labelText: "Amount",
-          hintext: "Amount",
-        );
-  },
-),
-    //     textFieldForWarranty(
-    //       context: context,
-    //       textEditingController: selectedResponseServerRes != null && selectedResponseServerRes.containsKey(name) &&
-    //           selectedResponseServerRes[name] != null && selectedResponseServerRes[name].containsKey("controllerMap") &&
-    //           selectedResponseServerRes[name]["controllerMap"] != null &&
-    //           selectedResponseServerRes[name]["controllerMap"].containsKey("rate") &&
-    //           selectedResponseServerRes[name]["controllerMap"]["rate"] != null
-    //           ? selectedResponseServerRes[name]["controllerMap"]["rate"]
-    //           : amountController,
-    //       labelText: "Amount",
-    //       hintext: "Amount",
-    //     ),
-    //       textFieldForWarranty(
-    //       context: context,
-    // textEditingController: (selectedResponseServerRes != null && selectedResponseServerRes.containsKey(name) && selectedResponseServerRes[name] != null && selectedResponseServerRes[name].containsKey("controllerMap") &&
-    // selectedResponseServerRes[name]["controllerMap"] != null &&
-    // selectedResponseServerRes[name]["controllerMap"].containsKey("rate") &&
-    // selectedResponseServerRes[name]["controllerMap"]["rate"] != null) ?
-    // selectedResponseServerRes[name]["controllerMap"]["rate"] : TextEditingController(),
-    // labelText: "Amount",
-    // hintext: "Amount",
-    //
-    // ),
-      ],
-    );
-    // }
+                print(selectedResponseServerRes);
+                if (selectedResponseServerRes[name]["packageTimeData"].isNotEmpty) {
+                  final index = selectedResponseServerRes[name]["packageTimeData"].indexOf(value);
+                  selectedResponseServerRes[name]["controllerMap"]["rate"].text = selectedResponseServerRes[name]["rateData"][index];
+                  selectedResponseServerRes[name]["controllerMap"]["package_time"].text = value!;
+                } else {
+                  selectedResponseServerRes[name]["controllerMap"]["package_time"].text = 'N/A';
+                }
+                updateTotalAmount();
+              });
+
+
+            }),
+          );
+        },
+      )
+          : Container(
+
+      ),
+      SizedBox(
+        width: 30,
+      ),
+
+
+      Consumer<QuotationListValue>(
+        builder: (context, provider, child) {
+
+          return textFieldForWarranty(
+            context: context,
+            textEditingController: provider.editing  ?selectedResponseServerRes[name]["controllerMap"]["rate"]:TextEditingController(text:selectedResponseServerRes[name]["rateData"][index].toString()),
+            // textEditingController: provider.editing? selectedResponseServerRes[name]["controllerMap"]["rate"]:amountController,
+            labelText: "Amount",
+            hintext: "Amount",
+          );
+        },
+      ),
+      //     textFieldForWarranty(
+      //       context: context,
+      //       textEditingController: selectedResponseServerRes != null && selectedResponseServerRes.containsKey(name) &&
+      //           selectedResponseServerRes[name] != null && selectedResponseServerRes[name].containsKey("controllerMap") &&
+      //           selectedResponseServerRes[name]["controllerMap"] != null &&
+      //           selectedResponseServerRes[name]["controllerMap"].containsKey("rate") &&
+      //           selectedResponseServerRes[name]["controllerMap"]["rate"] != null
+      //           ? selectedResponseServerRes[name]["controllerMap"]["rate"]
+      //           : amountController,
+      //       labelText: "Amount",
+      //       hintext: "Amount",
+      //     ),
+      //       textFieldForWarranty(
+      //       context: context,
+      // textEditingController: (selectedResponseServerRes != null && selectedResponseServerRes.containsKey(name) && selectedResponseServerRes[name] != null && selectedResponseServerRes[name].containsKey("controllerMap") &&
+      // selectedResponseServerRes[name]["controllerMap"] != null &&
+      // selectedResponseServerRes[name]["controllerMap"].containsKey("rate") &&
+      // selectedResponseServerRes[name]["controllerMap"]["rate"] != null) ?
+      // selectedResponseServerRes[name]["controllerMap"]["rate"] : TextEditingController(),
+      // labelText: "Amount",
+      // hintext: "Amount",
+      //
+      // ),
+    ],
+  );
+}
+
+
   }
   void updateTotalAmount() {
     totalServiceAmt.value = double.tryParse(ppfAmount.text)??0;
@@ -1903,9 +2212,9 @@ class _EstimateAddState extends State<EstimateAdd> {
       totalServiceAmt.value += double.parse(selectedResponseServerRes[service.name]["controllerMap"]["rate"].text);
     }
     calculateTotalBill(totalServiceAmt.value);
-    
-    
-    
+
+
+
 
   }
  }

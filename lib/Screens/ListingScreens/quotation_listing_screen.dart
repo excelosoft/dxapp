@@ -136,7 +136,7 @@ class _QuotationListingState extends State<QuotationListing> {
                                 //  Navigator.push(context, MaterialPageRoute(builder: (context) => EstimateAdd()));
                               },
                               child: Text(
-                                "Create Quick Quation",
+                                "Create Quick Quotation",
                                 style: kLabelStyle,
                               ))
                         ],
@@ -382,7 +382,7 @@ class _QuotationListingState extends State<QuotationListing> {
                                                     tooltip: 'Print',
                                                     onPressed: () async {
                                                       final id = filteredData[index].id.toString();
-                                                      html.window.open(' https://excelosoft.com/dxapp/public/quickquotations/$id/pdf', '_blank');
+                                                      html.window.open(' https://admin.detailingxperts.in/public/quickquotations/$id/pdf', '_blank');
                                                     },
                                                     icon: Icon(Icons.print_outlined),
                                                   ),

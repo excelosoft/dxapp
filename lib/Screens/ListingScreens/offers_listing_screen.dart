@@ -18,7 +18,7 @@ class OffersListingScreenStateState extends State<OffersListingScreen> {
   TextEditingController name = TextEditingController();
 
   Future<List<Coupon>> fetchCoupons() async {
-    final response = await http.get(Uri.parse('https://excelosoft.com/dxapp/public/api/getCoupons'));
+    final response = await http.get(Uri.parse('https://admin.detailingxperts.in/public/api/getCoupons'));
     if (response.statusCode == 200) {
       // Assuming the JSON response is an object with a "coupons" key
       Map<String, dynamic> jsonResponse = json.decode(response.body);

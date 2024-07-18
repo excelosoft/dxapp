@@ -1,7 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,8 +24,10 @@ import 'package:responsive_dashboard/config/size_config.dart';
 import 'package:responsive_dashboard/constants/validation/basic_validation.dart';
 import 'package:responsive_dashboard/dataModel/estimate_list_model.dart';
 import 'package:responsive_dashboard/style/colors.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../routes/RoutePath.dart';
+import '../../widgets/custom_image.dart';
 
 class AddJobSheet extends StatefulWidget {
   @override
@@ -86,6 +90,7 @@ class _AddJobSheetState extends State<AddJobSheet> {
   List ppfServices = [];
 
   List projectPhotosUrls = [];
+  List projectPhotosWebUrls = [];
   List photosToUploaded = [];
 
   bool jobsheetUpdated = false;
@@ -119,7 +124,7 @@ class _AddJobSheetState extends State<AddJobSheet> {
 
   estimatedata() async {
     var responseData = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getModels'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getModels'),
     );
     print(responseData.body);
     var model = jsonDecode(responseData.body.toString());
@@ -149,7 +154,7 @@ class _AddJobSheetState extends State<AddJobSheet> {
     }
 
     var response = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getServices'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getServices'),
     );
     var data = jsonDecode(response.body.toString());
 
@@ -163,7 +168,7 @@ class _AddJobSheetState extends State<AddJobSheet> {
     }
 
     var ppfresponse = await http.get(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getPPFServices'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getPPFServices'),
     );
     print(ppfresponse.body);
     var ppfdata = jsonDecode(ppfresponse.body.toString());
@@ -184,7 +189,7 @@ class _AddJobSheetState extends State<AddJobSheet> {
 
   getColors(String selectedModel) async {
     var responseData = await http.post(
-      Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$selectedModel'),
+      Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$selectedModel'),
     );
     var model = jsonDecode(responseData.body.toString());
 
@@ -273,7 +278,7 @@ class _AddJobSheetState extends State<AddJobSheet> {
                             validator: (value) => validateForNormalFeild(value: value, props: "Select Model"),
                             onChanged: (value) async {
                               var responseData = await http.post(
-                                Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+                                Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$value'),
                               );
                               var model = jsonDecode(responseData.body.toString());
                               if (model['status'] != 0) {
@@ -321,7 +326,7 @@ class _AddJobSheetState extends State<AddJobSheet> {
                             validator: (value) => validateForNormalFeild(value: value, props: "Select Model"),
                             onChanged: (value) async {
                               var responseData = await http.post(
-                                Uri.parse('https://excelosoft.com/dxapp/public/api/getModelByModalName/$value'),
+                                Uri.parse('https://admin.detailingxperts.in/public/api/getModelByModalName/$value'),
                               );
                               var model = jsonDecode(responseData.body.toString());
                               if (model['status'] != 0) {
@@ -754,6 +759,7 @@ class _AddJobSheetState extends State<AddJobSheet> {
                     ImageContainerForJobSheet(
                       projectPhotosUrls: projectPhotosUrls,
                       imagesToUploaded: photosToUploaded,
+                      projectPhotosWebUrls: projectPhotosWebUrls,
                     ),
 
                     StatefulBuilder(builder: (context, setstate) {
@@ -766,8 +772,8 @@ class _AddJobSheetState extends State<AddJobSheet> {
                               text: 'Print Job Sheet',
                               onPressed: () async {
                                 final id = jobData!.id.toString();
-                                https://excelosoft.com/dxapp/public/jobsheets/112/pdf
-                                html.window.open('https://excelosoft.com/dxapp/public/jobsheets/$id/pdf', '_blank');
+                                https://admin.detailingxperts.in/public/jobsheets/112/pdf
+                                html.window.open('https://admin.detailingxperts.in/public/jobsheets/$id/pdf', '_blank');
                               },
                               width: 180,
                               height: 35,
@@ -778,7 +784,9 @@ class _AddJobSheetState extends State<AddJobSheet> {
                           CustomButton(
                             text: isJobEdit == null ? "Create Job Sheet" : 'Update Job Sheet',
                             onPressed: () async {
+                            //  List photoUrl = photosToUploaded.where((url) => !url.startsWith('blob:')).toList();
                               Map<String, dynamic> jobDataMap = {
+
                                 "estimateId": jobData?.id,
                                 "name": name.text.isNotEmpty ? name.text : "N/A",
                                 "date": date.text.isNotEmpty ? date.text : "N/A",
@@ -807,8 +815,8 @@ class _AddJobSheetState extends State<AddJobSheet> {
 
                                 "modal_name": jobData?.modalName,
                                 //"description": controllers.length > 0 ? controllers[0].text : "",
-                                "carphoto": photosToUploaded,
-                                "assigned_worker": AssignedWorkers.text,
+                                "carphoto": projectPhotosUrls,
+                                "assigned_worker": AssignedWorkers.text.toString(),
                                 "estimated_delivery_time": estDateTime.text.toString(),
                                 "remarks": remarksController.text,
                               };
@@ -862,11 +870,13 @@ class _AddJobSheetState extends State<AddJobSheet> {
 class ImageContainerForJobSheet extends StatefulWidget {
   final List projectPhotosUrls;
   final List imagesToUploaded;
+  final List projectPhotosWebUrls;
 
   const ImageContainerForJobSheet({
     Key? key,
     required this.projectPhotosUrls,
     required this.imagesToUploaded,
+    required this.projectPhotosWebUrls,
   }) : super(key: key);
 
   @override
@@ -874,35 +884,128 @@ class ImageContainerForJobSheet extends StatefulWidget {
 }
 
 class _ImageContainerForJobSheetState extends State<ImageContainerForJobSheet> {
-  Future<void> selectImage(context, bool fromGallery) async {
+
+  Future<String> blobToBase64(Uint8List webUrl) async {
+    final completer = Completer<String>();
+    final blob = html.Blob([webUrl]);
+    final reader = html.FileReader();
+    reader.readAsDataUrl(blob);
+    reader.onLoadEnd.listen((_) {
+      final base64Data = reader.result as String;
+      // Remove the data URL prefix to get the pure base64 string
+      final base64String = base64Data.split(',').last;
+      completer.complete(base64String);
+    });
+    return completer.future;
+  }
+
+  Future<void> selectImage(BuildContext context, bool fromGallery) async {
+    final ImagePicker picker = ImagePicker();
     if (fromGallery) {
-      List<XFile>? pickedImages = await ImagePicker().pickMultiImage(maxWidth: 1000, maxHeight: 1000);
-      if (pickedImages.isNotEmpty) {
+      List<XFile>? pickedImages = await picker.pickMultiImage(maxWidth: 1000, maxHeight: 1000);
+      if (pickedImages != null && pickedImages.isNotEmpty) {
         for (var i = 0; i < pickedImages.length; i++) {
           var webUrl = await pickedImages[i].readAsBytes();
           var imageUrl = File(pickedImages[i].path);
-          widget.imagesToUploaded.add(imageUrl.path);
           if (kIsWeb) {
-            widget.projectPhotosUrls.add(webUrl);
+            String downloadUrl = await uploadImageToFirebase(webUrl, pickedImages[i].name);
+            print(downloadUrl);
+           // final blob = html.Blob([downloadUrl]);
+            widget.projectPhotosWebUrls.add(webUrl);
+            widget.projectPhotosUrls.add(downloadUrl);
           } else {
-            widget.projectPhotosUrls.add(imageUrl);
+            final downloadUrl = await uploadImageToFirebase(webUrl, pickedImages[i].name);
+          //  final blob = html.Blob([downloadUrl]);
+           // final url = html.Url.createObjectUrlFromBlob(blob);
+            widget.projectPhotosWebUrls.add(imageUrl);
+            widget.projectPhotosUrls.add(downloadUrl);
           }
-          setState(() {});
         }
+        setState(() {});
       }
     } else {
-      XFile? pickedImage = await ImagePicker().pickImage(maxWidth: 1000, maxHeight: 1000, source: ImageSource.camera);
-      var webUrl = await pickedImage?.readAsBytes();
-      var imageUrl = File(pickedImage!.path);
-      if (kIsWeb) {
-        widget.projectPhotosUrls.add(webUrl);
-      } else {
-        widget.projectPhotosUrls.add(imageUrl);
+      XFile? pickedImage = await picker.pickImage(maxWidth: 1000, maxHeight: 1000, source: ImageSource.camera);
+      if (pickedImage != null) {
+        var webUrl = await pickedImage.readAsBytes();
+        var imageUrl = File(pickedImage.path);
+        if (kIsWeb) {
+          final downloadUrl = await uploadImageToFirebase(webUrl, pickedImage.name);
+          //final blob = html.Blob([imageUrl]);
+          widget.projectPhotosWebUrls.add(webUrl);
+          widget.projectPhotosUrls.add(downloadUrl);
+        } else {
+          final downloadUrl = await uploadImageToFirebase(webUrl, pickedImage.name);
+          //final blob = html.Blob([downloadUrl]);
+          widget.projectPhotosWebUrls.add(imageUrl);
+          widget.projectPhotosUrls.add(downloadUrl);
+        }
+        setState(() {});
       }
-      setState(() {});
     }
   }
 
+  Future<String> uploadImageToFirebase(Uint8List imageData, String fileName) async {
+    try {
+      Reference storageReference = FirebaseStorage.instance.ref().child('images/$fileName');
+      final metadata = SettableMetadata(contentType: 'image/jpeg');
+      UploadTask uploadTask;
+
+
+      if (kIsWeb) {
+        uploadTask = storageReference.putData(imageData, metadata);
+      } else {
+        File imageFile = File.fromRawPath(imageData);
+        uploadTask = storageReference.putFile(imageFile, metadata);
+      }
+
+      TaskSnapshot snapshot = await uploadTask.whenComplete(() => {});
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print('Error uploading image: $e');
+      return '';
+    }
+  }
+
+
+
+  // Future<void> selectImage(context, bool fromGallery) async {
+  //   final ImagePicker picker = ImagePicker();
+  //   if (fromGallery) {
+  //     List<XFile>? pickedImages = await picker.pickMultiImage(maxWidth: 1000, maxHeight: 1000);
+  //     if (pickedImages != null && pickedImages.isNotEmpty) {
+  //       for (var i = 0; i < pickedImages.length; i++) {
+  //         var webUrl = await pickedImages[i].readAsBytes();
+  //         var imageUrl = File(pickedImages[i].path);
+  //         widget.imagesToUploaded.add(imageUrl.path);
+  //         if (kIsWeb) {
+  //           // Create a Blob and generate a URL for it
+  //           final blob = html.Blob([webUrl]);
+  //           final blobUrl = html.Url.createObjectUrlFromBlob(blob);
+  //           widget.projectPhotosUrls.add(blobUrl);
+  //         } else {
+  //           widget.projectPhotosUrls.add(imageUrl.path);
+  //         }
+  //       }
+  //       setState(() {});
+  //     }
+  //   } else {
+  //     XFile? pickedImage = await picker.pickImage(maxWidth: 1000, maxHeight: 1000, source: ImageSource.camera);
+  //     if (pickedImage != null) {
+  //       var webUrl = await pickedImage.readAsBytes();
+  //       var imageUrl = File(pickedImage.path);
+  //       if (kIsWeb) {
+  //         // Create a Blob and generate a URL for it
+  //         final blob = html.Blob([webUrl]);
+  //         final blobUrl = html.Url.createObjectUrlFromBlob(blob);
+  //         widget.projectPhotosUrls.add(blobUrl);
+  //       } else {
+  //         widget.projectPhotosUrls.add(imageUrl.path);
+  //       }
+  //       setState(() {});
+  //     }
+  //   }
+  // }
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -951,6 +1054,8 @@ class _ImageContainerForJobSheetState extends State<ImageContainerForJobSheet> {
             ),
           ],
         ),
+
+
         SizedBox(
           height: 120,
           width: Responsive.isMobile(context) ? MediaQuery.of(context).size.width * 0.3 : MediaQuery.of(context).size.width * 0.5,
@@ -970,15 +1075,30 @@ class _ImageContainerForJobSheetState extends State<ImageContainerForJobSheet> {
                         child: SizedBox(
                           width: 220,
                           height: 140,
-                          child: kIsWeb
-                              ? Image.memory(
-                                  widget.projectPhotosUrls[index],
-                                  fit: BoxFit.fill,
-                                )
-                              : Image.file(
-                                  widget.projectPhotosUrls[index],
-                                  fit: BoxFit.fill,
-                                ),
+                          child: kIsWeb?
+                          // Image.memory(
+                          //   widget.projectPhotosWebUrls[index],
+                          //   fit: BoxFit.fill,
+                          // )
+
+
+                               CachedNetworkImage(
+                            imageUrl: widget.projectPhotosUrls[index],
+                            imageBuilder: (context, imageProvider) => Container(
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    image: imageProvider,
+                                    fit: BoxFit.cover,
+                                    colorFilter:
+                                    ColorFilter.mode(Colors.red, BlendMode.colorBurn)),
+                              ),
+                            ),
+                            placeholder: (context, url) => CircularProgressIndicator(),
+                            errorWidget: (context, url, error) => Icon(Icons.error),
+                          ) : Image.file(
+                            widget.projectPhotosUrls[index],
+                            fit: BoxFit.fill,
+                          ),
                         ))
                   ],
                 );
@@ -988,3 +1108,5 @@ class _ImageContainerForJobSheetState extends State<ImageContainerForJobSheet> {
     );
   }
 }
+
+

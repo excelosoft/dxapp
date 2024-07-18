@@ -364,7 +364,7 @@ class _JobSheetState extends State<JobSheet> {
                                                         onPressed: () async {
                                                           final id = filteredData[index].id.toString();
 
-                                                          html.window.open('https://excelosoft.com/dxapp/public/jobsheets/$id/pdf', '_blank');
+                                                          html.window.open('https://admin.detailingxperts.in/public/jobsheets/$id/pdf', '_blank');
                                                         },
                                                         icon: Icon(Icons.print_outlined),
                                                       ),

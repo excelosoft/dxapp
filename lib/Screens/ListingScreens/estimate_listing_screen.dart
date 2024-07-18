@@ -394,7 +394,7 @@ class _EstimateState extends State<Estimate> {
                                                     onPressed: () async {
                                                       final id = paginatedData[index].id.toString();
                                                       // https: //excelosoft.com/dxapp/public/estimates/116/pdf
-                                                      html.window.open('https://excelosoft.com/dxapp/public/estimates/$id/pdf', '_blank');
+                                                      html.window.open('https://admin.detailingxperts.in/public/estimates/$id/pdf', '_blank');
                                                     },
                                                     icon: Icon(Icons.print_outlined),
                                                   ),
